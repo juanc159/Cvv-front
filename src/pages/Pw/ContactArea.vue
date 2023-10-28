@@ -49,10 +49,11 @@ const { data } = defineProps({
                   </div>
                   <VCardText>
                     <div class="d-flex justify-space-between flex-wrap gap-y-4">
+                      <!-- {{ data.details }} -->
                       <div
-                        v-for="(item, index) in data.contactArea"
+                        v-for="(item, index) in data.details"
                         :key="index"
-                        class="d-flex gap-x-3 align-center"
+                        class="w-100 d-flex gap-x-3 align-center"
                       >
                         <div>
                           <VAvatar
@@ -66,13 +67,13 @@ const { data } = defineProps({
                         </div>
 
                         <div>
-                          <b>{{ item.title }}</b>
+                          <b>{{ item.type_detail_name }}</b>
                           <VDivider />
                           <div class="font-weight-medium text-high-emphasis">
-                            <template v-if="Array.isArray(item.value)">
+                            <template v-if="Array.isArray(item.content)">
                               <ul style="list-style-type: none">
                                 <li
-                                  v-for="(element, index) in item.value"
+                                  v-for="(element, index) in item.content"
                                   :key="index"
                                 >
                                   {{ element }}
@@ -80,7 +81,7 @@ const { data } = defineProps({
                               </ul>
                             </template>
                             <template v-else>
-                              <span>{{ item.value }}</span>
+                              <span>{{ item.content }}</span>
                             </template>
                           </div>
                         </div>
@@ -97,7 +98,8 @@ const { data } = defineProps({
 
                 <VCardText>
                   <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3952.6676004022324!2d-72.20886082542425!3d7.824962306673646!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e666c2486e7b9c9%3A0x6b3c0c32ba495b0a!2sColegio%20Virgen%20del%20Valle!5e0!3m2!1ses-419!2sco!4v1698344529987!5m2!1ses-419!2sco"
+                    v-if="data.iframeGoogleMap"
+                    :src="data.iframeGoogleMap"
                     height="450"
                     style="border-radius: 1rem; inline-size: 100%"
                     :allowfullscreen="true"
@@ -147,4 +149,4 @@ const { data } = defineProps({
     display: none;
   }
 }
-</style>
+</style> 

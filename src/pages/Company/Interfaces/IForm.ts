@@ -4,5 +4,6 @@ export default interface IForm {
   id?: number | null
   name: string | null
   slogan?: string | null
+  iframeGoogleMap?: string | null
   arrayDetails: Array<IDetail>
 }

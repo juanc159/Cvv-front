@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import banner1 from "@/assets/cvv-central/banner1.png";
 import Footer from "@/views/front-pages/front-page-footer.vue";
 import AllSchool from "@/views/front-pages/landing-page/all-school.vue";
 
@@ -28,19 +27,29 @@ useIntersectionObserver(
     threshold: 0.25,
   }
 );
+
+const banners = ref([]);
+const companies = ref([]);
+onMounted(async () => {
+  const response = await useApi("pw-dataPrincipal").get();
+  if (response.data) {
+    banners.value = response.data.value.banners;
+    companies.value = response.data.value.companies;
+  }
+});
 </script>
 
 <template>
   <div class="landing-page-wrapper">
     <swiper-container navigation="true" events-prefix="swiper-">
-      <swiper-slide v-for="swiperImg in [banner1]" :key="swiperImg">
-        <VImg :src="swiperImg" />
+      <swiper-slide v-for="swiperImg in banners" :key="swiperImg">
+        <VImg :src="swiperImg.path" />
       </swiper-slide>
     </swiper-container>
 
     <!-- 👉 Our Team -->
     <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-      <AllSchool ref="refTeam" />
+      <AllSchool ref="refTeam" :companies="companies" />
     </div>
 
     <!-- 👉 Footer -->

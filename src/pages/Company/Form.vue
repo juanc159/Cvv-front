@@ -112,6 +112,15 @@ const deleteDetail = (index: number) => {
               >
               </AppTextField>
             </VCol>
+            <VCol cols="12" md="4">
+              <AppTextField
+                clearable
+                v-model="form.iframeGoogleMap"
+                label="iframeGoogleMap"
+                :requiredField="true"
+              >
+              </AppTextField>
+            </VCol>
           </VRow>
         </VForm>
       </VCardText>

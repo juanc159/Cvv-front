@@ -171,12 +171,12 @@ const openLink = (link: string) => {
             {{ item.title }}
           </RouterLink>
         </div>
-        <div v-if="props.school?.networkLiks.length > 0">
+        <div v-if="props.school?.social_networks.length > 0">
           <VBtn
             icon
-            v-for="(item, index) in props.school?.networkLiks"
+            v-for="(item, index) in props.school?.social_networks"
             :key="index"
-            @click="openLink(item.link)"
+            @click="openLink(item.content)"
           >
             <VIcon size="30" :icon="item.icon"></VIcon>
           </VBtn>

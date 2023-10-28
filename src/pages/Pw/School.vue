@@ -271,8 +271,13 @@ useIntersectionObserver(
 
 const route = useRoute();
 const school = ref();
-onMounted(() => {
-  school.value = schools.value.find((ele) => ele.id == route.params.id);
+onMounted(async () => {
+  // school.value = schools.value.find((ele) => ele.id == route.params.id);
+
+  const response = await useApi("pw-dataSchool/" + route.params.id).get();
+  if (response.data) {
+    school.value = response.data.value.company;
+  }
 });
 </script>
 
@@ -282,16 +287,16 @@ onMounted(() => {
 
     <swiper-container
       style="margin-block-start: 6rem"
-      v-if="school?.banner.length > 0"
+      v-if="school?.banners.length > 0"
       navigation="true"
       events-prefix="swiper-"
     >
       <swiper-slide
         pagination="true"
-        v-for="swiperImg in school.banner"
-        :key="swiperImg"
+        v-for="(item, index) in school.banners"
+        :key="index"
       >
-        <VImg :src="swiperImg" />
+        <VImg :src="item.path" />
       </swiper-slide>
     </swiper-container>
 

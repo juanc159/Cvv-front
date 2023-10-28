@@ -173,6 +173,15 @@ const headers = [
             </VBtn>
           </template>
 
+          <template v-if="loading.table" #body>
+            <tr>
+              <td colspan="4">
+                <div style="inline-size: 100" class="d-flex justify-center">
+                  <PreloadInterno />
+                </div>
+              </td>
+            </tr>
+          </template>
           <template #bottom>
             <VCardText class="pt-2">
               <VRow>

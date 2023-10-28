@@ -3,6 +3,12 @@ import school_1 from "@/assets/cvv-central/school_1.jpg";
 import school_2 from "@/assets/cvv-central/school_2.jpg";
 import school_3 from "@/assets/cvv-central/school_3.jpg";
 
+const { companies } = defineProps({
+  companies: {
+    type: Array<Object>,
+    required: true,
+  },
+});
 const teamData = ref([
   {
     name: "U.E Colegio Virgen del Valle",
@@ -46,7 +52,7 @@ const teamData = ref([
 
       <VRow class="d-flex justify-center">
         <VCol
-          v-for="(data, index) in teamData"
+          v-for="(data, index) in companies"
           :key="index"
           cols="12"
           lg="4"
