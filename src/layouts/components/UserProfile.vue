@@ -5,10 +5,17 @@ import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
 const authenticationStore = useAuthenticationStore();
 
+const { company, user } = storeToRefs(authenticationStore);
 const router = useRouter();
 const logout = () => {
   authenticationStore.logout();
   router.push("/login");
+};
+
+/* Limpia los datos del storage */
+const clearStorage = () => {
+  company.value = {};
+  authenticationStore.getMenuData;
 };
 </script>
 
@@ -46,11 +53,23 @@ const logout = () => {
             </template>
 
             <VListItemTitle class="font-weight-semibold">
-              {{ authenticationStore.user.name }}
+              {{ user.name }}
             </VListItemTitle>
             <!-- <VListItemSubtitle>Admin</VListItemSubtitle> -->
           </VListItem>
 
+          <!-- 👉 Cambiar empresa -->
+          <VListItem
+            v-if="company.id && !user.company_id"
+            :to="{ name: 'Company-Index' }"
+            @click="clearStorage"
+          >
+            <template #prepend>
+              <VIcon class="me-2" icon="tabler-logout" size="22" />
+            </template>
+
+            <VListItemTitle>Cambiar Empresa</VListItemTitle>
+          </VListItem>
           <VDivider class="my-2" />
 
           <!-- 👉 Logout -->

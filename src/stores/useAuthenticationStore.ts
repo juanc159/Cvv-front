@@ -1,11 +1,9 @@
 import { defineStore } from 'pinia'
 
-import { useToast } from '@/composables/useToast'
 import type IAuth from '@/interfaces/Authentication/IAuth'
 import type ILogin from '@/interfaces/Authentication/ILogin'
 import type IPromise from '@/interfaces/Axios/IPromise'
 
-const toast = useToast()
 
 export const useAuthenticationStore = defineStore('useAuthenticationStore', {
   state: () => ({
@@ -20,8 +18,9 @@ export const useAuthenticationStore = defineStore('useAuthenticationStore', {
   persist: true,
   getters: {
     getMenuData: state => {
-      /** **  Filtrar menu USUARIOS Y ROLES ***********/
-      return state.menu
+      if (state.company.id)
+        return state.menu.filter(ele => ele.to.name != 'Company-Index')
+      else return state.menu.filter(ele => ele.to.name == 'Company-Index')
     },
   },
   actions: {

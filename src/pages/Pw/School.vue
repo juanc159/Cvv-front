@@ -27,6 +27,33 @@ const schools = ref([
     name: "U.E Colegio Virgen del Valle",
     position: "",
     banner: [banner_tariba_1],
+    networkLiks: [
+      {
+        text: "Sigueme en facebook",
+        icon: "tabler-brand-facebook",
+        link: "https://www.facebook.com/ColegioVirgenDelValleArjona",
+      },
+      {
+        text: "instagram",
+        icon: "tabler-brand-instagram",
+        link: "https://www.instagram.com/challenge/?next=https%3A%2F%2Fwww.instagram.com%2Fcvirgendelvalle%2F%3F__coig_challenged%3D1",
+      },
+      {
+        text: "tiktok",
+        icon: "tabler-brand-tiktok",
+        link: "https://www.tiktok.com/@cvirgendelvalle?_t=8cymV9IJMdJ&_r=1",
+      },
+      {
+        text: "twiter",
+        icon: "tabler-brand-x",
+        link: "https://twitter.com/CVirgendelValle",
+      },
+      {
+        text: "youtube",
+        icon: "tabler-brand-youtube",
+        link: "https://www.youtube.com/@unidadeducativacolegiovirg5233",
+      },
+    ],
     contactArea: [
       {
         title: "Dirección",
@@ -79,6 +106,33 @@ const schools = ref([
     name: "Virgen del Valle International School",
     position: "",
     banner: [banner_cucuta_1],
+    networkLiks: [
+      {
+        text: "Sigueme en facebook",
+        icon: "tabler-brand-facebook",
+        link: "https://www.facebook.com/ColegioVirgenDelValleArjona",
+      },
+      {
+        text: "instagram",
+        icon: "tabler-brand-instagram",
+        link: "https://www.instagram.com/challenge/?next=https%3A%2F%2Fwww.instagram.com%2Fcvirgendelvalle%2F%3F__coig_challenged%3D1",
+      },
+      {
+        text: "tiktok",
+        icon: "tabler-brand-tiktok",
+        link: "https://www.tiktok.com/@cvirgendelvalle?_t=8cymV9IJMdJ&_r=1",
+      },
+      {
+        text: "twiter",
+        icon: "tabler-brand-x",
+        link: "https://twitter.com/CVirgendelValle",
+      },
+      {
+        text: "youtube",
+        icon: "tabler-brand-youtube",
+        link: "https://www.youtube.com/@unidadeducativacolegiovirg5233",
+      },
+    ],
     contactArea: [
       {
         title: "Dirección",
@@ -126,6 +180,33 @@ const schools = ref([
     name: "U.E Colegio Lolita Robles de Mora",
     position: "",
     banner: [banner_pirineos_1],
+    networkLiks: [
+      {
+        text: "Sigueme en facebook",
+        icon: "tabler-brand-facebook",
+        link: "https://www.facebook.com/ColegioVirgenDelValleArjona",
+      },
+      {
+        text: "instagram",
+        icon: "tabler-brand-instagram",
+        link: "https://www.instagram.com/challenge/?next=https%3A%2F%2Fwww.instagram.com%2Fcvirgendelvalle%2F%3F__coig_challenged%3D1",
+      },
+      {
+        text: "tiktok",
+        icon: "tabler-brand-tiktok",
+        link: "https://www.tiktok.com/@cvirgendelvalle?_t=8cymV9IJMdJ&_r=1",
+      },
+      {
+        text: "twiter",
+        icon: "tabler-brand-x",
+        link: "https://twitter.com/CVirgendelValle",
+      },
+      {
+        text: "youtube",
+        icon: "tabler-brand-youtube",
+        link: "https://www.youtube.com/@unidadeducativacolegiovirg5233",
+      },
+    ],
     contactArea: [
       {
         title: "Dirección",
@@ -215,9 +296,9 @@ onMounted(() => {
     </swiper-container>
 
     <!--Activity Area Start-->
-    <AditionalService />
+    <AditionalService id="servicioData" />
 
-    <ContactArea v-if="school" :data="school" />
+    <ContactArea v-if="school" :data="school" id="contactData" />
 
     <!-- 👉 Hero Section  -->
     <!-- <HeroSection ref="refHome" /> -->

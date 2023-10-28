@@ -36,24 +36,35 @@ watch(
 const menu = ref<
   Array<{
     title: string;
+    to: string;
+    hash: string | null;
   }>
 >([
   {
     title: "Principal",
+    to: "Pw-home",
+    hash: null,
   },
   {
     title: "Inicio",
+    to: "",
+    hash: null,
   },
   {
-    title: "Sobre nosotros",
-  },
-  {
-    title: "Galeria",
+    title: "Servicios",
+    to: "",
+    hash: "#servicioData",
   },
   {
     title: "Contactanos",
+    to: "",
+    hash: "#contactData",
   },
 ]);
+
+const openLink = (link: string) => {
+  window.open(link, "_blank");
+};
 </script>
 
 <template>
@@ -128,7 +139,7 @@ const menu = ref<
         />
       </IconBtn>
       <!-- Title and Landing page sections -->
-      <div class="d-flex align-center justify-center w-100">
+      <div class="d-flex align-center justify-space-between w-100">
         <!-- <VAppBarTitle class="me-6">
           <RouterLink
             to="/"
@@ -152,12 +163,23 @@ const menu = ref<
             v-for="(item, index) in menu"
             :key="index"
             :to="{
-              name: 'Pw-home',
+              name: item.to,
+              hash: item.hash,
             }"
             class="nav-link font-weight-medium py-2 px-2 px-lg-4"
           >
             {{ item.title }}
           </RouterLink>
+        </div>
+        <div v-if="props.school?.networkLiks.length > 0">
+          <VBtn
+            icon
+            v-for="(item, index) in props.school?.networkLiks"
+            :key="index"
+            @click="openLink(item.link)"
+          >
+            <VIcon size="30" :icon="item.icon"></VIcon>
+          </VBtn>
         </div>
       </div>
     </VAppBar>

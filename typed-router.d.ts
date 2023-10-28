@@ -40,6 +40,10 @@ import type {
 declare module 'vue-router/auto/routes' {
   export interface RouteNamedMap {
     '$error': RouteRecordInfo<'$error', '/:error(.*)', { error: ParamValue<true> }, { error: ParamValue<false> }>,
+    'Banner-Form': RouteRecordInfo<'Banner-Form', '/banner-form/:action/:id?', Record<never, never>, Record<never, never>>,
+    'Banner-Index': RouteRecordInfo<'Banner-Index', '/Banner/Index', Record<never, never>, Record<never, never>>,
+    'Company-Form': RouteRecordInfo<'Company-Form', '/company-form/:action/:id?', Record<never, never>, Record<never, never>>,
+    'Company-Index': RouteRecordInfo<'Company-Index', '/Company/Index', Record<never, never>, Record<never, never>>,
     'login': RouteRecordInfo<'login', '/login', Record<never, never>, Record<never, never>>,
     'Pw-home': RouteRecordInfo<'Pw-home', '/', Record<never, never>, Record<never, never>>,
     'Pw-school': RouteRecordInfo<'Pw-school', '/school/:id', Record<never, never>, Record<never, never>>,

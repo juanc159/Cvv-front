@@ -12,10 +12,11 @@
 // ]
 
 
-import type { VerticalNavItems } from '@/@layouts/types'
+import type { VerticalNavItems } from '@/@layouts/types';
 
-import { useAuthenticationStore } from '@/stores/useAuthenticationStore'
+import { useAuthenticationStore } from '@/stores/useAuthenticationStore';
 
 const { getMenuData } = storeToRefs(useAuthenticationStore())
 
+console.log(getMenuData.value);
 export default getMenuData as VerticalNavItems
