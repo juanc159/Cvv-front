@@ -8,21 +8,15 @@ const { data } = defineProps({
 </script>
 
 <template>
-  <div
-    :style="{
-      'background-color': 'rgb(var(--v-theme-surface))',
-      'border-radius': '3.75rem 3.75rem 0 0',
-    }"
-  >
+  <div :style="{
+    'background-color': 'rgb(var(--v-theme-surface))',
+    'border-radius': '3.75rem 3.75rem 0 0',
+  }">
     <VContainer id="contact-us">
       <!-- 👉 Headers  -->
       <div class="contact-us-section">
-        <div
-          class="headers d-flex justify-center flex-column align-center py-12"
-        >
-          <div
-            class="d-flex align-center text-h3 mb-1 flex-wrap justify-center"
-          >
+        <div class="headers d-flex justify-center flex-column align-center py-12">
+          <div class="d-flex align-center text-h3 mb-1 flex-wrap justify-center">
             <div class="position-relative me-2">
               <h3 class="section-title">Contactanos</h3>
             </div>
@@ -34,14 +28,9 @@ const { data } = defineProps({
           <VRow class="match-height">
             <VCol cols="12" md="4">
               <div class="contact-card h-100">
-                <VCard
-                  variant="outlined"
-                  border
-                  class="pa-2"
-                  :style="{
-                    borderRadius: '3.75rem 0.375rem 0.375rem 0.375rem',
-                  }"
-                >
+                <VCard variant="outlined" border class="pa-2" :style="{
+                  borderRadius: '3.75rem 0.375rem 0.375rem 0.375rem',
+                }">
                   <div class="d-flex justify-center">
                     <VAvatar color="primary" variant="tonal" size="170">
                       <VIcon icon="tabler-school" size="100"></VIcon>
@@ -50,18 +39,9 @@ const { data } = defineProps({
                   <VCardText>
                     <div class="d-flex justify-space-between flex-wrap gap-y-4">
                       <!-- {{ data.details }} -->
-                      <div
-                        v-for="(item, index) in data.details"
-                        :key="index"
-                        class="w-100 d-flex gap-x-3 align-center"
-                      >
+                      <div v-for="(item, index) in data.details" :key="index" class="w-100 d-flex gap-x-3 align-center">
                         <div>
-                          <VAvatar
-                            size="36"
-                            :color="item.color"
-                            variant="tonal"
-                            class="rounded-sm"
-                          >
+                          <VAvatar size="36" :color="item.color" variant="tonal" class="rounded-sm">
                             <VIcon :icon="item.icon" size="24" />
                           </VAvatar>
                         </div>
@@ -72,10 +52,7 @@ const { data } = defineProps({
                           <div class="font-weight-medium text-high-emphasis">
                             <template v-if="Array.isArray(item.content)">
                               <ul style="list-style-type: none">
-                                <li
-                                  v-for="(element, index) in item.content"
-                                  :key="index"
-                                >
+                                <li v-for="(element, index) in item.content" :key="index">
                                   {{ element }}
                                 </li>
                               </ul>
@@ -97,15 +74,9 @@ const { data } = defineProps({
                 <VCardItem class="pb-0"> </VCardItem>
 
                 <VCardText>
-                  <iframe
-                    v-if="data.iframeGoogleMap"
-                    :src="data.iframeGoogleMap"
-                    height="450"
-                    style="border-radius: 1rem; inline-size: 100%"
-                    :allowfullscreen="true"
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"
-                  ></iframe>
+                  <iframe v-if="data.iframeGoogleMap" :src="data.iframeGoogleMap" height="450"
+                    style="border-radius: 1rem; inline-size: 100%" :allowfullscreen="true" loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </VCardText>
               </VCard>
             </VCol>
@@ -117,13 +88,11 @@ const { data } = defineProps({
 </template>
 
 <style lang="scss" scoped>
-.contact-us-section {
-}
+.contact-us-section {}
 
 .section-title::after {
   position: absolute;
-  background: url("../../../assets/images/front-pages/icons/section-title-icon.png")
-    no-repeat left bottom;
+  // background: url("../../../assets/images/front-pages/icons/section-title-icon.png") no-repeat left bottom;
   background-size: contain;
   block-size: 100%;
   content: "";
@@ -139,7 +108,7 @@ const { data } = defineProps({
 
 .contact-card::before {
   position: absolute;
-  content: url("@images/front-pages/icons/contact-border.png");
+  // content: url("@images/front-pages/icons/contact-border.png");
   inset-block-start: -2.5rem;
   inset-inline-start: -2.5rem;
 }

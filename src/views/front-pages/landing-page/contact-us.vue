@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ConnectImg from '@images/front-pages/landing-page/contact-customer-service.png'
+import ConnectImg from '@images/front-pages/landing-page/contact-customer-service.png';
 
 const name = ref('')
 const email = ref('')
@@ -11,11 +11,7 @@ const message = ref('')
     <!-- 👉 Headers  -->
     <div class="contact-us-section">
       <div class="headers d-flex justify-center flex-column align-center py-12">
-        <VChip
-          label
-          color="primary"
-          class="mb-4"
-        >
+        <VChip label color="primary" class="mb-4">
           Contact US
         </VChip>
         <div class="d-flex align-center text-h3 mb-1 flex-wrap justify-center">
@@ -33,47 +29,25 @@ const message = ref('')
 
       <div class="mb-15">
         <VRow class="match-height">
-          <VCol
-            cols="12"
-            md="4"
-          >
+          <VCol cols="12" md="4">
             <div class="contact-card h-100">
-              <VCard
-                variant="outlined"
-                border
-                class="pa-2"
-                :style="{ borderRadius: '3.75rem 0.375rem 0.375rem 0.375rem' }"
-              >
-                <VImg
-                  :src="ConnectImg"
-                  :style="{ borderRadius: '3.75rem 0.375rem 0.375rem 0.375rem' }"
-                />
+              <VCard variant="outlined" border class="pa-2"
+                :style="{ borderRadius: '3.75rem 0.375rem 0.375rem 0.375rem' }">
+                <VImg :src="ConnectImg" :style="{ borderRadius: '3.75rem 0.375rem 0.375rem 0.375rem' }" />
                 <VCardText>
                   <div class="d-flex justify-space-between flex-wrap gap-y-4">
-                    <div
-                      v-for="(item, index) in [
-                        { title: 'Email', icon: 'tabler-mail', color: 'primary', value: 'example@gmail.com' },
-                        { title: 'Phone', icon: 'tabler-phone-call', color: 'success', value: '+1234 568 963' },
-                      ]"
-                      :key="index"
-                      class="d-flex gap-x-3 align-center"
-                    >
+                    <div v-for="(item, index) in [
+                      { title: 'Email', icon: 'tabler-mail', color: 'primary', value: 'example@gmail.com' },
+                      { title: 'Phone', icon: 'tabler-phone-call', color: 'success', value: '+1234 568 963' },
+                    ]" :key="index" class="d-flex gap-x-3 align-center">
                       <div>
-                        <VAvatar
-                          size="36"
-                          :color="item.color"
-                          variant="tonal"
-                          class="rounded-sm"
-                        >
-                          <VIcon
-                            :icon="item.icon"
-                            size="24"
-                          />
+                        <VAvatar size="36" :color="item.color" variant="tonal" class="rounded-sm">
+                          <VIcon :icon="item.icon" size="24" />
                         </VAvatar>
                       </div>
 
                       <div>
-                        <div>{{ item .title }}</div>
+                        <div>{{ item.title }}</div>
                         <div class="font-weight-medium text-high-emphasis">
                           {{ item.value }}
                         </div>
@@ -85,10 +59,7 @@ const message = ref('')
             </div>
           </VCol>
 
-          <VCol
-            cols="12"
-            md="8"
-          >
+          <VCol cols="12" md="8">
             <VCard flat>
               <VCardItem class="pb-0">
                 <VCardTitle class="text-h4 mb-1">
@@ -98,38 +69,21 @@ const message = ref('')
 
               <VCardText>
                 <p class="mb-6">
-                  If you would like to discuss anything related to payment, account, licensing, partnerships, or have pre-sales questions, you’re at the right place.
+                  If you would like to discuss anything related to payment, account, licensing, partnerships, or have
+                  pre-sales questions, you’re at the right place.
                 </p>
-                <VForm @submit.prevent="() => {}">
+                <VForm @submit.prevent="() => { }">
                   <VRow>
-                    <VCol
-                      cols="12"
-                      md="6"
-                    >
-                      <AppTextField
-                        v-model="name"
-                        placeholder="John Doe"
-                        label="Full Name"
-                      />
+                    <VCol cols="12" md="6">
+                      <AppTextField v-model="name" placeholder="John Doe" label="Full Name" />
                     </VCol>
 
-                    <VCol
-                      cols="12"
-                      md="6"
-                    >
-                      <AppTextField
-                        v-model="email"
-                        placeholder="johndoe@gmail.com"
-                        label="Email address"
-                      />
+                    <VCol cols="12" md="6">
+                      <AppTextField v-model="email" placeholder="johndoe@gmail.com" label="Email address" />
                     </VCol>
 
                     <VCol cols="12">
-                      <AppTextarea
-                        v-model="message"
-                        placeholder="Write a message"
-                        label="Message"
-                      />
+                      <AppTextarea v-model="message" placeholder="Write a message" label="Message" />
                     </VCol>
 
                     <VCol>
@@ -165,19 +119,19 @@ const message = ref('')
   inset-inline-start: 0%;
 }
 
-.contact-card{
+.contact-card {
   position: relative
 }
 
-.contact-card::before{
+.contact-card::before {
   position: absolute;
-  content: url('@images/front-pages/icons/contact-border.png');
+  // content: url('@images/front-pages/icons/contact-border.png');
   inset-block-start: -2.5rem;
   inset-inline-start: -2.5rem;
 }
 
 @media screen and (max-width: 999px) {
-  .contact-card::before{
+  .contact-card::before {
     display: none;
   }
 }
