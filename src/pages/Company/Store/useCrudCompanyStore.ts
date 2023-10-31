@@ -14,6 +14,8 @@ export const useCrudCompanyStore = defineStore('useCrudCompanyStore', {
       id: null,
       name: null,
       slogan: null,
+      iframeGoogleMap: null,
+      image_principal: null,
       arrayDetails: []
     } as IForm,
     companyData: {} as IForm,
@@ -35,6 +37,8 @@ export const useCrudCompanyStore = defineStore('useCrudCompanyStore', {
         id: null,
         name: null,
         slogan: null,
+        iframeGoogleMap: null,
+        image_principal: null,
         arrayDetails: []
       }
     },
@@ -68,8 +72,14 @@ export const useCrudCompanyStore = defineStore('useCrudCompanyStore', {
 
 
     async fetchSave(): Promise<IPromise> {
+      const formData = new FormData()
+      for (const key in this.form)
+        formData.append(key, this.form[key])
+
+      formData.append("arrayDetails", JSON.stringify(this.form.arrayDetails))
+
       this.loading.form = true
-      const { data, response, error, isFetching } = await useApi("/company-create").post(this.form)
+      const { data, response, error, isFetching } = await useApi("/company-create").post(formData)
       this.loading.form = isFetching.value
 
       if (response.value?.ok && data.value) {

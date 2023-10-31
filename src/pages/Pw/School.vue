@@ -285,17 +285,9 @@ onMounted(async () => {
   <div class="landing-page-wrapper">
     <Navbar :active-id="activeSectionId" :school="school" />
 
-    <swiper-container
-      style="margin-block-start: 6rem"
-      v-if="school?.banners.length > 0"
-      navigation="true"
-      events-prefix="swiper-"
-    >
-      <swiper-slide
-        pagination="true"
-        v-for="(item, index) in school.banners"
-        :key="index"
-      >
+    <swiper-container style="margin-block-start: 6rem" v-if="school?.banners.length > 0" navigation="true"
+      events-prefix="swiper-">
+      <swiper-slide pagination="true" v-for="(item, index) in school.banners" :key="index">
         <VImg :src="item.path" />
       </swiper-slide>
     </swiper-container>

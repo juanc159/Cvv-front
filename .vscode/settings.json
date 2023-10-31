@@ -25,7 +25,7 @@
   },
   // Vue
   "[vue]": {
-    "editor.defaultFormatter": "octref.vetur",
+    "editor.defaultFormatter": "Vue.volar",
   },
   // Extension: Volar
   "volar.preview.port": 3000,

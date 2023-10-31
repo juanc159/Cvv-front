@@ -8,6 +8,7 @@ export function useImageUpload() {
   const name = ref<string | null>(null);
   const allowedExtensions = ref<Array<string>>([]);
   const allowedSizeFile = ref<number>(10240);
+  const loading = ref<boolean>(false);
 
   function handleImageSelected() {
     //--------------------------------------------------------------------------------------------
@@ -57,6 +58,7 @@ export function useImageUpload() {
     console.log("event.target.files[0]", event.target.files[0]);
 
     imageFile.value = event.target.files[0];
+
     return true;
   }
 
@@ -67,8 +69,10 @@ export function useImageUpload() {
 
     fileReader.readAsDataURL(imageFile);
 
+    loading.value = true
     fileReader.addEventListener("load", () => {
       imageUrl.value = fileReader.result;
+      loading.value = false
 
       // console.log('imageUrl.value', imageUrl.value)
     });
@@ -79,6 +83,7 @@ export function useImageUpload() {
     imageUrl.value = null;
     name.value = null;
     key.value++;
+    loading.value = false;
   }
 
   return {
@@ -90,5 +95,6 @@ export function useImageUpload() {
     clearData,
     name,
     allowedSizeFile,
+    loading,
   };
 }

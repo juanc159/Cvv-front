@@ -22,7 +22,6 @@ const authenticationStore = useAuthenticationStore();
 const { form, loading } = storeToRefs(storeBanner);
 const errors = ref<IErrorsBack>({});
 const photo = ref(useImageUpload());
-const showPass = ref(false);
 
 const arrayValidation = ref<Array<string | boolean>>([]);
 
