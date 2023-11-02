@@ -74,9 +74,10 @@ const { data } = defineProps({
                 <VCardItem class="pb-0"> </VCardItem>
 
                 <VCardText>
-                  <iframe v-if="data.iframeGoogleMap" :src="data.iframeGoogleMap" height="450"
+                  <div v-html="data.iframeGoogleMap"></div>
+                  <!-- <iframe v-if="data.iframeGoogleMap" :src="data.iframeGoogleMap" height="450"
                     style="border-radius: 1rem; inline-size: 100%" :allowfullscreen="true" loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    referrerpolicy="no-referrer-when-downgrade"></iframe> -->
                 </VCardText>
               </VCard>
             </VCol>
