@@ -1,26 +1,26 @@
 <script lang="ts" setup type="module">
 definePage({
-  name: "Users-Index",
+  name: "Subject-Index",
 });
 
-import { useCrudUserStore } from "@/pages/Users/Store/useCrudUserStore";
+import { useCrudSubjectStore } from "@/pages/Subject/Store/useCrudSubjectStore";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import Swal from "sweetalert2";
 import { VDataTable } from "vuetify/labs/VDataTable";
 
-const crudUserStore = useCrudUserStore();
-const auth = useAuthenticationStore();
+const crudSubjectStore = useCrudSubjectStore();
+const authenticationStore = useAuthenticationStore();
 const router = useRouter();
 
-const { currentPage, totalPage, lastPage, totalData, users, loading } =
-  storeToRefs(crudUserStore);
+const { currentPage, totalPage, lastPage, totalData, subjects, loading } =
+  storeToRefs(crudSubjectStore);
 
 // menu data paginate
 const rowPerPage = ref<number>(10);
 
 const fetchDataTable = async (data: Array<object> = []) => {
-  await crudUserStore.fetchAll({
-    company_id: auth.company.id,
+  await crudSubjectStore.fetchAll({
+    company_id: authenticationStore.company.id,
     perPage: rowPerPage.value,
     page: currentPage.value,
     searchQuery: data,
@@ -43,23 +43,23 @@ watchArray([currentPage, rowPerPage], async () => {
 
 // 👉 Computing pagination data
 const paginationData = computed(() => {
-  const firstIndex = users.value.length
+  const firstIndex = subjects.value.length
     ? (currentPage.value - 1) * totalPage.value + 1
     : 0;
   const lastIndex =
-    users.value.length + (currentPage.value - 1) * totalPage.value;
+    subjects.value.length + (currentPage.value - 1) * totalPage.value;
 
   return `Mostrando ${firstIndex} a ${lastIndex} de ${totalData.value} registros`;
 });
 
 const changeScreen = async (action: string = "create", id?: number) => {
-  router.push({ name: "Users-Form", params: { action: action, id: id } });
+  router.push({ name: "Subject-Form", params: { action: action, id: id } });
 };
 
 // Accion cambio de estado
 const changeState = async (obj: any, field: string) => {
   const state = !obj[field];
-  const promise = await crudUserStore.changeState({
+  const promise = await crudSubjectStore.changeState({
     id: obj.id,
     value: state,
     field: field,
@@ -76,7 +76,7 @@ const deleteData = async (id: number) => {
     denyButtonText: "No",
   }).then(async (result) => {
     if (result.isConfirmed) {
-      await crudUserStore.fetchDelete(id);
+      await crudSubjectStore.fetchDelete(id);
       await fetchDataTable();
     } else if (result.isDenied) {
     }
@@ -85,9 +85,7 @@ const deleteData = async (id: number) => {
 
 const headers = [
   { title: "Nombre", key: "name" },
-  { title: "Correo", key: "email" },
-  { title: "Rol", key: "role" },
-  { title: "Estado", key: "state" },
+  { title: "Código", key: "code" },
   { title: "Acciones", key: "actions" },
 ];
 </script>
@@ -96,19 +94,25 @@ const headers = [
   <div>
     <VCard>
       <VCardText>
-        <VDataTable :headers="headers" :items="users" :items-per-page="rowPerPage">
+        <VDataTable :headers="headers" :items="subjects" :items-per-page="rowPerPage">
           <template #top>
             <VContainer fluid class="d-flex flex-wrap py-4 gap-4">
               <div class="me-3" style="inline-size: 80px">
                 <VSelect v-model="rowPerPage" density="compact" variant="outlined" :items="[10, 20, 30, 50]" />
               </div>
               <VSpacer />
-              <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
+              <div class="app-subject-search-filter d-flex align-center flex-wrap gap-4">
                 <VBtn color="primary" @click="changeScreen()">
-                  Crear usuario
+                  Crear Materia
                 </VBtn>
               </div>
             </VContainer>
+          </template>
+
+          <template #item.path="{ item }">
+            <div class="d-flex align-center py-2" style="inline-size: 10rem">
+              <VImg :src="item.path" class="rounded" />
+            </div>
           </template>
 
           <template #item.state="{ item }">
@@ -141,6 +145,7 @@ const headers = [
               </td>
             </tr>
           </template>
+
           <template #bottom>
             <VCardText class="pt-2">
               <VRow>

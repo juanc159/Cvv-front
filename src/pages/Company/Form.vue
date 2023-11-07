@@ -75,12 +75,8 @@ const deleteDetail = (index: number) => {
 watch(
   form,
   (newValue, oldValue) => {
-    if (!newValue.id)
-      // arrayValidation.value.password = [requiredValidator(newValue.password)];
-      arrayValidation.value.image_principal = [requiredValidator(archive.value.imageUrl)]
-    else arrayValidation.value.image_principal = null;
-
-    // arrayValidation.value["image_principal"] = []
+    if (!newValue.id) arrayValidation.value.image_principal = [requiredValidator(archive.value.imageUrl)]
+    else arrayValidation.value.image_principal = [];
   },
   { deep: true }
 );

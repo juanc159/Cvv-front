@@ -81,76 +81,35 @@ const selectCompany = (company: object) => {
   <div>
     <VCard>
       <VCardText>
-        <VDataTable :headers="headers" :items="companies" :items-per-page="5">
+        <VDataTable :headers="headers" :items="companies" :items-per-page="rowPerPage">
           <template #top>
             <VContainer fluid class="d-flex flex-wrap py-4 gap-4">
               <div class="me-3" style="inline-size: 80px">
-                <VSelect
-                  v-model="rowPerPage"
-                  density="compact"
-                  variant="outlined"
-                  :items="[10, 20, 30, 50]"
-                />
+                <VSelect v-model="rowPerPage" density="compact" variant="outlined" :items="[10, 20, 30, 50]" />
               </div>
               <VSpacer />
-              <div
-                class="app-Company-search-filter d-flex align-center flex-wrap gap-4"
-              ></div>
+              <div class="app-Company-search-filter d-flex align-center flex-wrap gap-4"></div>
             </VContainer>
           </template>
 
           <template #item.state="{ item }">
-            <VChip
-              :color="item.state == 1 ? 'success' : 'error'"
-              @click="changeState(item, 'state')"
-            >
-              <VIcon
-                start
-                size="16"
-                :icon="item.state == 1 ? 'tabler-bell' : 'tabler-alert-circle'"
-              />
+            <VChip :color="item.state == 1 ? 'success' : 'error'" @click="changeState(item, 'state')">
+              <VIcon start size="16" :icon="item.state == 1 ? 'tabler-bell' : 'tabler-alert-circle'" />
               <span>{{ item.state == 1 ? "Activo" : "Inactivo" }} </span>
-              <VTooltip
-                location="top"
-                transition="scale-transition"
-                activator="parent"
-                text="Cambiar Estado"
-              >
+              <VTooltip location="top" transition="scale-transition" activator="parent" text="Cambiar Estado">
               </VTooltip>
             </VChip>
           </template>
           <template #item.actions="{ item }">
-            <VBtn
-              icon
-              size="x-small"
-              color="default"
-              variant="text"
-              @click="changeScreen('edit', item.id)"
-            >
+            <VBtn icon size="x-small" color="default" variant="text" @click="changeScreen('edit', item.id)">
               <VIcon size="22" icon="tabler-edit" />
-              <VTooltip
-                location="top"
-                transition="scale-transition"
-                activator="parent"
-                text="Editar"
-              >
+              <VTooltip location="top" transition="scale-transition" activator="parent" text="Editar">
               </VTooltip>
             </VBtn>
 
-            <VBtn
-              v-show="item.state == 1"
-              size="x-small"
-              color="default"
-              icon
-              variant="text"
-              @click="selectCompany(item)"
-            >
-              <VTooltip
-                location="top"
-                transition="scale-transition"
-                activator="parent"
-                text="Ingresar"
-              >
+            <VBtn v-show="item.state == 1" size="x-small" color="default" icon variant="text"
+              @click="selectCompany(item)">
+              <VTooltip location="top" transition="scale-transition" activator="parent" text="Ingresar">
               </VTooltip>
               <VIcon size="22" icon="tabler-square-rounded-arrow-right" />
             </VBtn>
@@ -169,20 +128,12 @@ const selectCompany = (company: object) => {
           <template #bottom>
             <VCardText class="pt-2">
               <VRow>
-                <VContainer
-                  fluid
-                  class="d-flex align-center flex-wrap justify-space-between gap-4 py-3 px-5"
-                >
+                <VContainer fluid class="d-flex align-center flex-wrap justify-space-between gap-4 py-3 px-5">
                   <span class="text-sm text-disabled">
                     {{ paginationData }}
                   </span>
 
-                  <VPagination
-                    v-model="currentPage"
-                    size="small"
-                    :total-visible="5"
-                    :length="lastPage"
-                  />
+                  <VPagination v-model="currentPage" size="small" :total-visible="5" :length="lastPage" />
                 </VContainer>
               </VRow>
             </VCardText>

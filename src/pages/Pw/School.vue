@@ -3,6 +3,7 @@ import ContactArea from "@/pages/Pw/ContactArea.vue";
 import Footer from "@/views/front-pages/front-page-footer.vue";
 import Navbar from "@/views/front-pages/front-page-navbar.vue";
 import AditionalService from "@/views/front-pages/landing-page/AditionalService.vue";
+import OurTeam from "@/views/front-pages/landing-page/our-team.vue";
 
 
 import { register } from "swiper/element/bundle";
@@ -20,29 +21,16 @@ definePage({
 
 const activeSectionId = ref();
 
-const refHome = ref();
-const refFeatures = ref();
-const refTeam = ref();
-const refContact = ref();
-const refFaq = ref();
-
-useIntersectionObserver(
-  [refHome, refFeatures, refTeam, refContact, refFaq],
-  ([{ isIntersecting, target }]) => {
-    if (isIntersecting) activeSectionId.value = target.id;
-  },
-  {
-    threshold: 0.25,
-  }
-);
-
 const route = useRoute();
+const currentTab = ref();
 const school = ref();
+const typeEducations = ref();
 onMounted(async () => {
 
   const response = await useApi("pw-dataSchool/" + route.params.id).get();
   if (response.data) {
     school.value = response.data.value.company;
+    typeEducations.value = response.data.value.typeEducations;
   }
 });
 </script>
@@ -61,6 +49,30 @@ onMounted(async () => {
     <!--Activity Area Start-->
     <AditionalService id="servicioData" />
 
+
+    <VContainer v-if="school" style="margin-block: 5.25rem;">
+      <VCard class="mt-6">
+        <VTabs v-model="currentTab" grow stacked>
+          <VTab v-for="(item, key) in school.teachers" :key="item">
+            <!-- <VIcon icon="tabler-phone" class="mb-2" /> -->
+            <span>{{ key }}</span>
+          </VTab>
+        </VTabs>
+
+        <VCardText>
+          <VWindow v-model="currentTab">
+            <VWindowItem v-for="(item, key) in school.teachers" :key="item">
+
+              <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
+                <OurTeam v-if="item" ref="refTeam" :data="item" />
+              </div>
+            </VWindowItem>
+          </VWindow>
+        </VCardText>
+      </VCard>
+    </VContainer>
+
+
     <ContactArea v-if="school" :data="school" id="contactData" />
 
     <!-- 👉 Hero Section  -->
@@ -76,10 +88,7 @@ onMounted(async () => {
       <CustomersReview />
     </div> -->
 
-    <!-- 👉 Our Team -->
-    <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-      <OurTeam ref="refTeam" />
-    </div> -->
+
 
     <!-- 👉 Pricing Plans -->
     <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
