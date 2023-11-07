@@ -15,7 +15,7 @@ export const useCrudTeacherStore = defineStore('useCrudTeacherStore', {
       company_id: null,
       type_education_id: null,
       job_position_id: null,
-      subjects: [],
+      complementaries: [],
       name: null,
       last_name: null,
       email: null,
@@ -32,6 +32,8 @@ export const useCrudTeacherStore = defineStore('useCrudTeacherStore', {
     jobPositions: [] as Array<object>,
     typeEducations: [] as Array<object>,
     subjects: [] as Array<object>,
+    sections: [] as Array<object>,
+    grades: [] as Array<object>,
   }),
   getters: {
   },
@@ -42,7 +44,7 @@ export const useCrudTeacherStore = defineStore('useCrudTeacherStore', {
         company_id: null,
         type_education_id: null,
         job_position_id: null,
-        subjects: [],
+        complementaries: [],
         name: null,
         last_name: null,
         email: null,
@@ -67,7 +69,7 @@ export const useCrudTeacherStore = defineStore('useCrudTeacherStore', {
     },
 
     async fetchDataForm(id: number | undefined, action: string = "create"): Promise<void> {
-      this.loading.form = true
+      // this.loading.form = true
       const url = id ? `/teacher-dataForm/${action}/${id}` : `/teacher-dataForm/${action}`
       const { data, response, error, isFetching } = await useApi(url).get()
       this.loading.form = isFetching.value
@@ -77,6 +79,8 @@ export const useCrudTeacherStore = defineStore('useCrudTeacherStore', {
         this.jobPositions = data.value.jobPositions
         this.typeEducations = data.value.typeEducations
         this.subjects = data.value.subjects
+        this.sections = data.value.sections
+        this.grades = data.value.grades
       }
     },
 
@@ -87,9 +91,12 @@ export const useCrudTeacherStore = defineStore('useCrudTeacherStore', {
       for (const key in this.form)
         formData.append(key, this.form[key])
 
-      this.loading.form = true
+      formData.delete('complementaries');
+      formData.append('complementaries', JSON.stringify(this.form.complementaries))
+
+      // this.loading.form = true
       const { data, response, error, isFetching } = await useApi("/teacher-create").post(formData)
-      this.loading.form = isFetching.value
+      // this.loading.form = isFetching.value
 
       if (response.value?.ok && data.value) {
         this.form = data.value.data

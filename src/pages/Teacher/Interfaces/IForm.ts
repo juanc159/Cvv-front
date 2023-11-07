@@ -3,7 +3,7 @@ export default interface IForm {
   company_id: null | number
   type_education_id: null | number
   job_position_id: null | number
-  subjects: Array<number>
+  complementaries: Array<object>
   name: null | string
   last_name: null | string
   email: null | string

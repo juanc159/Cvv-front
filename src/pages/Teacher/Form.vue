@@ -14,12 +14,15 @@ import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import { useCrudTeacherStore } from "@/pages/Teacher/Store/useCrudTeacherStore";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import { VForm } from "vuetify/components";
+import { VDataTable } from "vuetify/labs/VDataTable";
+
 const route = useRoute();
 const { toast } = useToast();
 const formValidation = ref<VForm>();
+const complementaryValidation = ref<VForm>();
 const storeTeacher = useCrudTeacherStore();
 const authenticationStore = useAuthenticationStore();
-const { form, loading, jobPositions, typeEducations, subjects } = storeToRefs(storeTeacher);
+const { form, loading, jobPositions, typeEducations, subjects, sections, grades } = storeToRefs(storeTeacher);
 const errorsBack = ref<IErrorsBack>({});
 
 const arrayValidation = ref<Array<string | boolean>>([]);
@@ -31,6 +34,7 @@ archive.value.allowedExtensions = aExtImage;
 
 const submitForm = async () => {
   form.value.company_id = authenticationStore.company.id;
+  form.value.complementaries = arrayComplementary.value;
   const validation = await formValidation.value?.validate();
   if (validation?.valid) {
     const data = await storeTeacher.fetchSave();
@@ -60,6 +64,8 @@ onMounted(async () => {
       Number(route.params.id),
       route.params.action
     );
+
+    arrayComplementary.value = JSON.parse(JSON.stringify(form.value.complementaries))
   }
 });
 
@@ -71,6 +77,68 @@ watch(
   },
   { deep: true }
 );
+
+//COMPLEMENTARY
+const formComplementary = ref<{
+  grade_id: null | number
+  section_id: null | number
+  subjects: Array<number>
+}>({
+  grade_id: null,
+  section_id: null,
+  subjects: [],
+})
+const arrayComplementary = ref<Array<object>>([])
+
+const headers = [
+  { title: "Grado o nivel", key: "grade_name" },
+  { title: "Sección", key: "section_name" },
+  { title: "Materias", key: "subjects" },
+  { title: "Acciones", key: "actions" },
+];
+
+const clearFormComplementary = () => {
+  formComplementary.value = {
+    grade_id: null,
+    section_id: null,
+    subjects: [],
+  }
+}
+const addInfo = async () => {
+  const validation = await formValidation.value?.validate();
+  if (validation?.valid) {
+    const searchGrade = grades.value.find(ele => ele.value == formComplementary.value.grade_id)
+    const searchSection = sections.value.find(ele => ele.value == formComplementary.value.section_id)
+
+    const subjectsData = subjects.value.filter(ele => formComplementary.value.subjects.includes(ele.value))
+
+    arrayComplementary.value.push({
+      id: null,
+      grade_id: formComplementary.value.grade_id,
+      grade_name: searchGrade.title,
+      section_id: formComplementary.value.section_id,
+      section_name: searchSection.title,
+      subjects: subjectsData,
+      delete: 0,
+    })
+
+    clearFormComplementary()
+  } else {
+    toast("Faltan Campos Por Diligenciar", "", "danger");
+  }
+
+}
+const deleteInfo = (index: number) => {
+  if (arrayComplementary.value[index].id) arrayComplementary.value[index].delete = 1
+  else arrayComplementary.value.splice(index, 1)
+
+}
+
+const arrayElementsComplementaries = computed(() => {
+  return arrayComplementary.value.filter(ele => ele.delete != 1);
+});
+
+
 </script>
 
 <template>
@@ -112,9 +180,7 @@ watch(
                 label="Teléfono" @keypress="errorsBack.phone = ''" :requiredField="true">
               </AppTextField>
             </VCol>
-            <VCol cols="12" sm="3">
-              <VSelect multiple :items="subjects" v-model="form.subjects" label="Materias"></VSelect>
-            </VCol>
+
             <VCol cols="12" sm="3">
               <VFileInput accept="image/*" :rules="arrayValidation['photo']" :key="archive.key" @change="addFile($event)"
                 @click:clear="archive.clearData">
@@ -124,19 +190,62 @@ watch(
               </VFileInput>
             </VCol>
           </VRow>
+
           <VRow>
-            <VCol cols="3" class="d-flex justify-center">
-              <VImg :src="archive.imageUrl ?? form.photo"></VImg>
+            <VCol cols="12" class="d-flex justify-center ">
+              <div style="width: 200px; height: 200px;">
+                <VImg :src="archive.imageUrl ?? form.photo"></VImg>
+              </div>
             </VCol>
           </VRow>
+
+        </VForm>
+
+        <VForm ref="complementaryValidation" lazy-validation>
           <VRow>
-            <VCol cols="12" class="d-flex justify-center">
-              <VBtn :loading="loading.form" color="primary" @click="submitForm">
-                Guardar
-              </VBtn>
+            <VCol cols="12">
+              <h3>Información complementaria</h3>
+            </VCol>
+            <VCol cols="12" sm="3">
+              <VSelect :items="grades" v-model="formComplementary.grade_id" label="Grados y niveles"></VSelect>
+            </VCol>
+            <VCol cols="12" sm="3">
+              <VSelect :items="sections" v-model="formComplementary.section_id" label="Secciones"></VSelect>
+            </VCol>
+            <VCol cols="12" sm="3">
+              <VSelect multiple :items="subjects" v-model="formComplementary.subjects" label="Materias"></VSelect>
+            </VCol>
+            <VCol cols="12" sm="3">
+              <VBtn color="success" @click="addInfo()">Agregar</VBtn>
+            </VCol>
+            <VCol cols="12">
+              <VDataTable :headers="headers" :items="arrayElementsComplementaries" :items-per-page="999">
+                <template #item.subjects="{ item }">
+                  <VChip color="primary" class="mr-2" v-for="(element, index) in item.subjects" :key="index">{{
+                    element.title }}
+                  </VChip>
+                </template>
+                <template #item.actions="{ item, index }">
+                  <VBtn icon size="x-small" color="error" variant="text" @click="deleteInfo(index)">
+                    <VIcon size="22" icon="tabler-trash" />
+                    <VTooltip location="top" transition="scale-transition" activator="parent" text="Eliminar">
+                    </VTooltip>
+                  </VBtn>
+                </template>
+                <template #bottom>
+                </template>
+              </VDataTable>
             </VCol>
           </VRow>
         </VForm>
+
+        <VRow>
+          <VCol cols="12" class="d-flex justify-center">
+            <VBtn :loading="loading.form" color="primary" @click="submitForm">
+              Guardar
+            </VBtn>
+          </VCol>
+        </VRow>
       </VCardText>
     </VCard>
   </div>
