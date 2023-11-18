@@ -9,6 +9,7 @@ const props = defineProps({
   school: Object,
 });
 
+const route = useRoute()
 const display = useDisplay();
 
 interface navItem {
@@ -38,6 +39,7 @@ const menu = ref<
     title: string;
     to: string;
     hash: string | null;
+    params?: object;
   }>
 >([
   {
@@ -47,7 +49,10 @@ const menu = ref<
   },
   {
     title: "Inicio",
-    to: "",
+    to: 'Pw-school',
+    params: {
+      school_id: route.params.school_id
+    },
     hash: null,
   },
   {
@@ -73,70 +78,45 @@ const openLink = (link: string) => {
     <!-- Nav items -->
     <div>
       <div class="d-flex flex-column gap-y-4 pa-4">
-        <RouterLink
-          v-for="(item, index) in [
-            'Principal',
-            'Inicio',
-            'Sobre nosotros',
-            'Galeria',
-            'Contactanos',
-          ]"
-          :key="index"
-          :to="{
-            name: 'Pw-home',
-            hash: `#${item.toLowerCase().replace(' ', '-')}`,
-          }"
-          class="nav-link font-weight-medium"
-          :class="[
-            props.activeId?.toLocaleLowerCase().replace('-', ' ') ===
-            item.toLocaleLowerCase()
-              ? 'active-link'
-              : '',
-          ]"
-        >
+        <RouterLink v-for="(item, index) in [
+          'Principal',
+          'Inicio',
+          'Sobre nosotros',
+          'Galeria',
+          'Contactanos',
+        ]" :key="index" :to="{
+  name: 'Pw-home',
+  hash: `#${item.toLowerCase().replace(' ', '-')}`,
+}" class="nav-link font-weight-medium" :class="[
+  props.activeId?.toLocaleLowerCase().replace('-', ' ') ===
+    item.toLocaleLowerCase()
+    ? 'active-link'
+    : '',
+]">
           {{ item }}
         </RouterLink>
       </div>
     </div>
 
     <!-- Navigation drawer close icon -->
-    <VIcon
-      id="navigation-drawer-close-btn"
-      icon="tabler-x"
-      size="20"
-      @click="sidebar = !sidebar"
-    />
+    <VIcon id="navigation-drawer-close-btn" icon="tabler-x" size="20" @click="sidebar = !sidebar" />
   </VNavigationDrawer>
 
   <!-- 👉 Navbar for desktop devices  -->
   <div class="front-page-navbar">
-    <VAppBar
-      :color="
-        $vuetify.theme.current.dark
-          ? 'rgba(var(--v-theme-background))'
-          : 'rgba(255,255,255, 0.38)'
-      "
-      :class="
-        y > 10
-          ? 'app-bar-scrolled'
-          : [
-              $vuetify.theme.current.dark ? 'app-bar-dark' : 'app-bar-light',
-              'elevation-0',
-            ]
-      "
-      class="navbar-blur"
-    >
+    <VAppBar :color="$vuetify.theme.current.dark
+      ? 'rgba(var(--v-theme-background))'
+      : 'rgba(255,255,255, 0.38)'
+      " :class="y > 10
+    ? 'app-bar-scrolled'
+    : [
+      $vuetify.theme.current.dark ? 'app-bar-dark' : 'app-bar-light',
+      'elevation-0',
+    ]
+    " class="navbar-blur">
       <!-- toggle icon for mobile device -->
-      <IconBtn
-        id="vertical-nav-toggle-btn"
-        class="ms-n3 me-2 d-inline-block d-md-none"
-        @click="sidebar = !sidebar"
-      >
-        <VIcon
-          size="26"
-          icon="tabler-menu-2"
-          color="rgba(var(--v-theme-on-surface))"
-        />
+      <IconBtn id="vertical-nav-toggle-btn" class="ms-n3 me-2 d-inline-block d-md-none" @click="sidebar = !sidebar">
+        <VIcon size="26" icon="tabler-menu-2" color="rgba(var(--v-theme-on-surface))" />
       </IconBtn>
       <!-- Title and Landing page sections -->
       <div class="d-flex align-center justify-space-between w-100">
@@ -159,25 +139,15 @@ const openLink = (link: string) => {
 
         <!-- landing page sections -->
         <div class="text-base align-center d-none d-md-flex">
-          <RouterLink
-            v-for="(item, index) in menu"
-            :key="index"
-            :to="{
-              name: item.to,
-              hash: item.hash,
-            }"
-            class="nav-link font-weight-medium py-2 px-2 px-lg-4"
-          >
+          <RouterLink v-for="(item, index) in menu" :key="index" :to="{
+            name: item.to,
+            hash: item.hash,
+          }" class="nav-link font-weight-medium py-2 px-2 px-lg-4">
             {{ item.title }}
           </RouterLink>
         </div>
         <div v-if="props.school?.social_networks.length > 0">
-          <VBtn
-            icon
-            v-for="(item, index) in props.school?.social_networks"
-            :key="index"
-            @click="openLink(item.content)"
-          >
+          <VBtn icon v-for="(item, index) in props.school?.social_networks" :key="index" @click="openLink(item.content)">
             <VIcon size="30" :icon="item.icon"></VIcon>
           </VBtn>
         </div>

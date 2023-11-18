@@ -10,23 +10,6 @@ definePage({
     layout: "blank",
   },
 });
-const activeSectionId = ref();
-
-const refHome = ref();
-const refFeatures = ref();
-const refTeam = ref();
-const refContact = ref();
-const refFaq = ref();
-
-useIntersectionObserver(
-  [refHome, refFeatures, refTeam, refContact, refFaq],
-  ([{ isIntersecting, target }]) => {
-    if (isIntersecting) activeSectionId.value = target.id;
-  },
-  {
-    threshold: 0.25,
-  }
-);
 
 const banners = ref([]);
 const companies = ref([]);
@@ -49,7 +32,7 @@ onMounted(async () => {
 
     <!-- 👉 Our Team -->
     <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-      <AllSchool ref="refTeam" :companies="companies" />
+      <AllSchool :companies="companies" />
     </div>
 
     <!-- 👉 Footer -->

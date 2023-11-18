@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import SchoolData from "@/layouts/SchoolData.vue";
 import ContactArea from "@/pages/Pw/ContactArea.vue";
-import Footer from "@/views/front-pages/front-page-footer.vue";
-import Navbar from "@/views/front-pages/front-page-navbar.vue";
 import AditionalService from "@/views/front-pages/landing-page/AditionalService.vue";
+import GradeSection from "@/views/front-pages/landing-page/grade-section.vue";
 import OurTeam from "@/views/front-pages/landing-page/our-team.vue";
 
 
@@ -12,59 +12,56 @@ register();
 
 definePage({
   name: "Pw-school",
-  path: "/school/:id",
+  path: "/school/:school_id",
   meta: {
     requiresAuth: false,
     layout: "blank",
   },
 });
 
-const activeSectionId = ref();
 
 const route = useRoute();
 const currentTab = ref();
 const school = ref();
 const typeEducations = ref();
+const generalSecondaryEducation = ref<Array<object>>([]);
 onMounted(async () => {
-
-  const response = await useApi("pw-dataSchool/" + route.params.id).get();
+  const response = await useApi("pw-dataSchool/" + route.params.school_id).get();
   if (response.data) {
     school.value = response.data.value.company;
     typeEducations.value = response.data.value.typeEducations;
+    generalSecondaryEducation.value = response.data.value.generalSecondaryEducation;
   }
 });
 </script>
 
 <template>
-  <div class="landing-page-wrapper">
-    <Navbar :active-id="activeSectionId" :school="school" />
-
-    <swiper-container style="margin-block-start: 6rem" v-if="school?.banners.length > 0" navigation="true"
-      events-prefix="swiper-">
-      <swiper-slide pagination="true" v-for="(item, index) in school.banners" :key="index">
-        <VImg :src="item.path" />
-      </swiper-slide>
-    </swiper-container>
+  <SchoolData>
 
     <!--Activity Area Start-->
     <AditionalService id="servicioData" />
 
-
     <VContainer v-if="school" style="margin-block: 5.25rem;">
       <VCard class="mt-6">
         <VTabs v-model="currentTab" grow stacked>
-          <VTab v-for="(item, key) in school.teachers" :key="item">
+          <VTab v-for="(item, index) in typeEducations" :key="index">
             <!-- <VIcon icon="tabler-phone" class="mb-2" /> -->
-            <span>{{ key }}</span>
+            <span>{{ item.title }}</span>
           </VTab>
         </VTabs>
 
+
         <VCardText>
           <VWindow v-model="currentTab">
-            <VWindowItem v-for="(item, key) in school.teachers" :key="item">
+            <VWindowItem>
+              <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
+                <GradeSection :data="generalSecondaryEducation" />
+              </div>
+            </VWindowItem>
+            <VWindowItem v-for="(item, key) in typeEducations" :key="key">
 
               <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-                <OurTeam v-if="item" ref="refTeam" :data="item" />
+                <OurTeam v-if="item" :data="school.teachers[item.title]" />
               </div>
             </VWindowItem>
           </VWindow>
@@ -75,51 +72,6 @@ onMounted(async () => {
 
     <ContactArea v-if="school" :data="school" id="contactData" />
 
-    <!-- 👉 Hero Section  -->
-    <!-- <HeroSection ref="refHome" /> -->
-
-    <!-- 👉 Useful features  -->
-    <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-      <Features ref="refFeatures" />
-    </div> -->
-
-    <!-- 👉 Customer Review -->
-    <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-      <CustomersReview />
-    </div> -->
-
-
-
-    <!-- 👉 Pricing Plans -->
-    <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-      <PricingPlans />
-    </div> -->
-
-    <!-- 👉 Product stats -->
-    <!-- <ProductStats /> -->
-
-    <!-- 👉 FAQ Section -->
-    <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-      <FaqSection ref="refFaq" />
-    </div> -->
-
-    <!-- 👉 Banner  -->
-    <!-- <Banner /> -->
-
-    <!-- 👉 Contact Us  -->
-    <!-- <ContactUs ref="refContact" /> -->
-
-    <!-- 👉 Footer -->
-    <Footer v-if="school" :data="school" />
-  </div>
+  </SchoolData>
 </template>
-
-<style lang="scss">
-@media (max-width: 960px) and (min-width: 600px) {
-  .landing-page-wrapper {
-    .v-container {
-      padding-inline: 2rem !important;
-    }
-  }
-}
-</style>
+ 

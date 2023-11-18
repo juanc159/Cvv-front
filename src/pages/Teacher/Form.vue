@@ -19,6 +19,7 @@ import { VDataTable } from "vuetify/labs/VDataTable";
 const route = useRoute();
 const { toast } = useToast();
 const formValidation = ref<VForm>();
+const fileValidation = ref<VForm>();
 const complementaryValidation = ref<VForm>();
 const storeTeacher = useCrudTeacherStore();
 const authenticationStore = useAuthenticationStore();
@@ -50,7 +51,7 @@ const submitForm = async () => {
   }
 };
 
-const addFile = (e: Event) => {
+const addPhoto = (e: Event) => {
   archive.value.handleImageSelected(e);
   setTimeout(() => {
     form.value.photo = archive.value.imageFile;
@@ -139,6 +140,32 @@ const arrayElementsComplementaries = computed(() => {
 });
 
 
+
+//documentos
+const archiveDoc = ref(useImageUpload());
+archiveDoc.value.allowedExtensions = ["jpg", "jpeg", "png"];
+const headersFile = [
+  { title: "Título", key: "name" },
+  { title: "Acciones", key: "actions" },
+];
+
+
+const addFile = async () => {
+  const validation = await fileValidation.value?.validate();
+  console.log(validation);
+
+  if (validation?.valid) {
+
+    form.value.files.push({
+      name: archiveDoc.value.name,
+      file: archiveDoc.value.imageFile,
+    })
+
+    archiveDoc.value.clearData()
+
+  }
+};
+
 </script>
 
 <template>
@@ -182,7 +209,7 @@ const arrayElementsComplementaries = computed(() => {
             </VCol>
 
             <VCol cols="12" sm="3">
-              <VFileInput accept="image/*" :rules="arrayValidation['photo']" :key="archive.key" @change="addFile($event)"
+              <VFileInput accept="image/*" :rules="arrayValidation['photo']" :key="archive.key" @change="addPhoto($event)"
                 @click:clear="archive.clearData">
                 <template #label>
                   Foto&nbsp;<b class="text-warning">*</b>
@@ -193,7 +220,7 @@ const arrayElementsComplementaries = computed(() => {
 
           <VRow>
             <VCol cols="12" class="d-flex justify-center ">
-              <div style="width: 200px; height: 200px;">
+              <div style=" block-size: 200px;inline-size: 200px;">
                 <VImg :src="archive.imageUrl ?? form.photo"></VImg>
               </div>
             </VCol>
@@ -225,6 +252,45 @@ const arrayElementsComplementaries = computed(() => {
                     element.title }}
                   </VChip>
                 </template>
+                <template #item.actions="{ item, index }">
+                  <VBtn icon size="x-small" color="error" variant="text" @click="deleteInfo(index)">
+                    <VIcon size="22" icon="tabler-trash" />
+                    <VTooltip location="top" transition="scale-transition" activator="parent" text="Eliminar">
+                    </VTooltip>
+                  </VBtn>
+                </template>
+                <template #bottom>
+                </template>
+              </VDataTable>
+            </VCol>
+          </VRow>
+        </VForm>
+
+        <VForm ref="fileValidation" lazy-validation>
+          <VRow>
+            <VCol cols="12">
+              <h3>Planificación</h3>
+            </VCol>
+            <VCol cols="12" sm="6">
+              <AppTextField clearable v-model="archiveDoc.name" :rules="[requiredValidator]" label="Titulo"
+                :requiredField="true">
+              </AppTextField>
+            </VCol>
+            <VCol cols="12" sm="3">
+              <VLabel>Archivo&nbsp;<b class="text-warning">*</b></VLabel>
+              <VFileInput accept="image/*" :rules="[requiredValidator]" :key="archiveDoc.key"
+                @change="archiveDoc.handleImageSelected" @click:clear="archiveDoc.clearData">
+              </VFileInput>
+            </VCol>
+            <VCol cols="12" sm="3">
+              <VBtn size="30" class="mt-6" icon color="success" @click="addFile()">
+                <VIcon icon="tabler-plus"></VIcon>
+              </VBtn>
+            </VCol>
+
+            <VCol cols="12">
+              <VDataTable :headers="headersFile" :items="form.files" :items-per-page="999">
+
                 <template #item.actions="{ item, index }">
                   <VBtn icon size="x-small" color="error" variant="text" @click="deleteInfo(index)">
                     <VIcon size="22" icon="tabler-trash" />

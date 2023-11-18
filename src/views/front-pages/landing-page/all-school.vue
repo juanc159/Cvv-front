@@ -24,7 +24,7 @@ const { companies } = defineProps({
       <VRow class="d-flex justify-center">
         <VCol v-for="(data, index) in companies" :key="index" cols="12" lg="4" sm="6">
           <VCard flat min-width="262" class="position-relative overflow-visible team-card mb-12" style="cursor: pointer"
-            :to="{ name: 'Pw-school', params: { id: index + 1 } }">
+            :to="{ name: 'Pw-school', params: { school_id: index + 1 } }">
             <div :style="{
               maxHeight: '185px',
               minHeight: '185px',
