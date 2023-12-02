@@ -58,3 +58,31 @@ export const descargarArchivo = (path: string, name: string | null = null) => {
   link.click();
   document.body.removeChild(link);
 }
+
+
+
+export const openPdfBase64 = (pdfBase64: string) => {
+  // Crear una nueva ventana
+  const newWindow = window.open('', '_blank');
+
+  // Verificar si la ventana emergente fue bloqueada por el navegador
+  if (newWindow) {
+    // Crear un documento HTML en la ventana emergente
+    const html = `
+      <html>
+        <head>
+          <title>PDF Viewer</title>
+        </head>
+        <body>
+          <embed width="100%" height="100%" src="data:application/pdf;base64,${pdfBase64}" type="application/pdf">
+        </body>
+      </html>
+    `;
+
+    // Escribir el contenido HTML en la ventana emergente
+    newWindow.document.write(html);
+  } else {
+    // Mostrar un mensaje de error si la ventana emergente fue bloqueada
+    alert('La ventana emergente fue bloqueada por el navegador. Asegúrate de permitir ventanas emergentes.');
+  }
+} 
