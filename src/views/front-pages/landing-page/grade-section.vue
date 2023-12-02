@@ -41,7 +41,16 @@ const { data } = defineProps({
                 </router-link>
               </VCardTitle>
               <VCardText>
-                <h3>Nomina de estudiantes</h3>
+                <router-link :to="{
+                  name: 'Pw-GradeSectionNotes', params: {
+                    school_id: route.params.id,
+                    grade_id: section.grade_id,
+                    section_id: section.section_id,
+                  }
+                }">
+
+                  Nomina de estudiantes
+                </router-link>
                 <h3>Docente guia: xxxxx</h3>
               </VCardText>
             </VCard>

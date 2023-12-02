@@ -9,6 +9,7 @@ definePage({
   },
 });
 
+import { useImageUpload } from "@/composables/useImageUpload";
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import { useCrudSubjectStore } from "@/pages/Subject/Store/useCrudSubjectStore";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
@@ -19,6 +20,7 @@ const formValidation = ref<VForm>();
 const storeSubject = useCrudSubjectStore();
 const authenticationStore = useAuthenticationStore();
 const { form, loading, typeEducations } = storeToRefs(storeSubject);
+const photo = ref(useImageUpload());
 
 const errorsBack = ref<IErrorsBack>({});
 
@@ -29,6 +31,7 @@ const submitForm = async () => {
     const data = await storeSubject.fetchSave();
     if (data?.code === 200) {
       errorsBack.value = {};
+      photo.value.clearData();
       await formValidation.value?.resetValidation();
     }
     if (data?.code === 422) errorsBack.value = data.errors ?? {}; // muestra error del back

@@ -80,6 +80,7 @@ const selectCompany = (company: object) => {
 <template>
   <div>
     <VCard>
+      <VCardTitle primary-title>Listado de compañias</VCardTitle>
       <VCardText>
         <VDataTable :headers="headers" :items="companies" :items-per-page="rowPerPage">
           <template #top>

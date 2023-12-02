@@ -105,6 +105,7 @@ const headers = [
 <template>
   <div>
     <VCard>
+      <VCardTitle primary-title>Listado de docentes</VCardTitle>
       <VCardText>
         <VDataTable :headers="headers" :items="teachers" :items-per-page="rowPerPage">
           <template #top>
