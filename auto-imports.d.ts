@@ -48,6 +48,7 @@ declare global {
   const defineLoader: typeof import('vue-router/auto')['defineLoader']
   const definePage: typeof import('unplugin-vue-router/runtime')['_definePage']
   const defineStore: typeof import('pinia')['defineStore']
+  const descargarArchivo: typeof import('./src/@core/utils/helpers')['descargarArchivo']
   const eagerComputed: typeof import('@vueuse/core')['eagerComputed']
   const effectScope: typeof import('vue')['effectScope']
   const emailValidator: typeof import('./src/@core/utils/validators')['emailValidator']
@@ -421,6 +422,7 @@ declare module 'vue' {
     readonly defineLoader: UnwrapRef<typeof import('vue-router/auto')['defineLoader']>
     readonly definePage: UnwrapRef<typeof import('unplugin-vue-router/runtime')['_definePage']>
     readonly defineStore: UnwrapRef<typeof import('pinia')['defineStore']>
+    readonly descargarArchivo: UnwrapRef<typeof import('./src/@core/utils/helpers')['descargarArchivo']>
     readonly eagerComputed: UnwrapRef<typeof import('@vueuse/core')['eagerComputed']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly emailValidator: UnwrapRef<typeof import('./src/@core/utils/validators')['emailValidator']>
@@ -770,6 +772,7 @@ declare module '@vue/runtime-core' {
     readonly defineLoader: UnwrapRef<typeof import('vue-router/auto')['defineLoader']>
     readonly definePage: UnwrapRef<typeof import('unplugin-vue-router/runtime')['_definePage']>
     readonly defineStore: UnwrapRef<typeof import('pinia')['defineStore']>
+    readonly descargarArchivo: UnwrapRef<typeof import('./src/@core/utils/helpers')['descargarArchivo']>
     readonly eagerComputed: UnwrapRef<typeof import('@vueuse/core')['eagerComputed']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly emailValidator: UnwrapRef<typeof import('./src/@core/utils/validators')['emailValidator']>

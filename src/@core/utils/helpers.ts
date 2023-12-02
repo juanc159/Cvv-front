@@ -30,3 +30,31 @@ export const isToday = (date: Date) => {
     && date.getFullYear() === today.getFullYear()
   )
 }
+
+
+export const descargarArchivo = (path: string, name: string | null = null) => {
+
+  // Divide la URL por las barras diagonales '/' para obtener las partes
+  const partesURL = path.split('/');
+
+  // Toma la última parte que debería ser el nombre del archivo
+  const nombreArchivo = partesURL[partesURL.length - 1];
+
+  // Dividir el nombre del archivo por el punto '.' para obtener la extensión
+  const partesNombreArchivo = nombreArchivo.split('.');
+  const extension = partesNombreArchivo[partesNombreArchivo.length - 1];
+
+  let nameComplete = name + '.' + extension
+  if (name == null) {
+    nameComplete = nombreArchivo
+  }
+
+  // Código para descargar el archivo
+  const link = document.createElement('a');
+  link.href = path;
+  link.target = "_blank"
+  link.setAttribute('download', nameComplete);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}

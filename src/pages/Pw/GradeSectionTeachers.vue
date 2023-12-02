@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import SchoolData from "@/layouts/SchoolData.vue";
+// import { descargarArchivo } from "@core/utils/helpers";
 const route = useRoute()
 definePage({
   name: "Pw-GradeSectionTeachers",
@@ -21,16 +22,6 @@ onMounted(async () => {
 });
 
 
-const descargarArchivo = (file) => {
-  // Código para descargar el archivo
-  const link = document.createElement('a');
-  link.href = file.path;
-  link.target = "_blank"
-  link.setAttribute('download', file.name);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
 
 </script>
 
@@ -73,9 +64,7 @@ const descargarArchivo = (file) => {
                 <div v-if="item.files.length > 0">
                   <span class="text-h4 mb-6">Planificación</span>
                   <div v-for="(file, indexF) of item.files" :key="indexF" class="d-flex flex-column">
-                    <!-- <a :href="file.file" :download="file.file">{{ file.name }}</a> -->
-                    <a href="#" @click="descargarArchivo(file)">{{ file.name }}</a>
-
+                    <a href="#" @click="descargarArchivo(file.path, file.name)">{{ file.name }}</a>
                   </div>
                 </div>
               </VCardText>

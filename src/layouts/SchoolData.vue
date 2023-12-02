@@ -25,11 +25,11 @@ const typeEducations = ref();
 const generalSecondaryEducation = ref<Array<object>>([]);
 onMounted(async () => {
 
-  const response = await useApi("pw-dataSchool/" + route.params.school_id).get();
-  if (response.data) {
-    school.value = response.data.value.company;
-    typeEducations.value = response.data.value.typeEducations;
-    generalSecondaryEducation.value = response.data.value.generalSecondaryEducation;
+  const { data, response } = await useApi("pw-dataSchool/" + route.params.school_id).get();
+  if (data.value) {
+    school.value = data.value.company;
+    typeEducations.value = data.value.typeEducations;
+    generalSecondaryEducation.value = data.value.generalSecondaryEducation;
   }
 });
 </script>
