@@ -21,6 +21,17 @@ onMounted(async () => {
 });
 
 
+const descargarArchivo = (file) => {
+  // Código para descargar el archivo
+  const link = document.createElement('a');
+  link.href = file.path;
+  link.target = "_blank"
+  link.setAttribute('download', file.name);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 </script>
 
 <template>
@@ -51,7 +62,8 @@ onMounted(async () => {
                 :style="{ border: `1px solid ${item.backgroundColor}`, borderBlockStart: 'none', borderRadius: '0 0 6px 6px', boxSizing: 'border-box' }">
 
                 <div class="text-center">
-                  <h5 class="text-h5"> {{ item.fullName }} </h5>
+                  <span class="text-h3">{{ item.subject_name }} </span><br>
+                  <span h5 class="text-h5"> {{ item.fullName }} </span><br>
                   <span class="text-body-1 ">{{ item.jobPosition }}</span><br>
                   <span class="text-body-1 ">{{ item.email }}</span><br>
                   <span class="text-body-1 ">{{ item.phone }}</span>
@@ -61,7 +73,9 @@ onMounted(async () => {
                 <div v-if="item.files.length > 0">
                   <span class="text-h4 mb-6">Planificación</span>
                   <div v-for="(file, indexF) of item.files" :key="indexF" class="d-flex flex-column">
-                    <span>{{ file }}</span>
+                    <!-- <a :href="file.file" :download="file.file">{{ file.name }}</a> -->
+                    <a href="#" @click="descargarArchivo(file)">{{ file.name }}</a>
+
                   </div>
                 </div>
               </VCardText>

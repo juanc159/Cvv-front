@@ -20,7 +20,7 @@ export const useAuthenticationStore = defineStore('useAuthenticationStore', {
     getMenuData: state => {
       if (state.company.id)
         return state.menu.filter(ele => ele.to.name != 'Company-Index')
-      else return state.menu.filter(ele => ele.to.name == 'Company-Index' || ele.to.name == 'Banner-Index' || ele.to.name == 'Subject-Index')
+      else return state.menu.filter(ele => ele.to.name == 'Company-Index' || ele.to.name == 'Banner-Index')
     },
   },
   actions: {

@@ -60,14 +60,13 @@ const addPhoto = (e: Event) => {
 
 onMounted(async () => {
   storeTeacher.clearForm();
-  if (route.params.id) {
-    await storeTeacher.fetchDataForm(
-      Number(route.params.id),
-      route.params.action
-    );
 
-    arrayComplementary.value = JSON.parse(JSON.stringify(form.value.complementaries))
-  }
+  await storeTeacher.fetchDataForm(
+    Number(route.params.id),
+    route.params.action
+  );
+
+  arrayComplementary.value = JSON.parse(JSON.stringify(form.value.complementaries))
 });
 
 watch(
@@ -106,7 +105,7 @@ const clearFormComplementary = () => {
   }
 }
 const addInfo = async () => {
-  const validation = await formValidation.value?.validate();
+  const validation = await complementaryValidation.value?.validate();
   if (validation?.valid) {
     const searchGrade = grades.value.find(ele => ele.value == formComplementary.value.grade_id)
     const searchSection = sections.value.find(ele => ele.value == formComplementary.value.section_id)
@@ -141,30 +140,14 @@ const arrayElementsComplementaries = computed(() => {
 
 
 
-//documentos
-const archiveDoc = ref(useImageUpload());
-archiveDoc.value.allowedExtensions = ["jpg", "jpeg", "png"];
-const headersFile = [
-  { title: "Título", key: "name" },
-  { title: "Acciones", key: "actions" },
-];
 
+const gradesFilter = computed(() => {
+  return grades.value.filter(ele => ele.type_education_id == form.value.type_education_id)
+})
+const subjectsFilter = computed(() => {
+  return subjects.value.filter(ele => ele.type_education_id == form.value.type_education_id)
+})
 
-const addFile = async () => {
-  const validation = await fileValidation.value?.validate();
-  console.log(validation);
-
-  if (validation?.valid) {
-
-    form.value.files.push({
-      name: archiveDoc.value.name,
-      file: archiveDoc.value.imageFile,
-    })
-
-    archiveDoc.value.clearData()
-
-  }
-};
 
 </script>
 
@@ -181,10 +164,12 @@ const addFile = async () => {
         <VForm ref="formValidation" lazy-validation>
           <VRow>
             <VCol cols="12" sm="3">
-              <VSelect :items="typeEducations" v-model="form.type_education_id" label="Tipo de educación"></VSelect>
+              <AppSelect :items="typeEducations" :rules="[requiredValidator]" v-model="form.type_education_id"
+                label="Tipo de educación"></AppSelect>
             </VCol>
             <VCol cols="12" sm="3">
-              <VSelect :items="jobPositions" v-model="form.job_position_id" label="Cargo"></VSelect>
+              <AppSelect :items="jobPositions" :rules="[requiredValidator]" v-model="form.job_position_id" label="Cargo">
+              </AppSelect>
             </VCol>
             <VCol cols="12" sm="3">
               <AppTextField clearable v-model="form.name" :rules="[requiredValidator]" :error-messages="errorsBack.name"
@@ -198,8 +183,8 @@ const addFile = async () => {
               </AppTextField>
             </VCol>
             <VCol cols="12" sm="3">
-              <AppTextField clearable v-model="form.email" :rules="[requiredValidator]" :error-messages="errorsBack.email"
-                label="Correo" @keypress="errorsBack.email = ''" :requiredField="true">
+              <AppTextField clearable v-model="form.email" :rules="[requiredValidator, emailValidator]"
+                :error-messages="errorsBack.email" label="Correo" @keypress="errorsBack.email = ''" :requiredField="true">
               </AppTextField>
             </VCol>
             <VCol cols="12" sm="3">
@@ -234,13 +219,18 @@ const addFile = async () => {
               <h3>Información complementaria</h3>
             </VCol>
             <VCol cols="12" sm="3">
-              <VSelect :items="grades" v-model="formComplementary.grade_id" label="Grados y niveles"></VSelect>
+              <AppSelect clearable :items="gradesFilter" :rules="[requiredValidator]" v-model="formComplementary.grade_id"
+                label="Grados y niveles">
+              </AppSelect>
             </VCol>
             <VCol cols="12" sm="3">
-              <VSelect :items="sections" v-model="formComplementary.section_id" label="Secciones"></VSelect>
+              <AppSelect clearable :items="sections" :rules="[requiredValidator]" v-model="formComplementary.section_id"
+                label="Secciones"></AppSelect>
             </VCol>
             <VCol cols="12" sm="3">
-              <VSelect multiple :items="subjects" v-model="formComplementary.subjects" label="Materias"></VSelect>
+              <AppSelect clearable multiple :rules="[requiredValidator]" :items="subjectsFilter"
+                v-model="formComplementary.subjects" label="Materias">
+              </AppSelect>
             </VCol>
             <VCol cols="12" sm="3">
               <VBtn color="success" @click="addInfo()">Agregar</VBtn>
@@ -266,44 +256,7 @@ const addFile = async () => {
           </VRow>
         </VForm>
 
-        <VForm ref="fileValidation" lazy-validation>
-          <VRow>
-            <VCol cols="12">
-              <h3>Planificación</h3>
-            </VCol>
-            <VCol cols="12" sm="6">
-              <AppTextField clearable v-model="archiveDoc.name" :rules="[requiredValidator]" label="Titulo"
-                :requiredField="true">
-              </AppTextField>
-            </VCol>
-            <VCol cols="12" sm="3">
-              <VLabel>Archivo&nbsp;<b class="text-warning">*</b></VLabel>
-              <VFileInput accept="image/*" :rules="[requiredValidator]" :key="archiveDoc.key"
-                @change="archiveDoc.handleImageSelected" @click:clear="archiveDoc.clearData">
-              </VFileInput>
-            </VCol>
-            <VCol cols="12" sm="3">
-              <VBtn size="30" class="mt-6" icon color="success" @click="addFile()">
-                <VIcon icon="tabler-plus"></VIcon>
-              </VBtn>
-            </VCol>
 
-            <VCol cols="12">
-              <VDataTable :headers="headersFile" :items="form.files" :items-per-page="999">
-
-                <template #item.actions="{ item, index }">
-                  <VBtn icon size="x-small" color="error" variant="text" @click="deleteInfo(index)">
-                    <VIcon size="22" icon="tabler-trash" />
-                    <VTooltip location="top" transition="scale-transition" activator="parent" text="Eliminar">
-                    </VTooltip>
-                  </VBtn>
-                </template>
-                <template #bottom>
-                </template>
-              </VDataTable>
-            </VCol>
-          </VRow>
-        </VForm>
 
         <VRow>
           <VCol cols="12" class="d-flex justify-center">

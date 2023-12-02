@@ -84,6 +84,7 @@ const deleteData = async (id: number) => {
 };
 
 const headers = [
+  { title: "Tipo", key: "type_education_name" },
   { title: "Nombre", key: "name" },
   { title: "Código", key: "code" },
   { title: "Acciones", key: "actions" },

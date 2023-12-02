@@ -12,6 +12,7 @@ export const useCrudSubjectStore = defineStore('useCrudSubjectStore', {
     },
     form: {
       id: null,
+      type_education_id: null,
       name: null,
       code: null,
     } as IForm,
@@ -21,6 +22,7 @@ export const useCrudSubjectStore = defineStore('useCrudSubjectStore', {
     totalPage: 0 as number,
     currentPage: 1 as number,
     lastPage: 0 as number,
+    typeEducations: [] as Array<object>,
   }),
   getters: {
   },
@@ -28,6 +30,7 @@ export const useCrudSubjectStore = defineStore('useCrudSubjectStore', {
     clearForm() {
       this.form = <IForm>{
         id: null,
+        type_education_id: null,
         name: null,
         code: null,
       }
@@ -55,6 +58,9 @@ export const useCrudSubjectStore = defineStore('useCrudSubjectStore', {
       this.loading.form = isFetching.value
 
       if (response.value?.ok && data.value) {
+        this.typeEducations = data.value.typeEducations
+      }
+      if (response.value?.ok && data.value.form) {
         this.form = data.value.form
       }
     },

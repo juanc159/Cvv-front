@@ -53,6 +53,11 @@ const paginationData = computed(() => {
 });
 
 const changeScreen = async (action: string = "create", id?: number) => {
+
+  if (action == 'planning') {
+    router.push({ name: "Teacher-Planning", params: { id: id } });
+    return false
+  }
   router.push({ name: "Teacher-Form", params: { action: action, id: id } });
 };
 
@@ -153,6 +158,11 @@ const headers = [
             <VBtn icon size="x-small" color="default" variant="text" @click="changeScreen('edit', item.id)">
               <VIcon size="22" icon="tabler-edit" />
               <VTooltip location="top" transition="scale-transition" activator="parent" text="Editar">
+              </VTooltip>
+            </VBtn>
+            <VBtn icon size="x-small" color="default" variant="text" @click="changeScreen('planning', item.id)">
+              <VIcon size="22" icon="tabler-file" />
+              <VTooltip location="top" transition="scale-transition" activator="parent" text="Planificación">
               </VTooltip>
             </VBtn>
           </template>

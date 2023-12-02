@@ -19,7 +19,7 @@ const { toast } = useToast();
 const formValidation = ref<VForm>();
 const storeSubject = useCrudSubjectStore();
 const authenticationStore = useAuthenticationStore();
-const { form, loading } = storeToRefs(storeSubject);
+const { form, loading, typeEducations } = storeToRefs(storeSubject);
 const photo = ref(useImageUpload());
 
 const errorsBack = ref<IErrorsBack>({});
@@ -43,12 +43,12 @@ const submitForm = async () => {
 
 onMounted(async () => {
   storeSubject.clearForm();
-  if (route.params.id) {
-    await storeSubject.fetchDataForm(
-      Number(route.params.id),
-      route.params.action
-    );
-  }
+
+  await storeSubject.fetchDataForm(
+    Number(route.params.id),
+    route.params.action
+  );
+
 });
 </script>
 
@@ -65,13 +65,19 @@ onMounted(async () => {
         <VForm ref="formValidation" lazy-validation>
           <VRow>
             <VCol cols="12" sm="3">
+              <AppSelect clearable v-model="form.type_education_id" :rules="[requiredValidator]"
+                :error-messages="errorsBack.type_education_id" label="Tipo" @change="errorsBack.type_education_id = ''"
+                :requiredField="true" :items="typeEducations">
+              </AppSelect>
+            </VCol>
+            <VCol cols="12" sm="3">
               <AppTextField clearable v-model="form.name" :rules="[requiredValidator]" :error-messages="errorsBack.name"
                 label="Nombre" @keypress="errorsBack.name = ''" :requiredField="true">
               </AppTextField>
             </VCol>
             <VCol cols="12" sm="3">
               <AppTextField clearable v-model="form.code" :rules="[requiredValidator]" :error-messages="errorsBack.code"
-                label="Nombre" @keypress="errorsBack.code = ''" :requiredField="true">
+                label="Codigo" @keypress="errorsBack.code = ''" :requiredField="true">
               </AppTextField>
             </VCol>
           </VRow>

@@ -75,12 +75,14 @@ export const useCrudTeacherStore = defineStore('useCrudTeacherStore', {
       this.loading.form = isFetching.value
 
       if (response.value?.ok && data.value) {
-        this.form = data.value.form
         this.jobPositions = data.value.jobPositions
         this.typeEducations = data.value.typeEducations
         this.subjects = data.value.subjects
         this.sections = data.value.sections
         this.grades = data.value.grades
+      }
+      if (response.value?.ok && data.value.form) {
+        this.form = data.value.form
       }
     },
 
