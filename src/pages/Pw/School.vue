@@ -53,15 +53,22 @@ onMounted(async () => {
 
         <VCardText>
           <VWindow v-model="currentTab">
+
+            <VWindowItem>
+              <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
+                <OurTeam :data="school.teachers['Educación Inicial']" />
+              </div>
+            </VWindowItem>
+
+            <VWindowItem>
+              <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
+                <OurTeam :data="school.teachers['Educación Primaria']" />
+              </div>
+            </VWindowItem>
+
             <VWindowItem>
               <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
                 <GradeSection :data="generalSecondaryEducation" />
-              </div>
-            </VWindowItem>
-            <VWindowItem v-for="(item, key) in typeEducations" :key="key">
-
-              <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-                <OurTeam v-if="item" :data="school.teachers[item.title]" />
               </div>
             </VWindowItem>
           </VWindow>

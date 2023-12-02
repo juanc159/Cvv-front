@@ -23,7 +23,7 @@ const { data } = defineProps({
         </div>
 
         <p class="text-center">
-          Educadores comprometidos con el éxito de tus hijosaa
+          Educadores comprometidos con el éxito de tus hijos
         </p>
       </div>
       <VRow>

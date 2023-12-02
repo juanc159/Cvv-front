@@ -51,7 +51,7 @@ const { data } = defineProps({
 
                   Nomina de estudiantes
                 </router-link>
-                <h3>Docente guia: xxxxx</h3>
+                <!-- <h3>Docente guia: xxxxx</h3> -->
               </VCardText>
             </VCard>
           </template>
