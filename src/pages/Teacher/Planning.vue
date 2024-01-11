@@ -22,7 +22,7 @@ const arrayValidation = ref<Array<string | boolean>>([]);
 
 // File
 const archive = ref(useImageUpload());
-const aExtImage = ["jpg", "jpeg", "png"];
+const aExtImage = ["jpg", "jpeg", "png", "pdf", "ppsx", "pptx"];
 archive.value.allowedExtensions = aExtImage;
 
 const submitForm = async () => {
@@ -93,7 +93,7 @@ onMounted(async () => {
 
         dynamicVariables['file-' + element2.value] = ref(useImageUpload());
 
-        dynamicVariables['file-' + element2.value].allowedExtensions = ["jpg", "jpeg", "png"]
+        dynamicVariables['file-' + element2.value].allowedExtensions = ["jpg", "jpeg", "png", "pdf", "ppsx", "pptx"]
 
       });
     });
