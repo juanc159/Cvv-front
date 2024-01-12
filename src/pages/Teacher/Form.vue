@@ -153,7 +153,7 @@ const subjectsFilter = computed(() => {
 
 <template>
   <div>
-    <VCard>
+    <VCard :loading="loading.form" :disabled="loading.form">
       <VCardText>
         <VRow>
           <VCol>

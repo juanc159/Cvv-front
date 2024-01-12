@@ -161,7 +161,7 @@ const deleteFile = (obj: object, index: number, value: number) => {
                     </VCol>
                     <VCol cols="12" sm="3">
                       <VLabel>Archivo&nbsp;<b class="text-warning">*</b></VLabel>
-                      <VFileInput accept="image/*" :rules="[requiredValidator]"
+                      <VFileInput :rules="[requiredValidator]"
                         @change="dynamicVariables['file-' + subject.value].handleImageSelected"
                         :key="dynamicVariables['file-' + subject.value].key"
                         @click:clear="dynamicVariables['file-' + subject.value].clearData">

@@ -69,10 +69,10 @@ export const useCrudTeacherStore = defineStore('useCrudTeacherStore', {
     },
 
     async fetchDataForm(id: number | undefined, action: string = "create"): Promise<void> {
-      // this.loading.form = true
+      this.loading.form = true
       const url = id ? `/teacher-dataForm/${action}/${id}` : `/teacher-dataForm/${action}`
       const { data, response, error, isFetching } = await useApi(url).get()
-      this.loading.form = isFetching.value
+      this.loading.form = false
 
       if (response.value?.ok && data.value) {
         this.jobPositions = data.value.jobPositions
