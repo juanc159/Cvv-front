@@ -27,8 +27,10 @@ const typeEducations = ref();
 const generalSecondaryEducation = ref<Array<object>>([]);
 onMounted(async () => {
   const response = await useApi("pw-dataSchool/" + route.params.school_id).get();
+
   if (response.data) {
     school.value = response.data.value.company;
+    console.log(school.value);
     typeEducations.value = response.data.value.typeEducations;
     generalSecondaryEducation.value = response.data.value.generalSecondaryEducation;
   }
@@ -56,13 +58,13 @@ onMounted(async () => {
 
             <VWindowItem>
               <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-                <OurTeam :data="school.teachers['Educación Inicial']" />
+                <OurTeam v-if="school.teachers['Educación Inicial']" :data="school.teachers['Educación Inicial']" />
               </div>
             </VWindowItem>
 
             <VWindowItem>
               <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-                <OurTeam :data="school.teachers['Educación Primaria']" />
+                <OurTeam v-if="school.teachers['Educación Primaria']" :data="school.teachers['Educación Primaria']" />
               </div>
             </VWindowItem>
 
