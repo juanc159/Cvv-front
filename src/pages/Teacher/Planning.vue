@@ -63,7 +63,7 @@ const submitForm = async () => {
   });
 
   loading.form = true
-  await useApi('/teacher-planningStore/').post(formData)
+  await useApi('/teacher-planningStore').post(formData)
   loading.form = false
 
 
