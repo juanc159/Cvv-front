@@ -31,9 +31,9 @@ const submitForm = async () => {
 
   formData.append("teacher_id", JSON.stringify(teacher.value.id))
 
+  let cant = 0
   teacher.value.complementaries.forEach(element => {
 
-    let cant = 0
 
     element.subjects.forEach(element2 => {
 
