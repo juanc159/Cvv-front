@@ -64,7 +64,10 @@ onMounted(async () => {
                 <div v-if="item.files.length > 0">
                   <span class="text-h4 mb-6">Planificación</span>
                   <div v-for="(file, indexF) of item.files" :key="indexF" class="d-flex flex-column">
-                    <a href="#" @click="descargarArchivo(file.path, file.name)">{{ file.name }}</a>
+                    <div class="d-flex">
+                      <span style="font-size: 20px;">* &nbsp;</span>
+                      <a href="#" @click="descargarArchivo(file.path, file.name)">{{ file.name }}</a>
+                    </div>
                   </div>
                 </div>
               </VCardText>

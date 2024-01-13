@@ -147,54 +147,62 @@ const deleteFile = (obj: object, index: number, value: number) => {
           </VRow>
           <VRow>
             <VCol cols="12" v-for="(grade, index) in teacher.complementaries" :key="index">
-              <h2>Grado: {{ grade.grade_name }} {{ grade.section_name }}</h2>
+              <VCard :class="{ 'green-background': index % 2 === 0, 'red-background': index % 2 !== 0 }">
+                <VCardTitle primary-title>
+                  <h2>Grado: {{ grade.grade_name }} {{ grade.section_name }}</h2>
+                </VCardTitle>
+                <VCardText>
 
-              <div v-for="(subject, indexS) in grade.subjects" :key="indexS">
-                <h3>Planificacion: {{ subject.title }}</h3>
+                  <div v-for="(subject, indexS) in grade.subjects" :key="indexS">
+                    <h3>Planificacion: {{ subject.title }}</h3>
 
-                <VForm lazy-validation>
-                  <VRow>
-                    <VCol cols="12" sm="6">
-                      <AppTextField clearable v-model="dynamicVariables['file-' + subject.value].name"
-                        :rules="[requiredValidator]" label="Titulo" :requiredField="true">
-                      </AppTextField>
-                    </VCol>
-                    <VCol cols="12" sm="3">
-                      <VLabel>Archivo&nbsp;<b class="text-warning">*</b></VLabel>
-                      <VFileInput :rules="[requiredValidator]"
-                        @change="dynamicVariables['file-' + subject.value].handleImageSelected"
-                        :key="dynamicVariables['file-' + subject.value].key"
-                        @click:clear="dynamicVariables['file-' + subject.value].clearData">
-                      </VFileInput>
-                    </VCol>
-                    <VCol cols="12" sm="3">
-                      <VBtn size="30" class="mt-6" icon color="success" @click="addFile(subject)">
-                        <VIcon icon="tabler-plus"></VIcon>
-                      </VBtn>
-                    </VCol>
-
-                    <VCol cols="12">
-                      <VDataTable :headers="headersFile" :items="subject.files" :items-per-page="999">
-
-                        <template #item.actions="{ item, index }">
-                          <span v-if="item.delete">
-                            Sera eliminado al guardar, <b style="cursor: pointer;"
-                              @click="deleteFile(subject.files, index, 0)">restaurar</b>
-                          </span>
-                          <VBtn v-else icon size="x-small" color="error" variant="text"
-                            @click="deleteFile(subject.files, index, 1)">
-                            <VIcon size="22" icon="tabler-trash" />
-                            <VTooltip location="top" transition="scale-transition" activator="parent" text="Eliminar">
-                            </VTooltip>
+                    <VForm lazy-validation>
+                      <VRow>
+                        <VCol cols="12" sm="6">
+                          <AppTextField clearable v-model="dynamicVariables['file-' + subject.value].name"
+                            :rules="[requiredValidator]" label="Titulo" :requiredField="true">
+                          </AppTextField>
+                        </VCol>
+                        <VCol cols="12" sm="3">
+                          <VLabel>Archivo&nbsp;<b class="text-warning">*</b></VLabel>
+                          <VFileInput :rules="[requiredValidator]"
+                            @change="dynamicVariables['file-' + subject.value].handleImageSelected"
+                            :key="dynamicVariables['file-' + subject.value].key"
+                            @click:clear="dynamicVariables['file-' + subject.value].clearData">
+                          </VFileInput>
+                        </VCol>
+                        <VCol cols="12" sm="3">
+                          <VBtn size="30" class="mt-6" icon color="success" @click="addFile(subject)">
+                            <VIcon icon="tabler-plus"></VIcon>
                           </VBtn>
-                        </template>
-                        <template #bottom>
-                        </template>
-                      </VDataTable>
-                    </VCol>
-                  </VRow>
-                </VForm>
-              </div>
+                        </VCol>
+
+                        <VCol cols="12">
+                          <VDataTable :headers="headersFile" :items="subject.files" :items-per-page="999">
+
+                            <template #item.actions="{ item, index }">
+                              <span v-if="item.delete">
+                                Sera eliminado al guardar, <b style="cursor: pointer;"
+                                  @click="deleteFile(subject.files, index, 0)">restaurar</b>
+                              </span>
+                              <VBtn v-else icon size="x-small" color="error" variant="text"
+                                @click="deleteFile(subject.files, index, 1)">
+                                <VIcon size="22" icon="tabler-trash" />
+                                <VTooltip location="top" transition="scale-transition" activator="parent" text="Eliminar">
+                                </VTooltip>
+                              </VBtn>
+                            </template>
+                            <template #bottom>
+                            </template>
+                          </VDataTable>
+                        </VCol>
+                      </VRow>
+                    </VForm>
+                  </div>
+                </VCardText>
+              </VCard>
+
+
             </VCol>
           </VRow>
         </VCardText>
@@ -210,4 +218,14 @@ const deleteFile = (obj: object, index: number, value: number) => {
     </VCard>
   </div>
 </template>
+
+<style scoped>
+.green-background {
+  background-color: rgb(252, 231, 231);
+}
+
+.red-background {
+  background-color: rgb(236, 247, 255);
+}
+</style>
  
