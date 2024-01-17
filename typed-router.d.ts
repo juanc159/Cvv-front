@@ -44,6 +44,8 @@ declare module 'vue-router/auto/routes' {
     'Banner-Index': RouteRecordInfo<'Banner-Index', '/Banner/Index', Record<never, never>, Record<never, never>>,
     'Company-Form': RouteRecordInfo<'Company-Form', '/company-form/:action/:id?', Record<never, never>, Record<never, never>>,
     'Company-Index': RouteRecordInfo<'Company-Index', '/Company/Index', Record<never, never>, Record<never, never>>,
+    'Grade-Form': RouteRecordInfo<'Grade-Form', '/grade-form/:action/:id?', Record<never, never>, Record<never, never>>,
+    'Grade-Index': RouteRecordInfo<'Grade-Index', '/Grade/Index', Record<never, never>, Record<never, never>>,
     'login': RouteRecordInfo<'login', '/login', Record<never, never>, Record<never, never>>,
     'Subject-Form': RouteRecordInfo<'Subject-Form', '/subject-form/:action/:id?', Record<never, never>, Record<never, never>>,
     'Note-Index': RouteRecordInfo<'Note-Index', '/Note/Index', Record<never, never>, Record<never, never>>,
