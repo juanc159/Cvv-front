@@ -60,7 +60,7 @@ onMounted(async () => {
                   <span class="text-body-1 ">{{ item.phone }}</span>
                 </div>
 
-                <VDivider />
+                <!-- <VDivider /> -->
                 <div v-if="item.files.length > 0">
                   <span class="text-h4 mb-6">Planificación</span>
                   <div v-for="(file, indexF) of item.files" :key="indexF" class="d-flex flex-column">

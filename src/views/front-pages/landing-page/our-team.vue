@@ -44,7 +44,7 @@ const { data } = defineProps({
                 <span class="text-body-1 text-disabled">{{ item.phone }}</span>
               </div>
 
-              <VDivider />
+              <!-- <VDivider /> -->
 
               <div v-if="item.files.length > 0">
                 <span class="text-h4 mb-6">Planificación</span>
