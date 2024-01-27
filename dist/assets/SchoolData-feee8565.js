@@ -1,0 +1,1 @@
+import{_ as o}from"./SchoolData.vue_vue_type_style_index_0_lang-f15beb22.js";import"./front-page-footer-e3278c18.js";import"./VContainer-d156fdfb.js";/* empty css              */import"./index-f0a17608.js";import"./ssrBoot-0dd9127e.js";import"./VImg-3a55bcec.js";export{o as default};

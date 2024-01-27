@@ -23,7 +23,7 @@ const fileValidation = ref<VForm>();
 const complementaryValidation = ref<VForm>();
 const storeTeacher = useCrudTeacherStore();
 const authenticationStore = useAuthenticationStore();
-const { form, loading, jobPositions, typeEducations, subjects, sections, grades } = storeToRefs(storeTeacher);
+const { form, loading, jobPositions, typeEducations, sections } = storeToRefs(storeTeacher);
 const errorsBack = ref<IErrorsBack>({});
 
 const arrayValidation = ref<Array<string | boolean>>([]);
@@ -104,13 +104,16 @@ const clearFormComplementary = () => {
     subjects: [],
   }
 }
+
+const grades = ref([])
+const subjects = ref([])
 const addInfo = async () => {
   const validation = await complementaryValidation.value?.validate();
   if (validation?.valid) {
-    const searchGrade = grades.value.find(ele => ele.value == formComplementary.value.grade_id)
+    const searchGrade = gradesFilter.value.find(ele => ele.value == formComplementary.value.grade_id)
     const searchSection = sections.value.find(ele => ele.value == formComplementary.value.section_id)
 
-    const subjectsData = subjects.value.filter(ele => formComplementary.value.subjects.includes(ele.value))
+    const subjectsData = subjectsFilter.value.filter(ele => formComplementary.value.subjects.includes(ele.value))
 
     arrayComplementary.value.push({
       id: null,
@@ -142,10 +145,16 @@ const arrayElementsComplementaries = computed(() => {
 
 
 const gradesFilter = computed(() => {
-  return grades.value.filter(ele => ele.type_education_id == form.value.type_education_id)
+  if (form.value.type_education_id) {
+    return typeEducations.value.find(ele => ele.value == form.value.type_education_id).grades
+  }
+  return []
 })
 const subjectsFilter = computed(() => {
-  return subjects.value.filter(ele => ele.type_education_id == form.value.type_education_id)
+  if (formComplementary.value.grade_id) {
+    return gradesFilter.value.find(ele => ele.value == formComplementary.value.grade_id).subjects
+  }
+  return []
 })
 
 
@@ -164,7 +173,7 @@ const subjectsFilter = computed(() => {
         <VForm ref="formValidation" lazy-validation>
           <VRow>
             <VCol cols="12" sm="3">
-              <AppSelect :items="typeEducations" :rules="[requiredValidator]" v-model="form.type_education_id"
+              <AppSelect :items="typeEducations" clearable :rules="[requiredValidator]" v-model="form.type_education_id"
                 label="Tipo de educación"></AppSelect>
             </VCol>
             <VCol cols="12" sm="3">

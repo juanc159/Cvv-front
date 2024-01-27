@@ -31,9 +31,7 @@ export const useCrudTeacherStore = defineStore('useCrudTeacherStore', {
     lastPage: 0 as number,
     jobPositions: [] as Array<object>,
     typeEducations: [] as Array<object>,
-    subjects: [] as Array<object>,
     sections: [] as Array<object>,
-    grades: [] as Array<object>,
   }),
   getters: {
   },
@@ -77,9 +75,7 @@ export const useCrudTeacherStore = defineStore('useCrudTeacherStore', {
       if (response.value?.ok && data.value) {
         this.jobPositions = data.value.jobPositions
         this.typeEducations = data.value.typeEducations
-        this.subjects = data.value.subjects
         this.sections = data.value.sections
-        this.grades = data.value.grades
       }
       if (response.value?.ok && data.value.form) {
         this.form = data.value.form
