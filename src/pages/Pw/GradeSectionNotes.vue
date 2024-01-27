@@ -92,16 +92,22 @@ const openPdfPreview = async (obj: object) => {
                   <template v-for="(student, index) of listData" :key="student.name">
                     <VListItem>
                       <template #prepend>
-                        <VAvatar variant="tonal" color="primary" size="80">
-                          <span class="font-weight-medium">{{ avatarText(student.full_name) }}</span>
+
+                        <VAvatar :color="student.photo ? '' : 'primary'"
+                          :class="student.photo ? null : 'v-avatar-light-bg primary--text'"
+                          :variant="!student.photo ? 'tonal' : undefined" size="80">
+                          <VImg v-if="student.photo" :src="student.photo" />
+                          <!-- <span v-else>{{ avatarText(student.name + ' ' + student.last_name) }}</span> -->
+                          <span v-else class="font-weight-medium">{{ avatarText(student.full_name) }}</span>
                         </VAvatar>
+
                       </template>
                       <VListItemTitle>
                         {{ student.full_name }}
                       </VListItemTitle>
 
                       <template #append>
-                        <VBtn @click="openPdfPreview(student)">
+                        <VBtn @click="openPdfPreview(student)" v-if="student.pdf">
                           Visualizar notas
                         </VBtn>
                       </template>
