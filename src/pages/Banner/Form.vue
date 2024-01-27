@@ -71,26 +71,15 @@ onMounted(async () => {
       <VCardText>
         <VRow>
           <VCol>
-            <HeaderAlertView
-              sub-title="Formulario Banner"
-              :action="String($route.params.action)"
-              btn-action="list"
-              :validate-crud="true"
-              :btn-back="true"
-              @changeScreenBack="$router.back"
-            />
+            <HeaderAlertView sub-title="Formulario Banner" :action="String($route.params.action)" btn-action="list"
+              :validate-crud="true" :btn-back="true" @changeScreenBack="$router.back" />
           </VCol>
         </VRow>
         <VForm ref="formValidation" lazy-validation>
           <VRow>
             <VCol cols="12" sm="3">
-              <VFileInput
-                accept="image/*"
-                :rules="[requiredValidator]"
-                :key="archive.key"
-                @change="addFile($event)"
-                @click:clear="archive.clearData"
-              >
+              <VFileInput accept="image/*" :rules="[requiredValidator]" :key="archive.key" @change="addFile($event)"
+                @click:clear="archive.clearData">
                 <template #label>
                   Imagen&nbsp;<b class="text-warning">*</b>
                 </template>
@@ -104,7 +93,7 @@ onMounted(async () => {
           </VRow>
           <VRow>
             <VCol cols="12" class="d-flex justify-center">
-              <VBtn :loading="loading.form" color="primary" @click="submitForm">
+              <VBtn :loading="loading.form" color="primary" @click="submitForm()">
                 Guardar
               </VBtn>
             </VCol>

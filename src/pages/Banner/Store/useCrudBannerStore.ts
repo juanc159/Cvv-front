@@ -52,7 +52,7 @@ export const useCrudBannerStore = defineStore('useCrudBannerStore', {
       this.loading.form = true
       const url = id ? `/banner-dataForm/${action}/${id}` : `/banner-dataForm/${action}`
       const { data, response, error, isFetching } = await useApi(url).get()
-      this.loading.form = isFetching.value
+      this.loading.form = false
 
       if (response.value?.ok && data.value) {
         this.form = data.value.form
@@ -68,7 +68,7 @@ export const useCrudBannerStore = defineStore('useCrudBannerStore', {
 
       this.loading.form = true
       const { data, response, error, isFetching } = await useApi("/banner-create").post(formData)
-      this.loading.form = isFetching.value
+      this.loading.form = false
 
       if (response.value?.ok && data.value) {
         this.form = data.value.data

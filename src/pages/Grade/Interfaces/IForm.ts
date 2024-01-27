@@ -3,4 +3,5 @@ export default interface IForm {
   company_id: null | number
   type_education_id: null | number
   name: null | string
+  subjects: Array<number>
 }

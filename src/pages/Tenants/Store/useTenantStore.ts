@@ -33,7 +33,7 @@ export const useTenantStore = defineStore('useTenantStore', {
     async fetchSave(form: object): Promise<IPromise> {
       this.loading.form = true
       const { data, response, error, isFetching } = await useApi("/tenant-store").post(form)
-      this.loading.form = isFetching.value
+      this.loading.form = false
 
 
       if (response.value?.ok && data.value) {
@@ -61,7 +61,7 @@ export const useTenantStore = defineStore('useTenantStore', {
       const { data, response, error, isFetching } = await useApi("/tenant-list").post({
         typeData: 'todos',
       })
-      this.loading.form = isFetching.value
+      this.loading.form = false
 
       if (response.value?.ok && data.value) {
         this.tenants = data.value.data

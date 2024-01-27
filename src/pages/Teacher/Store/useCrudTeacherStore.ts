@@ -98,7 +98,7 @@ export const useCrudTeacherStore = defineStore('useCrudTeacherStore', {
 
       // this.loading.form = true
       const { data, response, error, isFetching } = await useApi("/teacher-create").post(formData)
-      // this.loading.form = isFetching.value
+      // this.loading.form = false
 
       if (response.value?.ok && data.value) {
         this.form = data.value.data

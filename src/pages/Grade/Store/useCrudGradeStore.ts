@@ -15,6 +15,7 @@ export const useCrudGradeStore = defineStore('useCrudGradeStore', {
       company_id: null,
       type_education_id: null,
       name: null,
+      subjects: [],
     } as IForm,
     gradeData: {} as IForm,
     grades: [] as Array<IList>,
@@ -33,6 +34,8 @@ export const useCrudGradeStore = defineStore('useCrudGradeStore', {
         company_id: null,
         type_education_id: null,
         name: null,
+        subjects: [],
+
       }
     },
 
@@ -55,7 +58,7 @@ export const useCrudGradeStore = defineStore('useCrudGradeStore', {
       this.loading.form = true
       const url = id ? `/grade-dataForm/${action}/${id}` : `/grade-dataForm/${action}`
       const { data, response, error, isFetching } = await useApi(url).get()
-      this.loading.form = isFetching.value
+      this.loading.form = false
 
       if (response.value?.ok && data.value) {
         this.typeEducations = data.value.typeEducations
@@ -68,13 +71,10 @@ export const useCrudGradeStore = defineStore('useCrudGradeStore', {
 
     async fetchSave(): Promise<IPromise> {
 
-      const formData = new FormData()
-      for (const key in this.form)
-        formData.append(key, this.form[key])
 
       this.loading.form = true
-      const { data, response, error, isFetching } = await useApi("/grade-create").post(formData)
-      this.loading.form = isFetching.value
+      const { data, response, error, isFetching } = await useApi("/grade-create").post(this.form)
+      this.loading.form = false
 
       if (response.value?.ok && data.value) {
         this.form = data.value.data

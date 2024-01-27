@@ -62,7 +62,7 @@ export const useCrudCompanyStore = defineStore('useCrudCompanyStore', {
       this.loading.form = true
       const url = id ? `/company-dataForm/${action}/${id}` : `/company-dataForm/${action}`
       const { data, response, error, isFetching } = await useApi(url).get()
-      this.loading.form = isFetching.value
+      this.loading.form = false
 
       if (response.value?.ok && data.value) {
         this.form = data.value.form
@@ -80,7 +80,7 @@ export const useCrudCompanyStore = defineStore('useCrudCompanyStore', {
 
       this.loading.form = true
       const { data, response, error, isFetching } = await useApi("/company-create").post(formData)
-      this.loading.form = isFetching.value
+      this.loading.form = false
 
       if (response.value?.ok && data.value) {
         this.form = data.value.data

@@ -209,7 +209,7 @@ const deleteFile = (obj: object, index: number, value: number) => {
 
         <VRow>
           <VCol cols="12" class="d-flex justify-center">
-            <VBtn :loading="loading.form" color="primary" @click="submitForm">
+            <VBtn :loading="loading.form" color="primary" @click="submitForm()">
               Guardar
             </VBtn>
           </VCol>

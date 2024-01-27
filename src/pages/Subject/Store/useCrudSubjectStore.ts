@@ -55,7 +55,7 @@ export const useCrudSubjectStore = defineStore('useCrudSubjectStore', {
       this.loading.form = true
       const url = id ? `/subject-dataForm/${action}/${id}` : `/subject-dataForm/${action}`
       const { data, response, error, isFetching } = await useApi(url).get()
-      this.loading.form = isFetching.value
+      this.loading.form = false
 
       if (response.value?.ok && data.value) {
         this.typeEducations = data.value.typeEducations
@@ -74,7 +74,7 @@ export const useCrudSubjectStore = defineStore('useCrudSubjectStore', {
 
       this.loading.form = true
       const { data, response, error, isFetching } = await useApi("/subject-create").post(formData)
-      this.loading.form = isFetching.value
+      this.loading.form = false
 
       if (response.value?.ok && data.value) {
         this.form = data.value.data

@@ -47,14 +47,23 @@ onMounted(async () => {
     route.params.action
   );
 
+  const info = JSON.parse(JSON.stringify(form.value))
+  await chageTypeEducation(info.type_education_id)
+  form.value.subjects = info.subjects
+
+
+
+
 });
 
 const subjects = ref<Array<object>>([])
 
-const chageTypeEducation = (event: Event) => {
+const chageTypeEducation = async (event: any) => {
   subjects.value = []
+  form.value.subjects = []
   if (event) {
-    subjects.value = typeEducations.value.filter(ele => event == ele.value).subjects
+    const search = await typeEducations.value.find(ele => ele.value == event)
+    subjects.value = search.subjects
   }
 
 }
@@ -89,7 +98,7 @@ const chageTypeEducation = (event: Event) => {
 
             <VCol cols="12" sm="3">
               <AppSelect clearable v-model="form.subjects" item-value="id" item-title="name" label="Materias" multiple
-                :requiredField="true" :items="subjects">
+                :requiredField="true" :items="subjects" :rules="[requiredValidator]">
               </AppSelect>
             </VCol>
           </VRow>
@@ -97,7 +106,7 @@ const chageTypeEducation = (event: Event) => {
 
         <VRow>
           <VCol cols="12" class="d-flex justify-center">
-            <VBtn :loading="loading.form" color="primary" @click="submitForm">
+            <VBtn :loading="loading.form" color="primary" @click="submitForm()">
               Guardar
             </VBtn>
           </VCol>

@@ -58,7 +58,7 @@ export const useCrudUserStore = defineStore('useCrudUserStore', {
       this.loading.form = true
       const url = id ? `/user-dataForm/${action}/${id}` : `/user-dataForm/${action}`
       const { data, response, error, isFetching } = await useApi(url).get()
-      this.loading.form = isFetching.value
+      this.loading.form = false
 
       if (response.value?.ok && data.value) {
         this.form = data.value.form
@@ -74,7 +74,7 @@ export const useCrudUserStore = defineStore('useCrudUserStore', {
 
       this.loading.form = true
       const { data, response, error, isFetching } = await useApi("/user-create").post(formData)
-      this.loading.form = isFetching.value
+      this.loading.form = false
 
       if (response.value?.ok && data.value) {
         this.form = data.value.data
