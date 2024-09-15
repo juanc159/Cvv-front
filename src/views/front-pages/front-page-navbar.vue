@@ -40,12 +40,15 @@ const menu = ref<
     to: string;
     hash: string | null;
     params?: object;
+    isExternal?: boolean;
+    icon?: string;
   }>
 >([
   {
     title: "Principal",
     to: "Pw-home",
     hash: null,
+    icon: "tabler-device-laptop",
   },
   {
     title: "Inicio",
@@ -54,16 +57,39 @@ const menu = ref<
       school_id: route.params.school_id
     },
     hash: null,
+    icon: "tabler-home",
   },
   {
     title: "Servicios",
     to: "",
     hash: "#servicioData",
+    icon: "tabler-brand-slack",
   },
   {
     title: "Contactanos",
     to: "",
     hash: "#contactData",
+    icon: "tabler-address-book",
+  },
+  {
+    title: "Pago de Mensualidades",
+    to: "https://docs.google.com/forms/d/e/1FAIpQLSfCU8h63sESKyk08iRCvIpKCewVLaNmOhh2RKj5srwFobRTJQ/closedform",
+    hash: "",
+    isExternal: true, // Marca como externa
+    icon: "tabler-brand-cashapp",
+  },
+  {
+    title: "Biblioteca virtual",
+    to: "https://inforcolegio.blogspot.com/2018/04/clase-25042018.html",
+    hash: "",
+    isExternal: true, // Marca como externa
+    icon: "tabler-books",
+  },
+  {
+    title: "Acceso",
+    to: "Login-Estudent",
+    hash: "",
+    icon: "tabler-lock-access",
   },
 ]);
 
@@ -85,14 +111,14 @@ const openLink = (link: string) => {
           'Galeria',
           'Contactanos',
         ]" :key="index" :to="{
-  name: 'Pw-home',
-  hash: `#${item.toLowerCase().replace(' ', '-')}`,
-}" class="nav-link font-weight-medium" :class="[
-  props.activeId?.toLocaleLowerCase().replace('-', ' ') ===
-    item.toLocaleLowerCase()
-    ? 'active-link'
-    : '',
-]">
+          name: 'Pw-home',
+          hash: `#${item.toLowerCase().replace(' ', '-')}`,
+        }" class="nav-link font-weight-medium" :class="[
+          props.activeId?.toLocaleLowerCase().replace('-', ' ') ===
+            item.toLocaleLowerCase()
+            ? 'active-link'
+            : '',
+        ]">
           {{ item }}
         </RouterLink>
       </div>
@@ -108,12 +134,12 @@ const openLink = (link: string) => {
       ? 'rgba(var(--v-theme-background))'
       : 'rgba(255,255,255, 0.38)'
       " :class="y > 10
-    ? 'app-bar-scrolled'
-    : [
-      $vuetify.theme.current.dark ? 'app-bar-dark' : 'app-bar-light',
-      'elevation-0',
-    ]
-    " class="navbar-blur">
+        ? 'app-bar-scrolled'
+        : [
+          $vuetify.theme.current.dark ? 'app-bar-dark' : 'app-bar-light',
+          'elevation-0',
+        ]
+        " class="navbar-blur">
       <!-- toggle icon for mobile device -->
       <IconBtn id="vertical-nav-toggle-btn" class="ms-n3 me-2 d-inline-block d-md-none" @click="sidebar = !sidebar">
         <VIcon size="26" icon="tabler-menu-2" color="rgba(var(--v-theme-on-surface))" />
@@ -139,15 +165,30 @@ const openLink = (link: string) => {
 
         <!-- landing page sections -->
         <div class="text-base align-center d-none d-md-flex">
-          <RouterLink v-for="(item, index) in menu" :key="index" :to="{
-            name: item.to,
-            hash: item.hash,
-          }" class="nav-link font-weight-medium py-2 px-2 px-lg-4">
-            {{ item.title }}
-          </RouterLink>
+          <template v-for="(item, index) in menu" key="index">
+
+            <a v-if="item.isExternal" :href="item.to" :target="item.isExternal ? '_blank' : '_self'"
+              class="nav-link font-weight-medium py-2 px-2 px-lg-4">
+              <VIcon :icon="item.icon" color="primary" />
+              {{ item.title }}
+            </a>
+
+            <RouterLink v-else :to="{
+              name: item.to,
+              hash: item.hash,
+            }" class="nav-link font-weight-medium py-2 px-2 px-lg-4">
+              <VIcon :icon="item.icon" color="primary" />
+
+              {{ item.title }}
+            </RouterLink>
+          </template>
         </div>
         <div v-if="props.school?.social_networks.length > 0">
-          <VBtn icon v-for="(item, index) in props.school?.social_networks" :key="index" @click="openLink(item.content)">
+          <VBtn :color="item.color" icon v-for="(item, index) in props.school?.social_networks" :key="index"
+            @click="openLink(item.content)">
+            <VTooltip location="top" activator="parent">
+              {{ item.type_detail_name }}
+            </VTooltip>
             <VIcon size="30" :icon="item.icon"></VIcon>
           </VBtn>
         </div>

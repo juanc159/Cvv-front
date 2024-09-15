@@ -2,7 +2,7 @@ export default interface IAuth {
   id: number
   company_id: number
   company: object
-  name: string
+  full_name: string
   token: string
   email: string
   photo: string

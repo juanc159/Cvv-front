@@ -2,8 +2,7 @@
 import SchoolData from "@/layouts/SchoolData.vue";
 import ContactArea from "@/pages/Pw/ContactArea.vue";
 import AditionalService from "@/views/front-pages/landing-page/AditionalService.vue";
-import GradeSection from "@/views/front-pages/landing-page/grade-section.vue";
-import OurTeam from "@/views/front-pages/landing-page/our-team.vue";
+import Teachers from "@/views/front-pages/landing-page/teachers.vue";
 
 
 import { register } from "swiper/element/bundle";
@@ -30,7 +29,6 @@ onMounted(async () => {
 
   if (response.data) {
     school.value = response.data.value.company;
-    console.log(school.value);
     typeEducations.value = response.data.value.typeEducations;
     generalSecondaryEducation.value = response.data.value.generalSecondaryEducation;
   }
@@ -58,19 +56,20 @@ onMounted(async () => {
 
             <VWindowItem>
               <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-                <OurTeam v-if="school.teachers['Educación Inicial']" :data="school.teachers['Educación Inicial']" />
+                <Teachers v-if="school.teachers['Educación Inicial']" :data="school.teachers['Educación Inicial']" />
               </div>
             </VWindowItem>
 
             <VWindowItem>
               <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-                <OurTeam v-if="school.teachers['Educación Primaria']" :data="school.teachers['Educación Primaria']" />
+                <Teachers v-if="school.teachers['Educación Primaria']" :data="school.teachers['Educación Primaria']" />
               </div>
             </VWindowItem>
 
             <VWindowItem>
               <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-                <GradeSection :data="generalSecondaryEducation" />
+                <Teachers v-if="school.teachers['Educación Media General']"
+                  :data="school.teachers['Educación Media General']" />
               </div>
             </VWindowItem>
           </VWindow>
@@ -83,4 +82,3 @@ onMounted(async () => {
 
   </SchoolData>
 </template>
- 

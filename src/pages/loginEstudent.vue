@@ -4,8 +4,8 @@ import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import { useGenerateImageVariant } from "@core/composable/useGenerateImageVariant";
 import authV2LoginIllustrationBorderedDark from "@images/pages/auth-v2-login-illustration-bordered-dark.png";
 import authV2LoginIllustrationBorderedLight from "@images/pages/auth-v2-login-illustration-bordered-light.png";
-import authV2LoginIllustrationDark from "@images/pages/auth-v2-login-illustration-dark.png";
-import authV2LoginIllustrationLight from "@images/pages/auth-v2-login-illustration-light.png";
+import authV2LoginIllustrationDark from "@images/pages/auth-v2-two-step-illustration-dark.png";
+import authV2LoginIllustrationLight from "@images/pages/auth-v2-two-step-illustration-light.png";
 import authV2MaskDark from "@images/pages/misc-mask-dark.png";
 import authV2MaskLight from "@images/pages/misc-mask-light.png";
 import { VNodeRenderer } from "@layouts/components/VNodeRenderer";
@@ -13,16 +13,15 @@ import { themeConfig } from "@themeConfig";
 import { VForm } from "vuetify/components/VForm";
 
 definePage({
-  name: "Login",
-  path: "/login",
+  name: "Login-Estudent",
+  path: "/loginStudent",
   meta: {
     layout: "blank",
   },
 });
 
-
 const form = reactive({
-  email: "",
+  identity_document: "",
   password: "",
 });
 const errorsBack = ref<IErrorsBack>({});
@@ -48,9 +47,9 @@ const router = useRouter();
 const login = async () => {
   const validation = await formValidation.value?.validate();
   if (validation?.valid) {
-    const promise = await authenticationStore.login(form);
+    const promise = await authenticationStore.loginStudent(form);
 
-    if (promise.code == 200) router.push({ name: "root" });
+    if (promise.code == 200) router.push({ name: "DashboardStudent" });
     if (promise.code === 422) errorsBack.value = promise.errors ?? {}; //muestra error del back
   }
 };
@@ -83,10 +82,10 @@ const login = async () => {
         <VCardText>
           <VForm ref="formValidation">
             <VRow>
-              <!-- email -->
+              <!-- identity_document -->
               <VCol cols="12">
-                <AppTextField clearable v-model="form.email" autofocus label="Email" type="email"
-                  :rules="[requiredValidator, emailValidator]" :error-messages="errorsBack.email" />
+                <AppTextField clearable v-model="form.identity_document" autofocus label="Cédula"
+                  :rules="[requiredValidator]" :error-messages="errorsBack.identity_document" />
               </VCol>
 
               <!-- password -->
