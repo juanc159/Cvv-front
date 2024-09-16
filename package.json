@@ -17,6 +17,7 @@
     "@casl/vue": "^2.2.1",
     "@floating-ui/dom": "1.5.3",
     "@sindresorhus/is": "^6.0.0",
+    "@tinymce/tinymce-vue": "^5.1.1",
     "@tiptap/extension-highlight": "^2.1.12",
     "@tiptap/extension-image": "^2.1.12",
     "@tiptap/extension-link": "^2.1.12",

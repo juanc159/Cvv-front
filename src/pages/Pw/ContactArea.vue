@@ -1,10 +1,29 @@
 <script setup lang="ts">
-const { data } = defineProps({
-  data: {
-    type: Object,
+const props = defineProps({
+  school_id: {
+    type: [Number, String],
     required: true,
   },
 });
+
+interface IInformation {
+  details: Array<{
+    type_detail_name: string
+    content: string
+    color: string
+    icon: string
+  }>,
+  iframeGoogleMap: string
+}
+
+const contactData = ref<IInformation>({})
+
+
+const { data, response } = await useApi("pw-contactData/" + props.school_id).get();
+if (data.value.code == 200) {
+  contactData.value = data.value.contactData;
+}
+
 </script>
 
 <template>
@@ -39,7 +58,8 @@ const { data } = defineProps({
                   <VCardText>
                     <div class="d-flex justify-space-between flex-wrap gap-y-4">
                       <!-- {{ data.details }} -->
-                      <div v-for="(item, index) in data.details" :key="index" class="w-100 d-flex gap-x-3 align-center">
+                      <div v-for="(item, index) in contactData.details" :key="index"
+                        class="w-100 d-flex gap-x-3 align-center">
                         <div>
                           <VAvatar size="36" :color="item.color" variant="tonal" class="rounded-sm">
                             <VIcon :icon="item.icon" size="24" />
@@ -74,7 +94,7 @@ const { data } = defineProps({
                 <VCardItem class="pb-0"> </VCardItem>
 
                 <VCardText>
-                  <div v-html="data.iframeGoogleMap"></div>
+                  <div v-html="contactData.iframeGoogleMap"></div>
                   <!-- <iframe v-if="data.iframeGoogleMap" :src="data.iframeGoogleMap" height="450"
                     style="border-radius: 1rem; inline-size: 100%" :allowfullscreen="true" loading="lazy"
                     referrerpolicy="no-referrer-when-downgrade"></iframe> -->
@@ -89,10 +109,9 @@ const { data } = defineProps({
 </template>
 
 <style lang="scss" scoped>
-.contact-us-section {}
-
 .section-title::after {
   position: absolute;
+
   // background: url("../../../assets/images/front-pages/icons/section-title-icon.png") no-repeat left bottom;
   background-size: contain;
   block-size: 100%;
@@ -109,6 +128,7 @@ const { data } = defineProps({
 
 .contact-card::before {
   position: absolute;
+
   // content: url("@images/front-pages/icons/contact-border.png");
   inset-block-start: -2.5rem;
   inset-inline-start: -2.5rem;
@@ -119,4 +139,4 @@ const { data } = defineProps({
     display: none;
   }
 }
-</style> 
+</style>

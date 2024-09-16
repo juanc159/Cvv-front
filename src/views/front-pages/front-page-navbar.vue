@@ -1,27 +1,29 @@
 <script setup lang="ts">
-import type { RouteLocationRaw } from "vue-router/auto";
 import { useDisplay } from "vuetify";
+
 
 import { useWindowScroll } from "@vueuse/core";
 
-const props = defineProps({
-  activeId: String,
-  school: Object,
-});
+const props = defineProps(
+  {
+    activeId: String,
+    school_id: {
+      type: [Number, String],
+      required: true,
+    },
+  }
+);
 
-const route = useRoute()
 const display = useDisplay();
 
-interface navItem {
-  name: string;
-  to: RouteLocationRaw;
+interface socialNetworks {
+  type_detail_name: string,
+  icon: string,
+  color: string,
+  content: string,
 }
 
-interface MenuItem {
-  listTitle: string;
-  listIcon: string;
-  navItems: navItem[];
-}
+
 const { y } = useWindowScroll();
 
 const sidebar = ref(false);
@@ -54,7 +56,7 @@ const menu = ref<
     title: "Inicio",
     to: 'Pw-school',
     params: {
-      school_id: route.params.school_id
+      school_id: props.school_id
     },
     hash: null,
     icon: "tabler-home",
@@ -70,6 +72,12 @@ const menu = ref<
     to: "",
     hash: "#contactData",
     icon: "tabler-address-book",
+  },
+  {
+    title: "Redes sociales",
+    to: "",
+    hash: "",
+    icon: "tabler-layout-grid",
   },
   {
     title: "Pago de Mensualidades",
@@ -93,9 +101,23 @@ const menu = ref<
   },
 ]);
 
+const isMenuOpen = ref(false)
+const isMegaMenuOpen = ref(false)
+
+
+
 const openLink = (link: string) => {
   window.open(link, "_blank");
 };
+
+const social_networks = ref<socialNetworks[]>([])
+onMounted(async () => {
+  const { data, response } = await useApi("pw-socialNetworks/" + props.school_id).get();
+  if (data.value.code == 200) {
+    social_networks.value = data.value.social_networks;
+  }
+});
+
 </script>
 
 <template>
@@ -104,23 +126,47 @@ const openLink = (link: string) => {
     <!-- Nav items -->
     <div>
       <div class="d-flex flex-column gap-y-4 pa-4">
-        <RouterLink v-for="(item, index) in [
-          'Principal',
-          'Inicio',
-          'Sobre nosotros',
-          'Galeria',
-          'Contactanos',
-        ]" :key="index" :to="{
-          name: 'Pw-home',
-          hash: `#${item.toLowerCase().replace(' ', '-')}`,
-        }" class="nav-link font-weight-medium" :class="[
-          props.activeId?.toLocaleLowerCase().replace('-', ' ') ===
-            item.toLocaleLowerCase()
-            ? 'active-link'
-            : '',
-        ]">
-          {{ item }}
-        </RouterLink>
+        <template v-for="(item, index) in menu" :key="index">
+
+          <a v-if="item.isExternal" :href="item.to" :target="item.isExternal ? '_blank' : '_self'"
+            class="nav-link font-weight-medium py-2 px-lg-4">
+            <VIcon :icon="item.icon" color="primary" />
+            {{ item.title }}
+          </a>
+
+
+          <RouterLink v-else :to="{
+            name: item.to,
+            hash: `#${item.title.toLowerCase().replace(' ', '-')}`,
+          }" class="nav-link font-weight-medium" :class="[
+            props.activeId?.toLocaleLowerCase().replace('-', ' ') ===
+              item.title.toLocaleLowerCase()
+              ? 'active-link'
+              : '',
+          ]">
+            <VIcon :icon="item.icon" color="primary" />
+            {{ item.title }}
+          </RouterLink>
+
+        </template>
+        <div class="font-weight-medium cursor-pointer">
+          <div :class="[isMenuOpen ? 'mb-6 active-link' : '']" style="color: rgba(var(--v-theme-on-surface))"
+            class="nav-link font-weight-medium" @click="isMenuOpen = !isMenuOpen">
+            <VIcon icon=" tabler-layout-grid" color="primary" />
+            Redes sociales
+            <VIcon :icon="isMenuOpen ? 'tabler-chevron-up' : 'tabler-chevron-down'" />
+          </div>
+          <div class="px-4" :class="isMenuOpen ? 'd-block' : 'd-none'" v-if="social_networks.length > 0">
+            <div v-for="(item, index) in social_networks" :key="index">
+              <div class="d-flex align-center gap-x-3 mb-4">
+                <VAvatar variant="tonal" :color="item.color" rounded :icon="item.icon" />
+                <div class="text-body-1 text-high-emphasis font-weight-medium">
+                  {{ item.type_detail_name }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -128,7 +174,7 @@ const openLink = (link: string) => {
     <VIcon id="navigation-drawer-close-btn" icon="tabler-x" size="20" @click="sidebar = !sidebar" />
   </VNavigationDrawer>
 
-  <!-- 👉 Navbar for desktop devices  -->
+
   <div class="front-page-navbar">
     <VAppBar :color="$vuetify.theme.current.dark
       ? 'rgba(var(--v-theme-background))'
@@ -145,33 +191,44 @@ const openLink = (link: string) => {
         <VIcon size="26" icon="tabler-menu-2" color="rgba(var(--v-theme-on-surface))" />
       </IconBtn>
       <!-- Title and Landing page sections -->
-      <div class="d-flex align-center justify-space-between w-100">
-        <!-- <VAppBarTitle class="me-6">
-          <RouterLink
-            to="/"
-            class="d-flex gap-x-4"
-            :class="$vuetify.display.mdAndUp ? 'd-none' : 'd-block'"
-          >
-            <div class="d-flex gap-x-3 align-center">
-              <VNodeRenderer :nodes="themeConfig.app.logo" />
-              <h4
-                class="text-h4 text-capitalize text-truncate font-weight-bold"
-              >
-                {{ themeConfig.app.title }}
-              </h4>
-            </div>
-          </RouterLink>
-        </VAppBarTitle> -->
+      <div class="d-flex align-center justify-center w-100">
+
 
         <!-- landing page sections -->
-        <div class="text-base align-center d-none d-md-flex">
-          <template v-for="(item, index) in menu" key="index">
+        <div class="text-base align-center d-none d-md-flex ">
+          <template v-for="(item, index) in menu" :key="index">
 
             <a v-if="item.isExternal" :href="item.to" :target="item.isExternal ? '_blank' : '_self'"
               class="nav-link font-weight-medium py-2 px-2 px-lg-4">
               <VIcon :icon="item.icon" color="primary" />
               {{ item.title }}
             </a>
+
+            <!-- Redes sociales -->
+            <span v-else-if="item.title == 'Redes sociales'" class="font-weight-medium cursor-pointer px-2 px-lg-4 py-2"
+              style="color: rgba(var(--v-theme-on-surface))">
+              <VIcon :icon="item.icon" color="primary" />
+              {{ item.title }}
+              <VIcon icon="tabler-chevron-down" size="12" />
+              <VMenu v-model="isMegaMenuOpen" open-on-hover activator="parent" transition="slide-y-transition"
+                location="bottom center" offset="16" content-class="mega-menu" location-strategy="static"
+                close-on-content-click>
+                <VCard max-width="1000">
+                  <VCardText class="pa-8">
+                    <div class="nav-menu">
+                      <div v-for="(item, index) in social_networks" :key="index">
+                        <div class="d-flex align-center gap-x-3 mb-6 cursor-pointer" @click="openLink(item.content)">
+                          <VAvatar variant="tonal" :color="item.color" rounded :icon="item.icon" />
+                          <div class="text-body-1 text-high-emphasis font-weight-medium">
+                            {{ item.type_detail_name }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </VCardText>
+                </VCard>
+              </VMenu>
+            </span>
 
             <RouterLink v-else :to="{
               name: item.to,
@@ -182,15 +239,8 @@ const openLink = (link: string) => {
               {{ item.title }}
             </RouterLink>
           </template>
-        </div>
-        <div v-if="props.school?.social_networks.length > 0">
-          <VBtn :color="item.color" icon v-for="(item, index) in props.school?.social_networks" :key="index"
-            @click="openLink(item.content)">
-            <VTooltip location="top" activator="parent">
-              {{ item.type_detail_name }}
-            </VTooltip>
-            <VIcon size="30" :icon="item.icon"></VIcon>
-          </VBtn>
+
+
         </div>
       </div>
     </VAppBar>
@@ -215,51 +265,6 @@ const openLink = (link: string) => {
   }
 }
 
-@media (max-width: 1280px) {
-  .nav-menu {
-    gap: 2.25rem;
-  }
-}
-
-@media (min-width: 1920px) {
-  .front-page-navbar {
-    .v-toolbar {
-      max-inline-size: calc(1440px - 32px);
-    }
-  }
-}
-
-@media (min-width: 1280px) and (max-width: 1919px) {
-  .front-page-navbar {
-    .v-toolbar {
-      max-inline-size: calc(1200px - 32px);
-    }
-  }
-}
-
-@media (min-width: 960px) and (max-width: 1279px) {
-  .front-page-navbar {
-    .v-toolbar {
-      max-inline-size: calc(900px - 32px);
-    }
-  }
-}
-
-@media (min-width: 600px) and (max-width: 959px) {
-  .front-page-navbar {
-    .v-toolbar {
-      max-inline-size: calc(100% - 64px);
-    }
-  }
-}
-
-@media (max-width: 600px) {
-  .front-page-navbar {
-    .v-toolbar {
-      max-inline-size: calc(100% - 32px);
-    }
-  }
-}
 
 .nav-item-img {
   border: 10px solid rgb(var(--v-theme-background));

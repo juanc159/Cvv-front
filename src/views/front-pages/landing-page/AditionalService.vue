@@ -1,4 +1,6 @@
 <script setup lang="ts">
+
+
 const colorAvatar = ref("primary");
 
 const data = ref([
@@ -42,13 +44,8 @@ const data = ref([
     <VRow>
       <VCol cols="12" class="d-flex justify-space-around w-100">
         <div v-for="(item, index) in data" :key="index" class="activity">
-          <VAvatar
-            :color="item.hover ? 'success' : 'primary'"
-            variant="tonal"
-            size="170"
-            @mouseover="item.hover = true"
-            @mouseout="item.hover = false"
-          >
+          <VAvatar :color="item.hover ? 'success' : 'primary'" variant="tonal" size="170" @mouseover="item.hover = true"
+            @mouseout="item.hover = false">
             <VIcon :icon="item.icon" size="100"></VIcon>
           </VAvatar>
           <h3 class="mt-1">{{ item.title }}</h3>

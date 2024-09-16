@@ -1,55 +1,34 @@
 <script setup lang="ts">
+import SwiperBanners from "@/components/SwiperBanners.vue";
 import Footer from "@/views/front-pages/front-page-footer.vue";
 import Navbar from "@/views/front-pages/front-page-navbar.vue";
 
-
-import { register } from "swiper/element/bundle";
-
-register();
-
-definePage({
-  name: "Pw-school",
-  path: "/school/:id",
-  meta: {
-    requiresAuth: false,
-    layout: "blank",
+const props = defineProps({
+  swiperBanners: {
+    type: Boolean,
+    default: true,
   },
 });
 
+
 const activeSectionId = ref();
-
 const route = useRoute();
-const currentTab = ref();
-const school = ref();
-const typeEducations = ref();
-const generalSecondaryEducation = ref<Array<object>>([]);
-onMounted(async () => {
-
-  const { data, response } = await useApi("pw-dataSchool/" + route.params.school_id).get();
-  if (data.value) {
-    school.value = data.value.company;
-    typeEducations.value = data.value.typeEducations;
-    generalSecondaryEducation.value = data.value.generalSecondaryEducation;
-  }
+const school_id = computed(() => {
+  return route.params.school_id
 });
+
+
 </script>
 
 <template>
   <div class="landing-page-wrapper">
-    <Navbar :active-id="activeSectionId" :school="school" />
-
-    <swiper-container style="margin-block-start: 6rem" v-if="school?.banners.length > 0" navigation="true"
-      events-prefix="swiper-">
-      <swiper-slide pagination="true" v-for="(item, index) in school.banners" :key="index">
-        <VImg :src="item.path" />
-      </swiper-slide>
-    </swiper-container>
+    <Navbar :active-id="activeSectionId" :school_id="school_id" />
+    <SwiperBanners v-if="props.swiperBanners" :school_id="school_id" />
 
     <slot></slot>
 
-
     <!-- 👉 Footer -->
-    <Footer v-if="school" :data="school" />
+    <Footer />
   </div>
 </template>
 

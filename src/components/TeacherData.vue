@@ -1,18 +1,35 @@
 <script setup lang="ts">
 
-const { data } = defineProps({
-  data: {
-    type: Array<Object>,
+interface ITeacher {
+  backgroundColor: string,
+  photo: string,
+  subject_name: string,
+  fullName: string,
+  jobPosition: string,
+  email: string,
+  phone: string,
+  files: Array<{
+    name: string,
+    path: string,
+  }>,
+}
+
+const props = defineProps({
+  teachers: {
+    type: Object,
     required: true,
   },
 });
+
+
 </script>
 
 <template>
-  <VContainer id="team" v-if="data.length > 0">
+
+  <VContainer id="team" v-if="props.teachers">
     <div class="our-team">
-      <VRow class="mt-6">
-        <VCol v-for="(item, index) in data" :key="index" cols="12" lg="3" sm="6">
+      <VRow>
+        <VCol v-for="(item, index) in props.teachers" :key="index" cols="12" lg="3" sm="6">
           <VCard flat min-width="262" class="position-relative overflow-visible team-card mb-12">
             <div
               :style="{ maxHeight: '185px', minHeight: '185px', borderRadius: '90px 20px 0 0', backgroundColor: `${item.backgroundColor}` }">
@@ -27,6 +44,7 @@ const { data } = defineProps({
                 <span class="text-body-1 ">{{ item.email }}</span><br>
                 <span class="text-body-1 ">{{ item.phone }}</span>
               </div>
+
             </VCardText>
           </VCard>
         </VCol>
@@ -34,7 +52,6 @@ const { data } = defineProps({
     </div>
   </VContainer>
 </template>
-
 
 <style lang="scss" scoped>
 .team-image {
@@ -53,5 +70,17 @@ const { data } = defineProps({
 
 .team-card {
   border-radius: 90px 20px 6px 6px;
+}
+
+.section-title::after {
+  position: absolute;
+  background: url('../../../assets/images/front-pages/icons/section-title-icon.png') no-repeat left bottom;
+  background-size: contain;
+  block-size: 100%;
+  content: '';
+  font-weight: 700;
+  inline-size: 120%;
+  inset-block-end: 0;
+  inset-inline-start: 0%;
 }
 </style>

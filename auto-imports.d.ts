@@ -9,6 +9,7 @@ declare global {
   const $prueba: typeof import('./src/utils/api')['$prueba']
   const $router: typeof import('./src/utils/api')['$router']
   const $web: typeof import('./src/utils/api')['$web']
+  const API_KEY_EDITOR: typeof import('./src/utils/constants')['API_KEY_EDITOR']
   const COOKIE_MAX_AGE_1_YEAR: typeof import('./src/utils/constants')['COOKIE_MAX_AGE_1_YEAR']
   const CreateUrl: typeof import('./src/@core/composable/CreateUrl')['CreateUrl']
   const EffectScope: typeof import('vue')['EffectScope']
@@ -385,6 +386,7 @@ declare module 'vue' {
   interface ComponentCustomProperties {
     readonly $api: UnwrapRef<typeof import('./src/utils/api')['$api']>
     readonly $web: UnwrapRef<typeof import('./src/utils/api')['$web']>
+    readonly API_KEY_EDITOR: UnwrapRef<typeof import('./src/utils/constants')['API_KEY_EDITOR']>
     readonly COOKIE_MAX_AGE_1_YEAR: UnwrapRef<typeof import('./src/utils/constants')['COOKIE_MAX_AGE_1_YEAR']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
@@ -736,6 +738,7 @@ declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
     readonly $api: UnwrapRef<typeof import('./src/utils/api')['$api']>
     readonly $web: UnwrapRef<typeof import('./src/utils/api')['$web']>
+    readonly API_KEY_EDITOR: UnwrapRef<typeof import('./src/utils/constants')['API_KEY_EDITOR']>
     readonly COOKIE_MAX_AGE_1_YEAR: UnwrapRef<typeof import('./src/utils/constants')['COOKIE_MAX_AGE_1_YEAR']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>

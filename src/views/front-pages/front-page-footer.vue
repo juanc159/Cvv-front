@@ -1,22 +1,10 @@
-<script setup lang="ts">
-const { data } = defineProps({
-  data: Object,
-});
-</script>
-
 <template>
   <div class="footer">
     <!-- 👉 Footer Line -->
     <div class="text-white-variant footer-line w-100">
       <VContainer>
-        <div
-          class="d-flex justify-space-between flex-wrap gap-y-4 align-center"
-        >
-          <div
-            style="color: white"
-            v-for="(item, index) in data?.footer"
-            :key="index"
-          >
+        <div class="d-flex justify-space-between flex-wrap gap-y-4 align-center">
+          <div style="color: white" v-for="(item, index) in data?.footer" :key="index">
             <VIcon :icon="item.icon"></VIcon>
             <span>{{ item.text }}</span>
           </div>
@@ -26,15 +14,23 @@ const { data } = defineProps({
   </div>
 </template>
 
-<style lang="scss" scoped>
-.footer-top {
-  border-radius: 60px 60px 0 0;
-  background-size: cover;
-  color: #fff;
-}
+<script setup lang="ts">
+const { data } = defineProps({
+  data: {
+    type: Object,
+    required: false,
+    default: {},
+  },
+});
+</script>
 
-.footer-line {
+<style lang="scss" scoped>
+.footer {
+  padding: 1rem;
   background: #171925;
+  color: #fff;
+  inline-size: 100%;
+  text-align: center;
 }
 </style>
 
@@ -53,13 +49,19 @@ const { data } = defineProps({
   }
 }
 
-.footer {
-  border-radius: 50%;
+.footer-top {
+  border-radius: 60px 60px 0 0;
+  background-size: cover;
+  color: #fff;
+}
 
-  @media (min-width: 600px) and (max-width: 960px) {
-    .v-container {
-      padding-inline: 2rem !important;
-    }
+.footer-line {
+  background: #171925;
+}
+
+@media (min-width: 600px) and (max-width: 960px) {
+  .v-container {
+    padding-inline: 2rem !important;
   }
 }
 </style>
