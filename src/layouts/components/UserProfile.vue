@@ -9,8 +9,14 @@ const router = useRouter();
 const logout = () => {
 
   let urlLogout = "Login"
-  if (authenticationStore.permissions.length == 0) {
+  if (authenticationStore.user.type_user == "admin") {
+    urlLogout = "Login"
+  }
+  if (authenticationStore.user.type_user == "student") {
     urlLogout = "Login-Estudent"
+  }
+  if (authenticationStore.user.type_user == "teacher") {
+    urlLogout = "Login-Teacher"
   }
   authenticationStore.logout();
   router.push({

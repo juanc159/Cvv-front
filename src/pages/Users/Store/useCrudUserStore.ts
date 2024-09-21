@@ -61,7 +61,10 @@ export const useCrudUserStore = defineStore('useCrudUserStore', {
       this.loading.form = false
 
       if (response.value?.ok && data.value) {
-        this.form = data.value.form
+        this.clearForm()
+        if (data.value.form) {
+          this.form = data.value.form
+        }
       }
     },
 

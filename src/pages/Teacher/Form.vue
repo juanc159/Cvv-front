@@ -177,7 +177,8 @@ const subjectsFilter = computed(() => {
                 label="Tipo de educación"></AppSelect>
             </VCol>
             <VCol cols="12" sm="3">
-              <AppSelect :items="jobPositions" :rules="[requiredValidator]" v-model="form.job_position_id" label="Cargo">
+              <AppSelect :items="jobPositions" :rules="[requiredValidator]" v-model="form.job_position_id"
+                label="Cargo">
               </AppSelect>
             </VCol>
             <VCol cols="12" sm="3">
@@ -193,18 +194,26 @@ const subjectsFilter = computed(() => {
             </VCol>
             <VCol cols="12" sm="3">
               <AppTextField clearable v-model="form.email" :rules="[requiredValidator, emailValidator]"
-                :error-messages="errorsBack.email" label="Correo" @keypress="errorsBack.email = ''" :requiredField="true">
+                :error-messages="errorsBack.email" label="Correo" @keypress="errorsBack.email = ''"
+                :requiredField="true">
               </AppTextField>
             </VCol>
             <VCol cols="12" sm="3">
-              <AppTextField clearable v-model="form.phone" :rules="[requiredValidator]" :error-messages="errorsBack.phone"
-                label="Teléfono" @keypress="errorsBack.phone = ''" :requiredField="true">
+              <AppTextField clearable v-model="form.password" :rules="[requiredValidator]"
+                :error-messages="errorsBack.password" label="Contraseña" @keypress="errorsBack.password = ''"
+                :requiredField="true">
+              </AppTextField>
+            </VCol>
+            <VCol cols="12" sm="3">
+              <AppTextField clearable v-model="form.phone" :rules="[requiredValidator]"
+                :error-messages="errorsBack.phone" label="Teléfono" @keypress="errorsBack.phone = ''"
+                :requiredField="true">
               </AppTextField>
             </VCol>
 
             <VCol cols="12" sm="3">
-              <VFileInput accept="image/*" :rules="arrayValidation['photo']" :key="archive.key" @change="addPhoto($event)"
-                @click:clear="archive.clearData">
+              <VFileInput accept="image/*" :rules="arrayValidation['photo']" :key="archive.key"
+                @change="addPhoto($event)" @click:clear="archive.clearData">
                 <template #label>
                   Foto&nbsp;<b class="text-warning">*</b>
                 </template>
@@ -228,8 +237,8 @@ const subjectsFilter = computed(() => {
               <h3>Información complementaria</h3>
             </VCol>
             <VCol cols="12" sm="3">
-              <AppSelect clearable :items="gradesFilter" :rules="[requiredValidator]" v-model="formComplementary.grade_id"
-                label="Grados y niveles">
+              <AppSelect clearable :items="gradesFilter" :rules="[requiredValidator]"
+                v-model="formComplementary.grade_id" label="Grados y niveles">
               </AppSelect>
             </VCol>
             <VCol cols="12" sm="3">
@@ -278,4 +287,3 @@ const subjectsFilter = computed(() => {
     </VCard>
   </div>
 </template>
- 

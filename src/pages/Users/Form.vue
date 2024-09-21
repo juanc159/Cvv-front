@@ -48,18 +48,18 @@ const submitForm = async () => {
   }
 };
 
-watch(
-  form,
-  (newValue, oldValue) => {
-    if (!newValue.id)
-      arrayValidation.value.password = [requiredValidator(newValue.password)];
-    // arrayValidation.value["photo"] =[requiredValidator(photo.value.imageUrl)]
-    else arrayValidation.value.password = [];
+// watch(
+//   form,
+//   (newValue, oldValue) => {
+//     if (!newValue.id)
+//       arrayValidation.value.password = [requiredValidator(newValue.password)];
+//     // arrayValidation.value["photo"] =[requiredValidator(photo.value.imageUrl)]
+//     else arrayValidation.value.password = [];
 
-    // arrayValidation.value["photo"] = []
-  },
-  { deep: true }
-);
+//     // arrayValidation.value["photo"] = []
+//   },
+//   { deep: true }
+// );
 
 onMounted(async () => {
   storeUser.clearForm();
@@ -80,8 +80,9 @@ onMounted(async () => {
         <VForm ref="formValidation" lazy-validation>
           <VRow>
             <VCol cols="12" md="4">
-              <AppTextField clearable v-model="form.email" :rules="[requiredValidator, emailValidator]" autocomplete="off"
-                :error-messages="errors.email" label="Email" @keypress="errors.email = ''" :requiredField="true">
+              <AppTextField clearable v-model="form.email" :rules="[requiredValidator, emailValidator]"
+                autocomplete="off" :error-messages="errors.email" label="Email" @keypress="errors.email = ''"
+                :requiredField="true">
               </AppTextField>
             </VCol>
             <VCol cols="12" md="4">
@@ -125,4 +126,3 @@ onMounted(async () => {
     </VCard>
   </div>
 </template>
- 

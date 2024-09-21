@@ -28,8 +28,8 @@ if (data.value.code == 200) {
 </script>
 
 <template>
-  <swiper-container style="margin-block-start: 6rem" v-if="banners.length > 0" navigation="true"
-    events-prefix="swiper-">
+  <swiper-container :autoplay="{ delay: 3000, disableOnInteraction: false }" style="margin-block-start: 6rem"
+    v-if="banners.length > 0" navigation="true" events-prefix="swiper-">
     <swiper-slide pagination="true" v-for="(item, index) in banners" :key="index">
       <VImg :src="item.path" />
     </swiper-slide>

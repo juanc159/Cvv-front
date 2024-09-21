@@ -62,6 +62,23 @@ export const useAuthenticationStore = defineStore('useAuthenticationStore', {
       return data.value
 
     },
+    async loginTeacher(formulario: ILogin): Promise<IPromise> {
+      this.loading = true
+      const { data, response, error, isFetching } = await useApi("/loginTeacher").post(formulario)
+      this.loading = isFetching.value
+
+      if (response.value?.ok && data.value) {
+        this.isAuthenticate = true
+        this.user = data.value.user
+        this.menu = data.value.menu
+        this.permissions = data.value.permissions
+        this.token = data.value.token
+        useCookie('accessToken').value = this.token
+      }
+
+      return data.value
+
+    },
 
   },
 })

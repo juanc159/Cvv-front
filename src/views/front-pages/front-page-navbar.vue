@@ -94,6 +94,12 @@ const menu = ref<
     icon: "tabler-books",
   },
   {
+    title: "Materia Pendiente",
+    to: "Pw-SubjectPennding",
+    hash: "",
+    icon: "tabler-file",
+  },
+  {
     title: "Acceso",
     to: "Login-Estudent",
     hash: "",
