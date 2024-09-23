@@ -45,7 +45,7 @@ if (data.value.code == 200) {
           <div class="d-flex align-center text-h3 mb-1 flex-wrap justify-center">
             <div class="position-relative me-2">
               <h3 class="section-title">
-                Materias pendientes año escolar 2023-2024
+                Materias Pendientes Año Escolar 2024-2025
               </h3>
             </div>
           </div>
