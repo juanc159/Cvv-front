@@ -10,6 +10,7 @@ definePage({
 });
 
 import { useImageUpload } from "@/composables/useImageUpload";
+import { router } from "@/plugins/1.router";
 import { VForm } from "vuetify/components";
 import { VDataTable } from "vuetify/labs/VDataTable";
 
@@ -33,15 +34,9 @@ const submitForm = async () => {
 
   let cant = 0
   teacher.value.complementaries.forEach(element => {
-
-
     element.subjects.forEach(element2 => {
 
       element2.files.forEach((element3, key) => {
-
-
-
-
 
         formData.append("file_id_" + cant, element3.id)
         formData.append("file_grade_id_" + cant, element.grade_id)
@@ -63,9 +58,12 @@ const submitForm = async () => {
   });
 
   loading.form = true
-  await useApi('/teacher-planningStore').post(formData)
+  const { data, response } = await useApi('/teacher-planningStore').post(formData)
   loading.form = false
 
+  if (response.value?.ok && data.value) {
+    router.push({ name: "Teacher-Index" })
+  }
 
 }
 
@@ -181,16 +179,27 @@ const deleteFile = (obj: object, index: number, value: number) => {
                           <VDataTable :headers="headersFile" :items="subject.files" :items-per-page="999">
 
                             <template #item.actions="{ item, index }">
-                              <span v-if="item.delete">
-                                Sera eliminado al guardar, <b style="cursor: pointer;"
-                                  @click="deleteFile(subject.files, index, 0)">restaurar</b>
-                              </span>
-                              <VBtn v-else icon size="x-small" color="error" variant="text"
-                                @click="deleteFile(subject.files, index, 1)">
-                                <VIcon size="22" icon="tabler-trash" />
-                                <VTooltip location="top" transition="scale-transition" activator="parent" text="Eliminar">
-                                </VTooltip>
-                              </VBtn>
+                              <div>
+                                <VBtn v-if="item.id" icon size="x-small" color="primary" variant="text"
+                                  @click="descargarArchivo(item.file, item.name)">
+                                  <VIcon size="22" icon="tabler-eye" />
+                                  <VTooltip location="top" transition="scale-transition" activator="parent"
+                                    text="Visualizar">
+                                  </VTooltip>
+                                </VBtn>
+                                <span v-if="item.delete">
+                                  Sera eliminado al guardar, <b style="cursor: pointer;"
+                                    @click="deleteFile(subject.files, index, 0)">restaurar</b>
+                                </span>
+                                <VBtn v-else icon size="x-small" color="error" variant="text"
+                                  @click="deleteFile(subject.files, index, 1)">
+                                  <VIcon size="22" icon="tabler-trash" />
+                                  <VTooltip location="top" transition="scale-transition" activator="parent"
+                                    text="Eliminar">
+                                  </VTooltip>
+                                </VBtn>
+                              </div>
+
                             </template>
                             <template #bottom>
                             </template>
@@ -228,4 +237,3 @@ const deleteFile = (obj: object, index: number, value: number) => {
   background-color: rgb(236, 247, 255);
 }
 </style>
- 

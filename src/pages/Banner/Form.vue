@@ -12,6 +12,7 @@ definePage({
 import { useImageUpload } from "@/composables/useImageUpload";
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import { useCrudBannerStore } from "@/pages/Banner/Store/useCrudBannerStore";
+import { router } from "@/plugins/1.router";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import { VForm } from "vuetify/components";
 const route = useRoute();
@@ -40,6 +41,8 @@ const submitForm = async () => {
       errors.value = {};
       photo.value.clearData();
       await formValidation.value?.resetValidation();
+      router.push({ name: "Banner-Index" })
+
     }
     if (data?.code === 422) errors.value = data.errors ?? {}; // muestra error del back
   } else {
@@ -103,4 +106,3 @@ onMounted(async () => {
     </VCard>
   </div>
 </template>
- 

@@ -12,6 +12,7 @@ definePage({
 import { useImageUpload } from "@/composables/useImageUpload";
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import { useCrudTeacherStore } from "@/pages/Teacher/Store/useCrudTeacherStore";
+import { router } from "@/plugins/1.router";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import { VForm } from "vuetify/components";
 import { VDataTable } from "vuetify/labs/VDataTable";
@@ -44,8 +45,13 @@ const submitForm = async () => {
       errorsBack.value = {};
       archive.value.clearData();
       await formValidation.value?.resetValidation();
+      router.push({ name: "Teacher-Index" })
+
     }
     if (data?.code === 422) errorsBack.value = data.errors ?? {}; // muestra error del back
+
+
+
   } else {
     toast("Faltan Campos Por Diligenciar", "", "danger");
   }
@@ -199,9 +205,8 @@ const subjectsFilter = computed(() => {
               </AppTextField>
             </VCol>
             <VCol cols="12" sm="3">
-              <AppTextField clearable v-model="form.password" :rules="[requiredValidator]"
-                :error-messages="errorsBack.password" label="Contraseña" @keypress="errorsBack.password = ''"
-                :requiredField="true">
+              <AppTextField clearable v-model="form.password" :error-messages="errorsBack.password" label="Contraseña"
+                @keypress="errorsBack.password = ''">
               </AppTextField>
             </VCol>
             <VCol cols="12" sm="3">

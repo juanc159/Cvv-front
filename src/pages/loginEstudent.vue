@@ -72,11 +72,10 @@ const login = async () => {
         <VCardText>
           <VNodeRenderer :nodes="themeConfig.app.logo" class="mb-6" />
           <h4 class="text-h4 mb-1">
-            Welcome to
-            <span class="text-capitalize">{{ themeConfig.app.title }}</span>! 👋🏻
+            Bienvenido Apreciado Estudiante
           </h4>
           <p class="mb-0">
-            Please sign-in to your account and start the adventure
+            Por favor, ingrese su número de cédula y su contraseña.
           </p>
         </VCardText>
         <VCardText>
@@ -90,13 +89,13 @@ const login = async () => {
 
               <!-- password -->
               <VCol cols="12">
-                <AppTextField clearable v-model="form.password" label="Password" placeholder="············"
+                <AppTextField clearable v-model="form.password" label="Contraseña" placeholder="············"
                   :type="isPasswordVisible ? 'text' : 'password'" :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'
                     " @click:append-inner="isPasswordVisible = !isPasswordVisible" :rules="[requiredValidator]"
                   :error-messages="errorsBack.password" />
 
                 <VBtn :loading="loading" block @click="login()" type="button" class="mt-5">
-                  Login
+                  Ingresar
                 </VBtn>
               </VCol>
             </VRow>

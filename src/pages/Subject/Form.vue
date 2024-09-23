@@ -11,6 +11,7 @@ definePage({
 
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import { useCrudSubjectStore } from "@/pages/Subject/Store/useCrudSubjectStore";
+import { router } from "@/plugins/1.router";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import { VForm } from "vuetify/components";
 const route = useRoute();
@@ -30,6 +31,8 @@ const submitForm = async () => {
     if (data?.code === 200) {
       errorsBack.value = {};
       await formValidation.value?.resetValidation();
+      router.push({ name: "Subject-Index" })
+
     }
     if (data?.code === 422) errorsBack.value = data.errors ?? {}; // muestra error del back
   } else {
@@ -90,4 +93,3 @@ onMounted(async () => {
     </VCard>
   </div>
 </template>
- 

@@ -54,7 +54,7 @@ if (data.value.code == 200) {
           <VCol>
             <h2 class=" font-weight-bold mb-6">
               <a target="_blank"
-                href="https://docs.google.com/document/d/1sJLQi7sObOw41VI9udy8P-9I3NZnLvII/edit?usp=sharing&ouid=109014023290836934766&rtpof=true&sd=true">LISTADO
+                href="https://docs.google.com/document/d/1C9zBx7USlfeffeYKWWJ7TVDiEm32EKzo/edit?usp=sharing&ouid=109014023290836934766&rtpof=true&sd=true">LISTADO
                 DE ESTUDIANTES CON MATERIA PENDIENTE</a>
             </h2>
             <v-list>
