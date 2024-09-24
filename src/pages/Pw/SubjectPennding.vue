@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ingVirgenCvv from "@/assets/general/Virgen.png";
 import SchoolData from "@/layouts/SchoolData.vue";
 
 const route = useRoute()
@@ -43,8 +44,9 @@ if (data.value.code == 200) {
       <div class="our-team">
         <div class="headers d-flex justify-center flex-column align-center">
           <div class="d-flex align-center text-h3 mb-1 flex-wrap justify-center">
-            <div class="position-relative me-2">
-              <h3 class="section-title">
+            <div class="position-relative me-2 d-flex flex-column justify-center align-center">
+              <VImg width="100" :src="ingVirgenCvv" />
+              <h3 class="section-title text-center">
                 Materias Pendientes Año Escolar 2024-2025
               </h3>
             </div>
@@ -57,37 +59,60 @@ if (data.value.code == 200) {
                 href="https://docs.google.com/document/d/1C9zBx7USlfeffeYKWWJ7TVDiEm32EKzo/edit?usp=sharing&ouid=109014023290836934766&rtpof=true&sd=true">LISTADO
                 DE ESTUDIANTES CON MATERIA PENDIENTE</a>
             </h2>
-            <v-list>
-              <v-list-item-group>
-                <v-list-item v-for="(sections, gradeName) in plannings" :key="gradeName">
-                  <v-list-item-content>
-                    <v-list-item-title class="font-weight-bold text-h5">{{ gradeName }}</v-list-item-title>
-                    <v-list>
-                      <v-list-item-group>
-                        <v-list-item v-for="(files, sectionName) in sections" :key="sectionName">
-                          <v-list-item-content>
-                            <v-list-item-title class="font-weight-medium text-h5">Sección {{ sectionName
-                              }}</v-list-item-title>
-                            <v-list>
-                              <v-list-item v-for="file in files" :key="file.id">
-                                <v-list-item-content>
-                                  <v-list-item-title class="text-body-1">{{ file.name }}</v-list-item-title>
-                                  <v-list-item-subtitle>
-                                    <a :href="file.path" target="_blank" class="text-primary">Ver Archivo</a>
-                                  </v-list-item-subtitle>
-                                </v-list-item-content>
-                              </v-list-item>
-                            </v-list>
-                            <v-divider></v-divider>
-                          </v-list-item-content>
-                        </v-list-item>
-                      </v-list-item-group>
-                    </v-list>
-                  </v-list-item-content>
-                  <v-divider></v-divider>
-                </v-list-item>
-              </v-list-item-group>
-            </v-list>
+
+            <v-container>
+              <v-row>
+                <v-col v-for="(sections, gradeName) in plannings" :key="gradeName" cols="12" md="6">
+                  <v-card class="mb-4">
+
+                    <!-- Toolbar -->
+                    <div>
+                      <VToolbar color="primary" class="text-center">
+                        <VToolbarTitle>{{ gradeName }}</VToolbarTitle>
+                      </VToolbar>
+                    </div>
+
+
+                    <!-- <v-card-title class="font-weight-bold text-h5">{{ gradeName }}</v-card-title> -->
+                    <v-card-text>
+                      <v-list>
+                        <v-list-item-group>
+                          <v-list-item v-for="(files, sectionName) in sections" :key="sectionName">
+                            <v-list-item-content>
+                              <v-list-item-title class="font-weight-medium text-h6">Sección {{ sectionName
+                                }}</v-list-item-title>
+                              <v-list>
+                                <v-list-item-group>
+                                  <v-list-item v-for="(subjectFiles, subjectName) in files" :key="subjectName">
+                                    <v-list-item-content>
+                                      <v-list-item-title class="text-body-1 font-weight-bold">● {{ subjectName
+                                        }}</v-list-item-title>
+                                      <v-list>
+                                        <v-list-item v-for="file in subjectFiles" :key="file.id">
+                                          <v-list-item-content>
+                                            <v-list-item-title class="text-body-1">{{ file.name }}</v-list-item-title>
+                                            <v-list-item-subtitle>
+                                              <a :href="file.path" target="_blank" class="text-primary">Ver Archivo</a>
+                                            </v-list-item-subtitle>
+                                          </v-list-item-content>
+                                        </v-list-item>
+                                      </v-list>
+                                    </v-list-item-content>
+                                  </v-list-item>
+                                </v-list-item-group>
+                              </v-list>
+                              <v-divider></v-divider>
+                            </v-list-item-content>
+                          </v-list-item>
+                        </v-list-item-group>
+                      </v-list>
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-container>
+
+
 
           </VCol>
         </VRow>
