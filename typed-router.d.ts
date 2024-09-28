@@ -68,6 +68,8 @@ declare module 'vue-router/auto/routes' {
     'Subject-Form': RouteRecordInfo<'Subject-Form', '/subject-form/:action/:id?', Record<never, never>, Record<never, never>>,
     'Subject-Index': RouteRecordInfo<'Subject-Index', '/Subject/Index', Record<never, never>, Record<never, never>>,
     'Teacher-Form': RouteRecordInfo<'Teacher-Form', '/teacher-form/:action/:id?', Record<never, never>, Record<never, never>>,
+    'Teacher-Order': RouteRecordInfo<'Teacher-Order', '/teacher-Order', Record<never, never>, Record<never, never>>,
+    'Teacher-Order1': RouteRecordInfo<'Teacher-Order1', '/teacher-Order1', Record<never, never>, Record<never, never>>,
     'Teacher-Planning': RouteRecordInfo<'Teacher-Planning', '/teacher-Planning/:id?', Record<never, never>, Record<never, never>>,
     'Teacher-Index': RouteRecordInfo<'Teacher-Index', '/Teacher/Index', Record<never, never>, Record<never, never>>,
     'tenants-components-modal-store': RouteRecordInfo<'tenants-components-modal-store', '/Tenants/components/ModalStore', Record<never, never>, Record<never, never>>,

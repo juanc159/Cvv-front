@@ -54,6 +54,10 @@ const paginationData = computed(() => {
 
 const changeScreen = async (action: string = "create", id?: number) => {
 
+  if (action == 'order') {
+    router.push({ name: "Teacher-Order" });
+    return false
+  }
   if (action == 'planning') {
     router.push({ name: "Teacher-Planning", params: { id: id } });
     return false
@@ -115,6 +119,9 @@ const headers = [
               </div>
               <VSpacer />
               <div class="app-teacher-search-filter d-flex align-center flex-wrap gap-4">
+                <VBtn color="primary" @click="changeScreen('order')">
+                  Ordenar Docentes
+                </VBtn>
                 <VBtn color="primary" @click="changeScreen()">
                   Crear Docente
                 </VBtn>
@@ -196,4 +203,3 @@ const headers = [
     </VCard>
   </div>
 </template>
-  
