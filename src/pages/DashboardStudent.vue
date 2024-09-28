@@ -25,6 +25,44 @@ const avatarData = computed(() => {
 
   return 'S/N'; // Retorna 'A' si `full_name` está vacío
 });
+
+
+const loading = reactive({
+  btnPdf: false
+})
+const openPdfPreview = async (obj: object) => {
+
+  loading.btnPdf = true
+  const { data, response } = await useApi(`pw-pdfNote/${obj.id}`).get();
+  loading.btnPdf = false
+
+  if (response.value?.ok && data.value) {
+    openPdfBase64(data.value.pdf)
+  }
+
+}
+
+
+//ModalChangePassword 
+const refModalChangePassword = ref()
+
+const openModalPassword = () => {
+  refModalChangePassword.value.openDialog(user.value.id, user.value.first_time)
+}
+
+
+onMounted(() => {
+  if (user.value.first_time) {
+    refModalChangePassword.value.openDialog(user.value.id, user.value.first_time)
+
+  }
+})
+
+const passwordSaved = () => {
+  user.value.first_time = 0
+}
+
+
 </script>
 <template>
   <div>
@@ -49,6 +87,7 @@ const avatarData = computed(() => {
 
         <VCol cols="12" sm="8" md="12" lg="7">
           <VCardItem>
+            {{ user.id }}
             <VCardTitle>¡Bienvenido! 🎉</VCardTitle>
           </VCardItem>
 
@@ -71,13 +110,17 @@ const avatarData = computed(() => {
           <VCardText class="d-flex justify-center">
             <div class="me-auto pe-4">
               <p class="d-flex align-center mb-6">
-                <VIcon color="primary" icon="tabler-download" size="22" />
-                <span class="ms-3">Descargar Notas</span>
+                <VBtn :loading="loading.btnPdf" @click="openPdfPreview(user)" :disabled="!user.pdf" variant="outlined">
+                  <VIcon icon="tabler-download"></VIcon>
+                  <span>Descargar Notas</span>
+                </VBtn>
               </p>
 
               <p class="d-flex align-center mb-0">
-                <VIcon color="primary" icon="tabler-download" size="22" />
-                <span class="ms-3">Descargar Boletin</span>
+                <VBtn disabled variant="outlined">
+                  <VIcon icon="tabler-download"></VIcon>
+                  <span>Descargar Boletin</span>
+                </VBtn>
               </p>
             </div>
 
@@ -85,13 +128,19 @@ const avatarData = computed(() => {
 
             <div class="ms-auto ps-4">
               <p class="d-flex align-center mb-6">
-                <VIcon color="primary" icon="tabler-address-book" size="22" />
-                <span class="ms-3">Contactanos</span>
+                <VBtn disabled variant="outlined">
+                  <VIcon icon="tabler-address-book"></VIcon>
+                  <span>Contactanos</span>
+                </VBtn>
+
+
               </p>
 
               <p class="d-flex align-center mb-0">
-                <VIcon color="primary" icon="tabler-lock-open" size="22" />
-                <span class="ms-3">Cambiar contraseña</span>
+                <VBtn variant="outlined" @click="openModalPassword()">
+                  <VIcon icon="tabler-lock-open"></VIcon>
+                  <span>Cambiar contraseña</span>
+                </VBtn>
               </p>
             </div>
           </VCardText>
@@ -117,6 +166,8 @@ const avatarData = computed(() => {
         </div>
       </VCardText>
     </VCard>
+
+    <ModalChangePassword ref="refModalChangePassword" @execute="passwordSaved" />
 
   </div>
 </template>
