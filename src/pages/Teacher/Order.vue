@@ -15,9 +15,6 @@ onMounted(async () => {
 
 
 
-const submitForm = () => {
-
-}
 
 const loading = reactive({
   form: false
@@ -96,14 +93,6 @@ if (data.value.code == 200) {
             </VCardText>
           </VCard>
         </VContainer>
-
-        <VRow>
-          <VCol cols="12" class="d-flex justify-center">
-            <VBtn :loading="loading.form" color="primary" @click="submitForm()">
-              Guardar
-            </VBtn>
-          </VCol>
-        </VRow>
       </VCardText>
     </VCard>
   </div>
