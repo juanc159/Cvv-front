@@ -41,7 +41,7 @@ export const useCrudServiceStore = defineStore('useCrudServiceStore', {
     async fetchAll(filter: object): Promise<void> {
       this.loading.table = true
       const { data, response, error, isFetching } = await useApi("/service-list").post(filter)
-      this.loading.table = isFetching.value
+      this.loading.table = false
 
       if (response.value?.ok && data.value) {
         this.services = data.value.services
@@ -84,13 +84,13 @@ export const useCrudServiceStore = defineStore('useCrudServiceStore', {
     async fetchDelete(id: number): Promise<void> {
       this.loading.table = true
       const { isFetching } = await useApi("/service-delete/" + id).delete()
-      this.loading.table = isFetching.value
+      this.loading.table = false
     },
 
     async changeState(obj: object): Promise<IPromise> {
       this.loading.table = true
       const { data, response, isFetching } = await useApi("/service-changeState").post(obj)
-      this.loading.table = isFetching.value
+      this.loading.table = false
 
       if (response.value?.ok && data.value) {
         this.form = data.value.data

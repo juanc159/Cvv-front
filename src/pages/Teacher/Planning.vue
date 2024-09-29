@@ -79,7 +79,7 @@ onMounted(async () => {
 
   loading.form = true
   const { data, response, error, isFetching } = await useApi('/teacher-planning/' + route.params.id).get()
-  loading.form = isFetching.value
+  loading.form = false
 
 
   if (response.value?.ok && data.value) {

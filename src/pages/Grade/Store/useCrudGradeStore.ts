@@ -43,7 +43,7 @@ export const useCrudGradeStore = defineStore('useCrudGradeStore', {
     async fetchAll(filter: object): Promise<void> {
       this.loading.table = true
       const { data, response, error, isFetching } = await useApi("/grade-list").post(filter)
-      this.loading.table = isFetching.value
+      this.loading.table = false
 
       if (response.value?.ok && data.value) {
         this.grades = data.value.grades
@@ -86,13 +86,13 @@ export const useCrudGradeStore = defineStore('useCrudGradeStore', {
     async fetchDelete(id: number): Promise<void> {
       this.loading.table = true
       const { isFetching } = await useApi("/grade-delete/" + id).delete()
-      this.loading.table = isFetching.value
+      this.loading.table = false
     },
 
     async changeState(obj: object): Promise<IPromise> {
       this.loading.table = true
       const { data, response, isFetching } = await useApi("/grade-changeState").post(obj)
-      this.loading.table = isFetching.value
+      this.loading.table = false
 
       if (response.value?.ok && data.value) {
         this.form = data.value.data

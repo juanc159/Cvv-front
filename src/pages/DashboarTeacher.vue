@@ -41,8 +41,8 @@ const teacher = ref()
 onMounted(async () => {
 
   loading.form = true
-  const { data, response, error, isFetching } = await useApi('/teacher-planningShow/' + authenticationStore.user?.id).get()
-  loading.form = isFetching.value
+  const { data, response, error } = await useApi('/teacher-planningShow/' + authenticationStore.user?.id).get()
+  loading.form = false
 
 
   if (response.value?.ok && data.value) {

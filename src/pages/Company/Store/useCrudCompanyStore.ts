@@ -46,8 +46,8 @@ export const useCrudCompanyStore = defineStore('useCrudCompanyStore', {
 
     async fetchAll(filter: object): Promise<void> {
       this.loading.table = true
-      const { data, response, error, isFetching } = await useApi("/company-list").post(filter)
-      this.loading.table = isFetching.value
+      const { data, response, error } = await useApi("/company-list").post(filter)
+      this.loading.table = false
 
       if (response.value?.ok && data.value) {
         this.companies = data.value.companies
@@ -61,7 +61,7 @@ export const useCrudCompanyStore = defineStore('useCrudCompanyStore', {
     async fetchDataForm(id: number | undefined, action: string = "create"): Promise<void> {
       this.loading.form = true
       const url = id ? `/company-dataForm/${action}/${id}` : `/company-dataForm/${action}`
-      const { data, response, error, isFetching } = await useApi(url).get()
+      const { data, response, error } = await useApi(url).get()
       this.loading.form = false
 
       if (response.value?.ok && data.value) {
@@ -79,7 +79,7 @@ export const useCrudCompanyStore = defineStore('useCrudCompanyStore', {
       formData.append("arrayDetails", JSON.stringify(this.form.arrayDetails))
 
       this.loading.form = true
-      const { data, response, error, isFetching } = await useApi("/company-create").post(formData)
+      const { data, response, error } = await useApi("/company-create").post(formData)
       this.loading.form = false
 
       if (response.value?.ok && data.value) {
@@ -92,13 +92,13 @@ export const useCrudCompanyStore = defineStore('useCrudCompanyStore', {
     async fetchDelete(id: number): Promise<void> {
       this.loading.table = true
       const { isFetching } = await useApi("/company-delete/" + id).delete()
-      this.loading.table = isFetching.value
+      this.loading.table = false
     },
 
     async changeState(obj: object): Promise<IPromise> {
       this.loading.table = true
       const { data, response, isFetching } = await useApi("/company-changeState").post(obj)
-      this.loading.table = isFetching.value
+      this.loading.table = false
 
       if (response.value?.ok && data.value) {
         this.form = data.value.data

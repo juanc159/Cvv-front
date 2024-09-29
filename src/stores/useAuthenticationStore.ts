@@ -31,7 +31,7 @@ export const useAuthenticationStore = defineStore('useAuthenticationStore', {
     async login(formulario: ILogin): Promise<IPromise> {
       this.loading = true
       const { data, response, error, isFetching } = await useApi("/login").post(formulario)
-      this.loading = isFetching.value
+      this.loading = false
 
       if (response.value?.ok && data.value) {
         this.isAuthenticate = true
@@ -48,7 +48,7 @@ export const useAuthenticationStore = defineStore('useAuthenticationStore', {
     async loginStudent(formulario: ILoginStudent): Promise<IPromise> {
       this.loading = true
       const { data, response, error, isFetching } = await useApi("/loginStudent").post(formulario)
-      this.loading = isFetching.value
+      this.loading = false
 
       if (response.value?.ok && data.value) {
         this.isAuthenticate = true
@@ -65,7 +65,7 @@ export const useAuthenticationStore = defineStore('useAuthenticationStore', {
     async loginTeacher(formulario: ILogin): Promise<IPromise> {
       this.loading = true
       const { data, response, error, isFetching } = await useApi("/loginTeacher").post(formulario)
-      this.loading = isFetching.value
+      this.loading = false
 
       if (response.value?.ok && data.value) {
         this.isAuthenticate = true

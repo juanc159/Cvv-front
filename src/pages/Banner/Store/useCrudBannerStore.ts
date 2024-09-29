@@ -36,8 +36,8 @@ export const useCrudBannerStore = defineStore('useCrudBannerStore', {
 
     async fetchAll(filter: object): Promise<void> {
       this.loading.table = true
-      const { data, response, error, isFetching } = await useApi("/banner-list").post(filter)
-      this.loading.table = isFetching.value
+      const { data, response, error } = await useApi("/banner-list").post(filter)
+      this.loading.table = false
 
       if (response.value?.ok && data.value) {
         this.banners = data.value.banners
@@ -51,7 +51,7 @@ export const useCrudBannerStore = defineStore('useCrudBannerStore', {
     async fetchDataForm(id: number | undefined, action: string = "create"): Promise<void> {
       this.loading.form = true
       const url = id ? `/banner-dataForm/${action}/${id}` : `/banner-dataForm/${action}`
-      const { data, response, error, isFetching } = await useApi(url).get()
+      const { data, response, error } = await useApi(url).get()
       this.loading.form = false
 
       if (response.value?.ok && data.value) {
@@ -67,7 +67,7 @@ export const useCrudBannerStore = defineStore('useCrudBannerStore', {
         formData.append(key, this.form[key])
 
       this.loading.form = true
-      const { data, response, error, isFetching } = await useApi("/banner-create").post(formData)
+      const { data, response, error } = await useApi("/banner-create").post(formData)
       this.loading.form = false
 
       if (response.value?.ok && data.value) {
@@ -80,13 +80,13 @@ export const useCrudBannerStore = defineStore('useCrudBannerStore', {
     async fetchDelete(id: number): Promise<void> {
       this.loading.table = true
       const { isFetching } = await useApi("/banner-delete/" + id).delete()
-      this.loading.table = isFetching.value
+      this.loading.table = false
     },
 
     async changeState(obj: object): Promise<IPromise> {
       this.loading.table = true
-      const { data, response, isFetching } = await useApi("/banner-changeState").post(obj)
-      this.loading.table = isFetching.value
+      const { data, response } = await useApi("/banner-changeState").post(obj)
+      this.loading.table = false
 
       if (response.value?.ok && data.value) {
         this.form = data.value.data
