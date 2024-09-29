@@ -41,6 +41,8 @@ const authThemeImg = useGenerateImageVariant(
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark);
 
 const authenticationStore = useAuthenticationStore();
+authenticationStore.loading = false
+
 const { loading } = storeToRefs(authenticationStore);
 
 const router = useRouter();
