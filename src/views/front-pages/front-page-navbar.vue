@@ -81,7 +81,7 @@ const menu = ref<
   },
   {
     title: "Pago de Mensualidades",
-    to: "https://docs.google.com/forms/d/e/1FAIpQLSfCU8h63sESKyk08iRCvIpKCewVLaNmOhh2RKj5srwFobRTJQ/closedform",
+    to: "https://docs.google.com/forms/d/e/1FAIpQLScAYuPwwN5z97wqcpo7p25dGUr6C23qqRvWVz206qAx09b8xg/viewform",
     hash: "",
     isExternal: true, // Marca como externa
     icon: "tabler-brand-cashapp",
