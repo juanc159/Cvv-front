@@ -70,7 +70,7 @@ const menu = ref<
   {
     title: "Contactanos",
     to: "",
-    hash: "#contactData",
+    hash: null,
     icon: "tabler-address-book",
   },
   {
@@ -123,6 +123,12 @@ onMounted(async () => {
     social_networks.value = data.value.social_networks;
   }
 });
+
+//ModalContactanosMenu 
+const refModalContactanosMenu = ref()
+const openModalContactanosMenu = () => {
+  refModalContactanosMenu.value.openDialog()
+}
 
 </script>
 
@@ -236,6 +242,13 @@ onMounted(async () => {
               </VMenu>
             </span>
 
+            <!-- Contactanos -->
+            <span v-else-if="item.title == 'Contactanos'" class="font-weight-medium cursor-pointer px-2 px-lg-4 py-2"
+              style="color: rgba(var(--v-theme-on-surface))" @click="openModalContactanosMenu()">
+              <VIcon :icon="item.icon" color="primary" />
+              {{ item.title }}
+            </span>
+
             <RouterLink v-else :to="{
               name: item.to,
               hash: item.hash,
@@ -250,6 +263,9 @@ onMounted(async () => {
         </div>
       </div>
     </VAppBar>
+
+    <ModalContactanosMenu ref="refModalContactanosMenu" />
+
   </div>
 </template>
 
