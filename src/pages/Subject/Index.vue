@@ -6,51 +6,10 @@ definePage({
 import { useCrudSubjectStore } from "@/pages/Subject/Store/useCrudSubjectStore";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import Swal from "sweetalert2";
-import { VDataTable } from "vuetify/labs/VDataTable";
 
 const crudSubjectStore = useCrudSubjectStore();
 const authenticationStore = useAuthenticationStore();
 const router = useRouter();
-
-const { currentPage, totalPage, lastPage, totalData, subjects, loading } =
-  storeToRefs(crudSubjectStore);
-
-// menu data paginate
-const rowPerPage = ref<number>(10);
-
-const fetchDataTable = async (data: Array<object> = []) => {
-  await crudSubjectStore.fetchAll({
-    company_id: authenticationStore.company.id,
-    perPage: rowPerPage.value,
-    page: currentPage.value,
-    searchQuery: data,
-  });
-};
-
-onMounted(async () => {
-  await fetchDataTable();
-});
-
-watch(currentPage, async () => {
-  if (currentPage.value > totalPage.value) currentPage.value = totalPage.value;
-});
-watch(rowPerPage, async () => {
-  currentPage.value = 1;
-});
-watchArray([currentPage, rowPerPage], async () => {
-  await fetchDataTable();
-});
-
-// 👉 Computing pagination data
-const paginationData = computed(() => {
-  const firstIndex = subjects.value.length
-    ? (currentPage.value - 1) * totalPage.value + 1
-    : 0;
-  const lastIndex =
-    subjects.value.length + (currentPage.value - 1) * totalPage.value;
-
-  return `Mostrando ${firstIndex} a ${lastIndex} de ${totalData.value} registros`;
-});
 
 const changeScreen = async (action: string = "create", id?: number) => {
   router.push({ name: "Subject-Form", params: { action: action, id: id } });
@@ -77,93 +36,93 @@ const deleteData = async (id: number) => {
   }).then(async (result) => {
     if (result.isConfirmed) {
       await crudSubjectStore.fetchDelete(id);
-      await fetchDataTable();
+      await filterTableFull(filterTableFullNew.value);
     } else if (result.isDenied) {
     }
   });
 };
 
-const headers = [
-  { title: "Tipo", key: "type_education_name" },
-  { title: "Nombre", key: "name" },
-  { title: "Código", key: "code" },
-  { title: "Acciones", key: "actions" },
-];
+//TABLE 
+const tableFullNew = ref();
+const optionsTable = {
+  url: "/subject-list",
+  headers: [
+    { title: "Tipo", key: "type_education_name" },
+    { title: "Nombre", key: "name" },
+    { title: "Código", key: "code" },
+    { title: "Acciones", key: "actions" },
+  ],
+}
+
+
+//FILTRO  
+const filterTableFullNew = ref({})
+const filterTableFull = (filter: any = {}) => {
+  filterTableFullNew.value = filter
+  tableFullNew.value.changeFilter(filter);
+};
+
+const optionsFilter = ref({
+  inputGeneral: {
+    relationsGeneral: {
+      all: ["name", "code"],
+      typeEducation: ["name"],
+    },
+  },
+})
 </script>
 
 <template>
   <div>
     <VCard>
-      <VCardTitle primary-title>Listado de materias</VCardTitle>
+      <VCardTitle class="d-flex justify-space-between">
+        <div>
+          Listado de materias
+        </div>
+        <div class="app-teacher-search-filter d-flex align-center flex-wrap gap-4">
+          <VBtn color="primary" @click="changeScreen('order')">
+            Ordenar Docentes
+          </VBtn>
+          <<VBtn color="primary" @click="changeScreen()">
+            Crear Materia
+            </VBtn>
+        </div>
+      </VCardTitle>
+
       <VCardText>
-        <VDataTable :headers="headers" :items="subjects" :items-per-page="rowPerPage">
-          <template #top>
-            <VContainer fluid class="d-flex flex-wrap py-4 gap-4">
-              <div class="me-3" style="inline-size: 80px">
-                <VSelect v-model="rowPerPage" density="compact" variant="outlined" :items="[10, 20, 30, 50]" />
-              </div>
-              <VSpacer />
-              <div class="app-subject-search-filter d-flex align-center flex-wrap gap-4">
-                <VBtn color="primary" @click="changeScreen()">
-                  Crear Materia
-                </VBtn>
-              </div>
-            </VContainer>
-          </template>
-
-          <template #item.path="{ item }">
-            <div class="d-flex align-center py-2" style="inline-size: 10rem">
-              <VImg :src="item.path" class="rounded" />
-            </div>
-          </template>
-
-          <template #item.state="{ item }">
-            <VChip :color="item.state == 1 ? 'success' : 'error'" @click="changeState(item, 'state')">
-              <VIcon start size="16" :icon="item.state == 1 ? 'tabler-bell' : 'tabler-alert-circle'" />
-              <span>{{ item.state == 1 ? "Activo" : "Inactivo" }} </span>
-              <VTooltip location="top" transition="scale-transition" activator="parent" text="Cambiar Estado">
-              </VTooltip>
-            </VChip>
-          </template>
-          <template #item.actions="{ item }">
-            <VBtn icon size="x-small" color="error" variant="text" @click="deleteData(item.id)">
-              <VIcon size="22" icon="tabler-trash" />
-              <VTooltip location="top" transition="scale-transition" activator="parent" text="Eliminar">
-              </VTooltip>
-            </VBtn>
-            <VBtn icon size="x-small" color="default" variant="text" @click="changeScreen('edit', item.id)">
-              <VIcon size="22" icon="tabler-edit" />
-              <VTooltip location="top" transition="scale-transition" activator="parent" text="Editar">
-              </VTooltip>
-            </VBtn>
-          </template>
-
-          <template v-if="loading.table" #body>
-            <tr>
-              <td colspan="4">
-                <div style="inline-size: 100" class="d-flex justify-center">
-                  <PreloadInterno />
-                </div>
-              </td>
-            </tr>
-          </template>
-
-          <template #bottom>
-            <VCardText class="pt-2">
-              <VRow>
-                <VContainer fluid class="d-flex align-center flex-wrap justify-space-between gap-4 py-3 px-5">
-                  <span class="text-sm text-disabled">
-                    {{ paginationData }}
-                  </span>
-
-                  <VPagination v-model="currentPage" size="small" :total-visible="5" :length="lastPage" />
-                </VContainer>
-              </VRow>
-            </VCardText>
-          </template>
-        </VDataTable>
+        <FilterDialogNew ref="filterDialogNewRef" :optionsFilter="optionsFilter" @sendFilter="filterTableFull" />
       </VCardText>
+
+
+      <TableFullNew ref="tableFullNew" :optionsTable="optionsTable">
+        <template #item.path="{ item }">
+          <div class="d-flex align-center py-2" style="inline-size: 10rem">
+            <VImg :src="item.path" class="rounded" />
+          </div>
+        </template>
+
+        <template #item.state="{ item }">
+          <VChip :color="item.state == 1 ? 'success' : 'error'" @click="changeState(item, 'state')">
+            <VIcon start size="16" :icon="item.state == 1 ? 'tabler-bell' : 'tabler-alert-circle'" />
+            <span>{{ item.state == 1 ? "Activo" : "Inactivo" }} </span>
+            <VTooltip location="top" transition="scale-transition" activator="parent" text="Cambiar Estado">
+            </VTooltip>
+          </VChip>
+        </template>
+        <template #item.actions="{ item }">
+          <VBtn icon size="x-small" color="error" variant="text" @click="deleteData(item.id)">
+            <VIcon size="22" icon="tabler-trash" />
+            <VTooltip location="top" transition="scale-transition" activator="parent" text="Eliminar">
+            </VTooltip>
+          </VBtn>
+          <VBtn icon size="x-small" color="default" variant="text" @click="changeScreen('edit', item.id)">
+            <VIcon size="22" icon="tabler-edit" />
+            <VTooltip location="top" transition="scale-transition" activator="parent" text="Editar">
+            </VTooltip>
+          </VBtn>
+        </template>
+
+      </TableFullNew>
     </VCard>
   </div>
 </template>
-  

@@ -12,6 +12,7 @@ definePage({
 import { useImageUpload } from "@/composables/useImageUpload";
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import { useCrudServiceStore } from "@/pages/Service/Store/useCrudServiceStore";
+import { router } from "@/plugins/1.router";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import { VForm } from "vuetify/components";
 const route = useRoute();
@@ -41,6 +42,8 @@ const submitForm = async () => {
       errorsBack.value = {};
       photo.value.clearData();
       await formValidation.value?.resetValidation();
+      router.push({ name: "Service-Index" })
+
     }
     if (data?.code === 422) errorsBack.value = data.errors ?? {}; // muestra error del back
   } else {
