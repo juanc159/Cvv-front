@@ -43,6 +43,12 @@ const openPdfPreview = async (obj: object) => {
 }
 
 
+//ModalContactanos 
+const refModalContactanos = ref()
+const openModalContactanos = () => {
+  refModalContactanos.value.openDialog()
+}
+
 //ModalChangePassword 
 const refModalChangePassword = ref()
 
@@ -87,7 +93,6 @@ const passwordSaved = () => {
 
         <VCol cols="12" sm="8" md="12" lg="7">
           <VCardItem>
-            {{ user.id }}
             <VCardTitle>¡Bienvenido! 🎉</VCardTitle>
           </VCardItem>
 
@@ -99,7 +104,8 @@ const passwordSaved = () => {
           <VCardText>
             Explora tu perfil y descubre todas las herramientas y recursos que hemos preparado para ti. Si tienes alguna
             pregunta o necesitas asistencia, no dudes en
-            <a href="/support" class="text-decoration-none">contactarnos</a>. ¡Estamos aquí para ayudarte a alcanzar tus
+            <a href="#" @click="openModalContactanos()" class="text-decoration-none">contactarnos</a>. ¡Estamos aquí
+            para ayudarte a alcanzar tus
             metas!
           </VCardText>
 
@@ -128,7 +134,7 @@ const passwordSaved = () => {
 
             <div class="ms-auto ps-4">
               <p class="d-flex align-center mb-6">
-                <VBtn disabled variant="outlined">
+                <VBtn variant="outlined" @click="openModalContactanos()">
                   <VIcon icon="tabler-address-book"></VIcon>
                   <span>Contactanos</span>
                 </VBtn>
@@ -168,6 +174,9 @@ const passwordSaved = () => {
     </VCard>
 
     <ModalChangePassword ref="refModalChangePassword" @execute="passwordSaved" />
+
+    <ModalContactanos ref="refModalContactanos" />
+
 
   </div>
 </template>

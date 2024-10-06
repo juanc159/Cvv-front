@@ -1,4 +1,4 @@
-<script setup lang="ts"> 
+<script setup lang="ts">
 import { VDataTable } from "vuetify/labs/VDataTable";
 import { VSkeletonLoader } from "vuetify/lib/labs/components.mjs";
 const { toast } = useToast();
@@ -94,7 +94,7 @@ const optionsTable = reactive<IOptionsTable>({
     currentPage: 1,
   },
 
-  actions: { 
+  actions: {
     styleShow: "dropdown", //normal,dropdown
     changeStatus: {
       show: true,

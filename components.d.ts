@@ -49,6 +49,7 @@ declare module 'vue' {
     I18n: typeof import('./src/@core/components/I18n.vue')['default']
     Interno: typeof import('./src/components/preload/Interno.vue')['default']
     ModalChangePassword: typeof import('./src/components/ModalChangePassword.vue')['default']
+    ModalContactanos: typeof import('./src/components/ModalContactanos.vue')['default']
     ModalQuestion: typeof import('./src/components/ModalQuestion.vue')['default']
     MoreBtn: typeof import('./src/@core/components/MoreBtn.vue')['default']
     Notifications: typeof import('./src/@core/components/Notifications.vue')['default']
