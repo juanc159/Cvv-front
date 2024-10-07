@@ -147,6 +147,15 @@ const openModalContactanosMenu = () => {
           </a>
 
 
+          <!-- Contactanos -->
+          <span v-else-if="item.title == 'Contactanos'" class="font-weight-medium cursor-pointer"
+            style="color: rgba(var(--v-theme-on-surface))" @click="openModalContactanosMenu()">
+            <VIcon :icon="item.icon" color="primary" />
+            {{ item.title }}
+          </span>
+
+
+
           <RouterLink v-else :to="{
             name: item.to,
             hash: `#${item.title.toLowerCase().replace(' ', '-')}`,
