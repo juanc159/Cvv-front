@@ -34,7 +34,8 @@ const headersFile = [
 
 
 const loading = reactive({
-  form: false
+  form: false,
+  excel: false
 })
 const teacher = ref()
 
@@ -50,6 +51,19 @@ onMounted(async () => {
   }
 })
 
+
+//EXCEL 
+const downloadConsolidated = async (id: number) => {
+
+  loading.excel = true;
+  const { data, response } = await useApi("/teacher-downloadConsolidated/" + id).get()
+
+  loading.excel = false;
+
+  if (response.value?.ok && data.value) {
+    downloadExcelBase64(data.value.excel, "Consolidado")
+  }
+}
 
 </script>
 <template>
@@ -89,6 +103,18 @@ onMounted(async () => {
 
           <VCardText>
             <VDivider />
+          </VCardText>
+
+          <VCardText class="d-flex justify-center">
+            <div class="ms-auto ps-4">
+              <p class="d-flex align-center mb-0">
+                <VBtn :disabled="loading.excel" :loading="loading.excel" variant="outlined"
+                  @click="downloadConsolidated(authenticationStore.user?.id)">
+                  <VIcon icon="tabler-lock-open"></VIcon>
+                  <span>Cambiar contraseña</span>
+                </VBtn>
+              </p>
+            </div>
           </VCardText>
 
         </VCol>
