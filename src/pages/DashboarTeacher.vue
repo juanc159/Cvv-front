@@ -110,8 +110,8 @@ const downloadConsolidated = async (id: number) => {
               <p class="d-flex align-center mb-0">
                 <VBtn :disabled="loading.excel" :loading="loading.excel" variant="outlined"
                   @click="downloadConsolidated(authenticationStore.user?.id)">
-                  <VIcon icon="tabler-lock-open"></VIcon>
-                  <span>Cambiar contraseña</span>
+                  <VIcon size="22" icon="tabler-file-download" />
+                  <span>Descargar Nómina</span>
                 </VBtn>
               </p>
             </div>

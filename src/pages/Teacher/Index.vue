@@ -190,7 +190,7 @@ const downloadConsolidated = async (id: number) => {
           </VBtn>
           <VBtn icon size="x-small" variant="text" @click="downloadConsolidated(item.id)">
             <VIcon size="22" icon="tabler-file-download" />
-            <VTooltip location="top" transition="scale-transition" activator="parent" text="Descargar nomina">
+            <VTooltip location="top" transition="scale-transition" activator="parent" text="Descargar Nómina">
             </VTooltip>
           </VBtn>
         </template>
