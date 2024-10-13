@@ -85,4 +85,16 @@ export const openPdfBase64 = (pdfBase64: string) => {
     // Mostrar un mensaje de error si la ventana emergente fue bloqueada
     alert('La ventana emergente fue bloqueada por el navegador. Asegúrate de permitir ventanas emergentes.');
   }
-} 
+}
+
+export const downloadExcelBase64 = (
+  base64: string,
+  fileName: string = "excel"
+) => {
+  if (base64) {
+    const link = document.createElement("a");
+    link.href = `data:application/vnd.ms-excel;base64,${base64}`;
+    link.download = fileName + ".xlsx";
+    link.click();
+  }
+};

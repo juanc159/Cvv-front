@@ -17,6 +17,7 @@ export const useCrudUserStore = defineStore('useCrudUserStore', {
       name: null,
       last_name: null,
       photo: null,
+      company_id: null,
     } as IForm,
     userData: {} as IForm,
     users: [] as Array<IList>,
@@ -36,6 +37,7 @@ export const useCrudUserStore = defineStore('useCrudUserStore', {
         name: null,
         last_name: null,
         photo: null,
+        company_id: null,
       }
     },
 

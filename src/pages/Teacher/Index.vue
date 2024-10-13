@@ -100,6 +100,24 @@ const optionsFilter = ref({
   }
 })
 
+
+
+//EXCEL
+const loading = reactive({ excel: false })
+const downloadConsolidated = async (id: number) => {
+
+  loading.excel = true;
+  const { data, response } = await useApi("/teacher-downloadConsolidated/" + id).get()
+
+  loading.excel = false;
+
+  if (response.value?.ok && data.value) {
+    downloadExcelBase64(data.value.excel, "Consolidado")
+  }
+}
+
+
+
 </script>
 
 
@@ -168,6 +186,11 @@ const optionsFilter = ref({
           <VBtn icon size="x-small" color="default" variant="text" @click="changeScreen('planning', item.id)">
             <VIcon size="22" icon="tabler-file" />
             <VTooltip location="top" transition="scale-transition" activator="parent" text="Planificación">
+            </VTooltip>
+          </VBtn>
+          <VBtn icon size="x-small" variant="text" @click="downloadConsolidated(item.id)">
+            <VIcon size="22" icon="tabler-file-download" />
+            <VTooltip location="top" transition="scale-transition" activator="parent" text="Descargar nomina">
             </VTooltip>
           </VBtn>
         </template>

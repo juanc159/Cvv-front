@@ -4,6 +4,7 @@ definePage({
 });
 
 import { useCrudStudentStore } from "@/pages/Student/Store/useCrudStudentStore";
+import { router } from "@/plugins/1.router";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import Swal from "sweetalert2";
 
@@ -56,6 +57,29 @@ const optionsFilter = ref({
   },
 })
 
+
+const changeScreen = async (action: string = "create", id?: number) => {
+  router.push({ name: "Student-Form", params: { action: action, id: id } });
+};
+
+const deleteData = async (id: number) => {
+  Swal.fire({
+    title: "¿Desea eliminar el registro?",
+    showDenyButton: true,
+    showCancelButton: false,
+    confirmButtonText: "Si",
+    denyButtonText: "No",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      await crudStudentStore.fetchDelete(id);
+      await filterTableFull(filterTableFullNew.value);
+    } else if (result.isDenied) {
+    }
+  });
+};
+
+
+
 </script>
 
 
@@ -66,6 +90,11 @@ const optionsFilter = ref({
         <div>
           Listado de estudiantes
         </div>
+        <div class="app-teacher-search-filter d-flex align-center flex-wrap gap-4">
+          <VBtn color="primary" @click="changeScreen()">
+            Crear Estudiante
+          </VBtn>
+        </div>
       </VCardTitle>
 
       <VCardText>
@@ -75,12 +104,24 @@ const optionsFilter = ref({
 
       <TableFullNew ref="tableFullNew" :optionsTable="optionsTable">
         <template #item.actions="{ item }">
+          <VBtn icon size="x-small" color="error" variant="text" @click="deleteData(item.id)">
+            <VIcon size="22" icon="tabler-trash" />
+            <VTooltip location="top" transition="scale-transition" activator="parent" text="Eliminar">
+            </VTooltip>
+          </VBtn>
+          <VBtn icon size="x-small" color="default" variant="text" @click="changeScreen('edit', item.id)">
+            <VIcon size="22" icon="tabler-edit" />
+            <VTooltip location="top" transition="scale-transition" activator="parent" text="Editar">
+            </VTooltip>
+          </VBtn>
           <VBtn icon size="x-small" variant="text" @click="resetPassword(item.id)">
             <VIcon size="22" icon="tabler-lock-open" />
             <VTooltip location="top" transition="scale-transition" activator="parent" text="Resetear contraseña">
             </VTooltip>
           </VBtn>
         </template>
+
+
       </TableFullNew>
     </VCard>
   </div>

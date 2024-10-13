@@ -1,4 +1,6 @@
+import { router } from "@/plugins/1.router";
 import { createFetch } from '@vueuse/core';
+
 import { destr } from 'destr';
 const { toast } = useToast()
 
@@ -51,7 +53,20 @@ export const useApi = createFetch({
         console.error(error)
       }
 
-      if (parsedData && parsedData.message) toast("Exito", parsedData.message, "success")
+
+      if (parsedData && parsedData.message) {
+        //verifica que tenga autorizacion apra acceder a la vista
+        if (parsedData.code == 403) {
+          router.push({ name: "NotAuthorized" })
+          return false
+        }
+
+        if (parsedData.code != 200) {
+          toast("Error", parsedData.message, "danger");
+        } else {
+          toast("Exito", parsedData.message, "success");
+        }
+      }
 
       return { data: parsedData, response }
     },

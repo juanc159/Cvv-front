@@ -5,4 +5,5 @@ export default interface IForm {
   name: string | null
   last_name: string | null
   photo: File | null
+  company_id: string | null
 }

@@ -14,10 +14,10 @@ import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import { useCrudUserStore } from "@/pages/Users/Store/useCrudUserStore";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import { VForm } from "vuetify/components";
+const authenticationStore = useAuthenticationStore();
 const route = useRoute();
 const { toast } = useToast();
 const formValidation = ref<VForm>();
-const authentication = useAuthenticationStore();
 const storeUser = useCrudUserStore();
 const { form, loading } = storeToRefs(storeUser);
 const errors = ref<IErrorsBack>({});
@@ -34,6 +34,8 @@ const submitForm = async () => {
   const validation = await formValidation.value?.validate();
   if (validation?.valid) {
     if (photo.value.imageFile) form.value.photo = photo.value.imageFile;
+
+    form.value.company_id = authenticationStore.company.id;
 
     const data = await storeUser.fetchSave();
     if (data?.code === 200) {

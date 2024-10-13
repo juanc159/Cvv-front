@@ -46,6 +46,9 @@ const deleteData = async (id: number) => {
 const tableFullNew = ref();
 const optionsTable = {
   url: "/subject-list",
+  params: {
+    company_id: authenticationStore.company.id,
+  },
   headers: [
     { title: "Tipo", key: "type_education_name" },
     { title: "Nombre", key: "name" },
