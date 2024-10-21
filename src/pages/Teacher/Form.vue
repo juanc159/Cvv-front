@@ -180,11 +180,11 @@ const subjectsFilter = computed(() => {
           <VRow>
             <VCol cols="12" sm="3">
               <AppSelect :items="typeEducations" clearable :rules="[requiredValidator]" v-model="form.type_education_id"
-                label="Tipo de educación"></AppSelect>
+                label="Tipo de educación" :requiredField="true"></AppSelect>
             </VCol>
             <VCol cols="12" sm="3">
-              <AppSelect :items="jobPositions" :rules="[requiredValidator]" v-model="form.job_position_id"
-                label="Cargo">
+              <AppSelect :items="jobPositions" :rules="[requiredValidator]" v-model="form.job_position_id" label="Cargo"
+                :requiredField="true">
               </AppSelect>
             </VCol>
             <VCol cols="12" sm="3">

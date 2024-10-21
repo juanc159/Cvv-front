@@ -21,14 +21,13 @@ interface IService {
   html: string,
 }
 
-
 const plannings = ref<IService>({
   id: "",
   title: "",
   image: "",
   html: "",
 })
-const { data, response } = await useApi("pw-materiaPendiente").get();
+const { data, response } = await useApi(`pw-materiaPendiente/${route.params.school_id}`).get();
 if (data.value.code == 200) {
   plannings.value = data.value.plannings;
 }
@@ -56,8 +55,9 @@ if (data.value.code == 200) {
           <VCol>
             <h2 class=" font-weight-bold mb-6">
               <a target="_blank"
-                href="https://docs.google.com/document/d/1C9zBx7USlfeffeYKWWJ7TVDiEm32EKzo/edit?usp=sharing&ouid=109014023290836934766&rtpof=true&sd=true">LISTADO
-                DE ESTUDIANTES CON MATERIA PENDIENTE</a>
+                href="https://docs.google.com/document/d/1C9zBx7USlfeffeYKWWJ7TVDiEm32EKzo/edit?usp=sharing&ouid=109014023290836934766&rtpof=true&sd=true">
+                LISTADO DE ESTUDIANTES CON MATERIA PENDIENTE
+              </a>
             </h2>
 
             <v-container>

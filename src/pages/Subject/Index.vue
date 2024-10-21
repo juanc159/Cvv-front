@@ -83,12 +83,9 @@ const optionsFilter = ref({
           Listado de materias
         </div>
         <div class="app-teacher-search-filter d-flex align-center flex-wrap gap-4">
-          <VBtn color="primary" @click="changeScreen('order')">
-            Ordenar Docentes
-          </VBtn>
-          <<VBtn color="primary" @click="changeScreen()">
+          <VBtn color="primary" @click="changeScreen()">
             Crear Materia
-            </VBtn>
+          </VBtn>
         </div>
       </VCardTitle>
 

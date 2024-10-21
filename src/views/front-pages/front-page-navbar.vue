@@ -16,7 +16,7 @@ const props = defineProps(
 
 const display = useDisplay();
 
-interface socialNetworks {
+interface linksMenu {
   type_detail_name: string,
   icon: string,
   color: string,
@@ -81,10 +81,10 @@ const menu = ref<
   },
   {
     title: "Pago de Mensualidades",
-    to: "https://docs.google.com/forms/d/e/1FAIpQLScAYuPwwN5z97wqcpo7p25dGUr6C23qqRvWVz206qAx09b8xg/viewform",
+    to: "",
     hash: "",
     isExternal: true, // Marca como externa
-    icon: "tabler-brand-cashapp",
+    icon: "",
   },
   {
     title: "Biblioteca virtual",
@@ -107,6 +107,36 @@ const menu = ref<
   },
 ]);
 
+const filteredMenu = computed(() => {
+
+  const updateItemWithLink = (item) => {
+    const link = links.value.find(link => link.type_detail_name === item.title);
+    if (link) {
+      return {
+        ...item,
+        icon: link.icon, // Nuevo icono
+        to: link.content, // O el valor que quieras usar
+      };
+    }
+    return null; // Si no existe el link, excluimos el elemento
+  };
+
+  return menu.value.map(item => {
+    // Verificación y actualización para otros elementos
+    if (["Materia Pendiente", "Pago de Mensualidades", "Biblioteca virtual"].includes(item.title)) {
+      return updateItemWithLink(item);
+    }
+
+    // Retorna el resto de los elementos sin cambios
+    return item;
+  }).filter(Boolean); // Filtra elementos nulos
+});
+
+// Usa `filteredMenu` en tu template
+
+
+
+
 const isMenuOpen = ref(false)
 const isMegaMenuOpen = ref(false)
 
@@ -116,11 +146,13 @@ const openLink = (link: string) => {
   window.open(link, "_blank");
 };
 
-const social_networks = ref<socialNetworks[]>([])
+const social_networks = ref<linksMenu[]>([])
+const links = ref([])
 onMounted(async () => {
-  const { data, response } = await useApi("pw-socialNetworks/" + props.school_id).get();
+  const { data, response } = await useApi("pw-linksMenu/" + props.school_id).get();
   if (data.value.code == 200) {
     social_networks.value = data.value.social_networks;
+    links.value = data.value.links;
   }
 });
 
@@ -138,7 +170,7 @@ const openModalContactanosMenu = () => {
     <!-- Nav items -->
     <div>
       <div class="d-flex flex-column gap-y-4 pa-4">
-        <template v-for="(item, index) in menu" :key="index">
+        <template v-for="(item, index) in filteredMenu" :key="index">
 
           <a v-if="item.isExternal" :href="item.to" :target="item.isExternal ? '_blank' : '_self'"
             class="nav-link font-weight-medium py-2 px-lg-4">
@@ -217,7 +249,7 @@ const openModalContactanosMenu = () => {
 
         <!-- landing page sections -->
         <div class="text-base align-center d-none d-md-flex ">
-          <template v-for="(item, index) in menu" :key="index">
+          <template v-for="(item, index) in filteredMenu" :key="index">
 
             <a v-if="item.isExternal" :href="item.to" :target="item.isExternal ? '_blank' : '_self'"
               class="nav-link font-weight-medium py-2 px-2 px-lg-4">

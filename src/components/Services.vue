@@ -37,7 +37,7 @@ const goView = (id: string) => {
 <template>
 
 
-  <VContainer id="team">
+  <VContainer id="team" v-if="services.length > 0">
     <div class="our-team">
       <div class="headers d-flex justify-center flex-column align-center">
 

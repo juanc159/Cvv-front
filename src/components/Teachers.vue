@@ -19,16 +19,18 @@ interface ITeachers {
   backgroundColor: string,
 }
 
-const currentTab = ref();
 
-const teachers = ref<ITeachers[]>([])
-const typeEducations = ref<{ title: string }[]>([])
+const tabsData = ref<{ title: string, number_records: string, data: Array<ITeachers> }[]>([])
+
 
 const { data, response } = await useApi("pw-teachers/" + props.school_id).get();
 if (data.value.code == 200) {
-  teachers.value = data.value.teachers;
-  typeEducations.value = data.value.typeEducations;
+  tabsData.value = data.value.tabsData;
 }
+
+
+//TABS 
+const currentTab = ref();
 
 
 </script>
@@ -52,18 +54,24 @@ if (data.value.code == 200) {
         </p>
       </div>
     </div>
+
+
     <VCard>
-      <VTabs v-model="currentTab" grow stacked>
-        <VTab v-for="(item, index) in typeEducations" :key="index">
-          <!-- <VIcon icon="tabler-phone" class="mb-2" /> -->
-          <span>{{ item.title }}</span>
+      <VTabs next-icon="tabler-arrow-right" prev-icon="tabler-arrow-left" v-model="currentTab" grow stacked fixed-tabs
+        show-arrows>
+        <VTab v-for="(item, index) in tabsData" :key="index">
+          <v-chip class="ma-2" label>
+            <span>{{ item.number_records }}</span>
+          </v-chip>
+          {{ item.title }}
         </VTab>
       </VTabs>
+
       <VCardText>
         <VWindow v-model="currentTab">
-          <VWindowItem v-for="(item, index) in typeEducations" :key="index">
+          <VWindowItem v-for="(item, index) in tabsData" :key="index">
             <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-              <TeacherData v-if="teachers[item.title]?.length > 0" :teachers="teachers[item.title]" />
+              <TeacherData v-if="item.data?.length > 0" :teachers="item.data" />
             </div>
           </VWindowItem>
         </VWindow>
