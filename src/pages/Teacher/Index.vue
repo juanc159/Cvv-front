@@ -116,6 +116,18 @@ const downloadConsolidated = async (id: number) => {
   }
 }
 
+const dowloadNomina = async () => {
+
+  loading.excel = true;
+  const { data, response } = await useApi("/teacher-downloadAllConsolidated").get()
+
+  loading.excel = false;
+
+  if (response.value?.ok && data.value) {
+    downloadExcelBase64(data.value.excel, "Consolidado")
+  }
+}
+
 
 
 </script>
@@ -129,6 +141,9 @@ const downloadConsolidated = async (id: number) => {
           Listado de docentes
         </div>
         <div class="app-teacher-search-filter d-flex align-center flex-wrap gap-4">
+          <VBtn color="primary" @click="dowloadNomina()">
+            descargar nomina general
+          </VBtn>
           <VBtn color="primary" @click="changeScreen('order')">
             Ordenar Docentes
           </VBtn>
