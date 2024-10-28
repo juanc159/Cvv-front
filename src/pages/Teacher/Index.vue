@@ -104,15 +104,18 @@ const optionsFilter = ref({
 
 //EXCEL
 const loading = reactive({ excel: false })
-const downloadConsolidated = async (id: number) => {
+const downloadConsolidated = async (obj: object) => {
 
   loading.excel = true;
-  const { data, response } = await useApi("/teacher-downloadConsolidated/" + id).get()
+  const { data, response } = await useApi("/teacher-downloadConsolidated/" + obj.id).get()
 
   loading.excel = false;
 
   if (response.value?.ok && data.value) {
-    downloadExcelBase64(data.value.excel, "Consolidado")
+
+    const nameExcel = "Nómina " + obj.name + ' ' + obj.last_name
+
+    downloadExcelBase64(data.value.excel, nameExcel)
   }
 }
 
@@ -128,8 +131,6 @@ const dowloadNomina = async () => {
   }
 }
 
-
-
 </script>
 
 
@@ -141,7 +142,7 @@ const dowloadNomina = async () => {
           Listado de docentes
         </div>
         <div class="app-teacher-search-filter d-flex align-center flex-wrap gap-4">
-          <VBtn color="primary" @click="dowloadNomina()">
+          <VBtn color="primary" :loading="loading.excel" :disabled="loading.excel" @click="dowloadNomina()">
             descargar nomina general
           </VBtn>
           <VBtn color="primary" @click="changeScreen('order')">
@@ -203,7 +204,7 @@ const dowloadNomina = async () => {
             <VTooltip location="top" transition="scale-transition" activator="parent" text="Planificación">
             </VTooltip>
           </VBtn>
-          <VBtn icon size="x-small" variant="text" @click="downloadConsolidated(item.id)">
+          <VBtn icon size="x-small" variant="text" @click="downloadConsolidated(item)">
             <VIcon size="22" icon="tabler-file-download" />
             <VTooltip location="top" transition="scale-transition" activator="parent" text="Descargar Nómina">
             </VTooltip>
