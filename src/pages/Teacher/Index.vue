@@ -127,7 +127,7 @@ const dowloadNomina = async () => {
   loading.excel = false;
 
   if (response.value?.ok && data.value) {
-    downloadExcelBase64(data.value.excel, "Consolidado")
+    downloadExcelBase64(data.value.excel, "Consolidado Educación Media General")
   }
 }
 
