@@ -11,6 +11,7 @@ const componentData = reactive({
   isDialogVisible: false,
   isLoading: false,
   first_time: false,
+  module: "Student",
   statuses: [],
   form: {
     id: null as null | string | number,
@@ -52,6 +53,7 @@ const submitForm = async () => {
     const { response, data } = await useApi(`changePassword`).post({
       id: componentData.form.id,
       new_password: componentData.form.new_password,
+      module: componentData.module,
     });
     componentData.isLoading = false;
 
@@ -71,6 +73,7 @@ const refForm = ref<VForm>();
 
 defineExpose({
   openDialog,
+  componentData
 });
 
 const isPasswordVisible = ref(false);
@@ -90,6 +93,7 @@ const isPasswordVisible = ref(false);
       </div>
       <VCard>
         <VCardText>
+          {{ componentData }}
           <VForm ref="refForm" @submit.prevent="() => { }">
             <VRow>
               <VCol cols="12" v-if="componentData.first_time">

@@ -53,17 +53,40 @@ onMounted(async () => {
 
 
 //EXCEL 
-const downloadConsolidated = async (id: number) => {
+const downloadConsolidated = async (obj: object) => {
 
   loading.excel = true;
-  const { data, response } = await useApi("/teacher-downloadConsolidated/" + id).get()
+  const { data, response } = await useApi("/teacher-downloadConsolidated/" + obj.id).get()
 
   loading.excel = false;
 
+
   if (response.value?.ok && data.value) {
-    downloadExcelBase64(data.value.excel, "Consolidado")
+    const nameExcel = "Nómina " + obj.full_name
+
+
+    downloadExcelBase64(data.value.excel, nameExcel)
   }
 }
+
+
+
+//ModalUploadExcelNomina 
+const refModalUploadExcelNomina = ref()
+const openModalUploadExcelNomina = () => {
+  refModalUploadExcelNomina.value.openDialog()
+}
+
+
+//ModalChangePassword 
+const refModalChangePassword = ref()
+
+const openModalPassword = () => {
+  refModalChangePassword.value.componentData.module = "Teacher"
+
+  refModalChangePassword.value.openDialog(user.value.id, false)
+}
+
 
 </script>
 <template>
@@ -105,13 +128,34 @@ const downloadConsolidated = async (id: number) => {
             <VDivider />
           </VCardText>
 
+
+
           <VCardText class="d-flex justify-center">
-            <div class="ms-auto ps-4">
-              <p class="d-flex align-center mb-0">
-                <VBtn :disabled="loading.excel" :loading="loading.excel" variant="outlined"
-                  @click="downloadConsolidated(authenticationStore.user?.id)">
-                  <VIcon size="22" icon="tabler-file-download" />
+            <div class="me-auto pe-4">
+              <p class="d-flex align-center mb-6">
+                <VBtn variant="outlined" :disabled="loading.excel" :loading="loading.excel"
+                  @click="downloadConsolidated(authenticationStore.user)">
+                  <VIcon icon="tabler-download"></VIcon>
                   <span>Descargar Nómina</span>
+                </VBtn>
+              </p>
+
+              <p class="d-flex align-center mb-0">
+                <VBtn variant="outlined" @click="openModalUploadExcelNomina()">
+                  <VIcon icon="tabler-download"></VIcon>
+                  <span>Subir Nómina</span>
+                </VBtn>
+              </p>
+            </div>
+
+            <VDivider v-if="$vuetify.display.smAndUp" vertical inset />
+
+            <div class="ms-auto ps-4">
+
+              <p class="d-flex align-center mb-0">
+                <VBtn variant="outlined" @click="openModalPassword()">
+                  <VIcon icon="tabler-lock-open"></VIcon>
+                  <span>Cambiar contraseña</span>
                 </VBtn>
               </p>
             </div>
@@ -174,6 +218,12 @@ const downloadConsolidated = async (id: number) => {
         </VRow>
       </VCardText>
     </VCard>
+
+
+    <ModalUploadExcelNomina ref="refModalUploadExcelNomina" />
+
+    <ModalChangePassword ref="refModalChangePassword" />
+
 
   </div>
 </template>
