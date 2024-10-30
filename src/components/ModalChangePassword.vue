@@ -93,7 +93,6 @@ const isPasswordVisible = ref(false);
       </div>
       <VCard>
         <VCardText>
-          {{ componentData }}
           <VForm ref="refForm" @submit.prevent="() => { }">
             <VRow>
               <VCol cols="12" v-if="componentData.first_time">

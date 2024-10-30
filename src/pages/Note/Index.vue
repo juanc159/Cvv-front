@@ -8,7 +8,7 @@ import { VForm } from "vuetify/components";
 const authenticationStore = useAuthenticationStore();
 
 const { toast } = useToast();
-const loading = reactive({ form: false })
+const loading = reactive({ form: false, excel: false })
 const form = ref<{
   company_id: null | number
   type_education_id: null | number
@@ -20,6 +20,7 @@ const form = ref<{
 })
 const errorsBack = ref<IErrorsBack>({});
 const formValidation = ref<VForm>();
+const formValidationDownload = ref<VForm>();
 const typeEducations = ref<Array<object>>([])
 const archive = ref(useImageUpload());
 archive.value.allowedExtensions = ["xls", "xlsx"]
@@ -52,18 +53,40 @@ const submitForm = async () => {
     const { data, response } = await useApi('note-store').post(formData)
     loading.form = false
 
-    // const data = await storeSubject.fetchSave();
-    // if (data?.code === 200) {
-    //   errorsBack.value = {};
-    //   photo.value.clearData();
-    //   await formValidation.value?.resetValidation();
-    // }
-    // if (data?.code === 422) errorsBack.value = data.errors ?? {}; // muestra error del back
   } else {
     toast("Faltan Campos Por Diligenciar", "", "danger");
   }
 };
 
+
+const formDownload = ref({
+  type_education_id: null as null | string
+})
+const dowloadNomina = async () => {
+
+  const validation = await formValidationDownload.value?.validate();
+
+  if (validation?.valid) {
+    loading.excel = true;
+
+    const search = typeEducations.value.find(ele => ele.value == formDownload.value.type_education_id)
+    const { data, response } = await useApi<any>(
+      createUrl(`/teacher-downloadAllConsolidated`, {
+        query: {
+          type_education_id: formDownload.value.type_education_id
+        },
+      })
+    );
+
+    loading.excel = false;
+
+    if (response.value?.ok && data.value) {
+      downloadExcelBase64(data.value.excel, "Consolidado " + search?.title)
+    }
+  } else {
+    toast("Faltan Campos Por Diligenciar", "", "danger");
+  }
+}
 </script>
 
 <template>
@@ -87,8 +110,31 @@ const submitForm = async () => {
           </VRow>
           <VRow>
             <VCol cols="12" class="d-flex justify-center">
-              <VBtn :loading="loading.form" color="primary" @click="submitForm()">
-                Guardar
+              <VBtn :loading="loading.form" :disabled="loading.form" color="primary" @click="submitForm()">
+                Cargar
+              </VBtn>
+            </VCol>
+          </VRow>
+        </VForm>
+      </VCardText>
+    </VCard>
+
+    <VCard :disabled="loading.form" :loading="loading.form" class="mt-3">
+      <VCardTitle primary-title>Descargar Notas</VCardTitle>
+      <VCardText>
+        <VForm ref="formValidationDownload" lazy-validation>
+          <VRow>
+            <VCol cols="12" sm="4">
+              <AppSelect clearable v-model="formDownload.type_education_id" :rules="[requiredValidator]"
+                :error-messages="errorsBack.type_education_id" label="Tipo" @change="errorsBack.type_education_id = ''"
+                :requiredField="true" :items="typeEducations">
+              </AppSelect>
+            </VCol>
+          </VRow>
+          <VRow>
+            <VCol cols="12" class="d-flex justify-center">
+              <VBtn :loading="loading.excel" :disabled="loading.excel" color="primary" @click="dowloadNomina()">
+                Descargar
               </VBtn>
             </VCol>
           </VRow>
