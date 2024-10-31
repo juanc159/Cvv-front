@@ -119,6 +119,23 @@ const downloadConsolidated = async (obj: object) => {
   }
 }
 
+
+
+const resetPassword = async (id: number) => {
+  Swal.fire({
+    title: "¿Seguro desea reiniciar la contraseña al registro?",
+    showDenyButton: true,
+    showCancelButton: false,
+    confirmButtonText: "Si",
+    denyButtonText: "No",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      const { data, response } = await useApi("/teacher-resetPassword/" + id).get()
+    } else if (result.isDenied) {
+    }
+  });
+};
+
 </script>
 
 
@@ -194,6 +211,13 @@ const downloadConsolidated = async (obj: object) => {
             <VTooltip location="top" transition="scale-transition" activator="parent" text="Descargar Nómina">
             </VTooltip>
           </VBtn>
+
+          <VBtn icon size="x-small" variant="text" @click="resetPassword(item.id)">
+            <VIcon size="22" icon="tabler-lock-open" />
+            <VTooltip location="top" transition="scale-transition" activator="parent" text="Resetear contraseña">
+            </VTooltip>
+          </VBtn>
+
         </template>
       </TableFullNew>
 

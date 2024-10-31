@@ -24,6 +24,7 @@ const formValidationDownload = ref<VForm>();
 const typeEducations = ref<Array<object>>([])
 const archive = ref(useImageUpload());
 archive.value.allowedExtensions = ["xls", "xlsx"]
+const selectedSwitch = ref<boolean>(false)
 
 
 onMounted(async () => {
@@ -34,6 +35,8 @@ onMounted(async () => {
 
   if (response.value?.ok && data.value) {
     typeEducations.value = data.value.typeEducations
+
+    selectedSwitch.value = data.value.blockData
   }
 })
 
@@ -87,10 +90,35 @@ const dowloadNomina = async () => {
     toast("Faltan Campos Por Diligenciar", "", "danger");
   }
 }
+
+
+
+
+const changeStatus = async (
+  value: any
+) => {
+  const { data, response } = await useApi(`/note-blockPayrollUpload`).post({
+    value: value,
+  });
+  // if (data.value.code === 200) toast("Éxito", data.value.message, "success");
+  if (response.value?.ok && data.value) {
+  };
+};
+
+const selectValueLabel = computed(() => {
+
+  return selectedSwitch.value ? 'Sí' : 'No';
+});
+
+
+
+
 </script>
 
 <template>
   <div>
+
+
     <VCard :disabled="loading.form" :loading="loading.form">
       <VCardTitle primary-title>Cargar Notas</VCardTitle>
       <VCardText>
@@ -139,6 +167,21 @@ const dowloadNomina = async () => {
             </VCol>
           </VRow>
         </VForm>
+      </VCardText>
+    </VCard>
+
+    <VCard :disabled="loading.form" :loading="loading.form" class="mt-3">
+      <VCardTitle primary-title>Bloquear carga de notas a los profesores</VCardTitle>
+      <VCardText>
+        <VRow>
+          <VCol cols="12" sm="4">
+            <div class="demo-space-x">
+              <VSwitch v-model="selectedSwitch" @update:model-value="changeStatus($event)" :label="selectValueLabel"
+                color="success" />
+            </div>
+
+          </VCol>
+        </VRow>
       </VCardText>
     </VCard>
   </div>

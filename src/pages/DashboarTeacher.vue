@@ -131,7 +131,7 @@ const openModalPassword = () => {
 
 
           <VCardText class="d-flex justify-center">
-            <div class="me-auto pe-4">
+            <div class="me-auto  ">
               <p class="d-flex align-center mb-6">
                 <VBtn variant="outlined" :disabled="loading.excel" :loading="loading.excel"
                   @click="downloadConsolidated(authenticationStore.user)">
@@ -141,7 +141,7 @@ const openModalPassword = () => {
               </p>
 
               <p class="d-flex align-center mb-0">
-                <VBtn variant="outlined" @click="openModalUploadExcelNomina()">
+                <VBtn :disabled="user.blockData" variant="outlined" @click="openModalUploadExcelNomina()">
                   <VIcon icon="tabler-download"></VIcon>
                   <span>Subir Nómina</span>
                 </VBtn>

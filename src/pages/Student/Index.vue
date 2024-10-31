@@ -80,6 +80,7 @@ const deleteData = async (id: number) => {
 
 
 
+
 </script>
 
 
