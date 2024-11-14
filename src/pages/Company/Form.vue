@@ -103,23 +103,24 @@ const addFile = (e: Event) => {
           <VRow>
             <VCol cols="12" md="4">
               <AppTextField clearable v-model="form.name" :rules="[requiredValidator]" :error-messages="errorsBack.name"
-                label="Nombre" @keypress="errorsBack.name = ''" :requiredField="true">
+                label="Nombre" @input="errorsBack.name = ''" :requiredField="true">
               </AppTextField>
             </VCol>
             <VCol cols="12" md="4">
               <AppTextField clearable v-model="form.slogan" :rules="[requiredValidator]"
-                :error-messages="errorsBack.slogan" label="Eslogan" @keypress="errorsBack.slogan = ''"
+                :error-messages="errorsBack.slogan" label="Eslogan" @input="errorsBack.slogan = ''"
                 :requiredField="true">
               </AppTextField>
             </VCol>
             <VCol cols="12" md="4">
-              <AppTextField clearable v-model="form.iframeGoogleMap" label="iframeGoogleMap" :requiredField="true">
+              <AppTextField clearable v-model="form.iframeGoogleMap" label="iframeGoogleMap">
               </AppTextField>
             </VCol>
           </VRow>
           <VRow>
             <VCol cols="12" sm="3">
-              <VFileInput accept="image/*" :key="archive.key" @change="addFile($event)" @click:clear="archive.clearData">
+              <VFileInput accept="image/*" :key="archive.key" @change="addFile($event)"
+                @click:clear="archive.clearData">
                 <template #label>
                   Imagen Principal&nbsp;<b class="text-warning">*</b>
                 </template>
@@ -147,14 +148,17 @@ const addFile = (e: Event) => {
       <VCardText>
         <VRow v-for="(item, index) in details" :key="index">
           <VCol cols="12" md="2">
-            <AppSelect :items="typeDetails" v-model="item.type_detail_id" label="Tipo" :requiredField="true"></AppSelect>
+            <AppSelect :items="typeDetails" v-model="item.type_detail_id" label="Tipo" :requiredField="true">
+            </AppSelect>
           </VCol>
           <VCol cols="12" md="2">
-            <AppTextField clearable v-model="item.icon" :rules="[requiredValidator]" label="Icono" :requiredField="true">
+            <AppTextField clearable v-model="item.icon" :rules="[requiredValidator]" label="Icono"
+              :requiredField="true">
             </AppTextField>
           </VCol>
           <VCol cols="12" md="2">
-            <AppTextField clearable v-model="item.color" :rules="[requiredValidator]" label="Color" :requiredField="true">
+            <AppTextField clearable v-model="item.color" :rules="[requiredValidator]" label="Color"
+              :requiredField="true">
             </AppTextField>
           </VCol>
           <VCol cols="12" md="5">
@@ -182,4 +186,3 @@ const addFile = (e: Event) => {
     </VRow>
   </div>
 </template>
- 

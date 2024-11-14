@@ -33,6 +33,7 @@ const optionsTable = {
   url: "/student-list",
   headers: [
     { title: "Acciones", key: "actions" },
+    { title: "Foto ", key: "photo" },
     { title: "Cédula ", key: "identity_document" },
     { title: "Nombre", key: "full_name" },
   ],
@@ -80,7 +81,6 @@ const deleteData = async (id: number) => {
 
 
 
-
 </script>
 
 
@@ -104,6 +104,22 @@ const deleteData = async (id: number) => {
 
 
       <TableFullNew ref="tableFullNew" :optionsTable="optionsTable">
+
+        <template #item.photo="{ item }">
+          <div>
+            <VAvatar v-if="item.photo" color="primary" variant="tonal" size="50">
+              <VImg :src="item.photo" />
+            </VAvatar>
+
+            <VAvatar v-else color="primary" variant="tonal" size="50">
+              {{ avatarText(item.full_name) }}
+            </VAvatar>
+          </div>
+
+
+        </template>
+
+
         <template #item.actions="{ item }">
           <VBtn icon size="x-small" color="error" variant="text" @click="deleteData(item.id)">
             <VIcon size="22" icon="tabler-trash" />

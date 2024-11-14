@@ -165,4 +165,3 @@ const headers = [
     </VCard>
   </div>
 </template>
-  

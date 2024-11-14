@@ -82,7 +82,7 @@ onMounted(async () => {
           <VRow>
             <VCol cols="12" sm="3">
               <VFileInput accept="image/*" :rules="[requiredValidator]" :key="archive.key" @change="addFile($event)"
-                @click:clear="archive.clearData">
+                @click:clear="archive.clearData" :requiredField="true">
                 <template #label>
                   Imagen&nbsp;<b class="text-warning">*</b>
                 </template>
