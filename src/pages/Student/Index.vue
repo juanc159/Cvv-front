@@ -36,12 +36,12 @@ const optionsTable = {
     { title: "Foto ", key: "photo" },
     { title: "Cédula ", key: "identity_document" },
     { title: "Nombre", key: "full_name" },
+    { title: "Tipo de educación", key: "type_education_name" },
   ],
   params: {
     company_id: authenticationStore.company.id,
   }
 }
-
 
 //FILTRO  
 const filterTableFullNew = ref({})
@@ -54,6 +54,7 @@ const optionsFilter = ref({
   inputGeneral: {
     relationsGeneral: {
       all: ["identity_document", "full_name"],
+      typeEducation: ["name"],
     },
   },
 })
