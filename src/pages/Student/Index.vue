@@ -63,7 +63,7 @@ const optionsFilter = ref({
       {
         input_type: "select",
         title: "Foto",
-        key: "photo",
+        key: "first_time",
         type: "null",
         arrayList: [
           {
