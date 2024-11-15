@@ -57,8 +57,27 @@ const optionsFilter = ref({
       typeEducation: ["name"],
     },
   },
+  dialog: {
+    width: 500,
+    inputs: [
+      {
+        input_type: "select",
+        title: "Foto",
+        key: "first_time",
+        type: "null",
+        arrayList: [
+          {
+            value: "1",
+            title: "Con foto"
+          },
+          {
+            value: "0",
+            title: "Sin foto"
+          }],
+      },
+    ],
+  }
 })
-
 
 const changeScreen = async (action: string = "create", id?: number) => {
   router.push({ name: "Student-Form", params: { action: action, id: id } });
