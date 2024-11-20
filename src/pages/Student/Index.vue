@@ -67,8 +67,9 @@ const optionsFilter = ref({
       {
         input_type: "select",
         title: "Foto",
-        key: "first_time",
+        search_key: "photoPerzonalized",
         type: "null",
+        custom_search: true,
         arrayList: [
           {
             value: "1",
@@ -79,14 +80,14 @@ const optionsFilter = ref({
             title: "Sin foto"
           }],
       },
-      // {
-      //   input_type: "selectInfinite",
-      //   title: 'Grado',
-      //   key: 'grade',
-      //   search_key: 'grade_id',
-      //   multiple: true,
-      //   api: "selectInfiniteGrade",
-      // },
+      {
+        input_type: "selectInfinite",
+        title: "Sección",
+        key: "section",
+        api: "selectInfiniteSection",
+        search_key: "section_id",
+      },
+
     ],
   }
 })
