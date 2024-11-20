@@ -34,6 +34,8 @@ const optionsTable = {
   headers: [
     { title: "Acciones", key: "actions" },
     { title: "Foto ", key: "photo" },
+    { title: "Grado ", key: "grade_name" },
+    { title: "Sección ", key: "section_name" },
     { title: "Cédula ", key: "identity_document" },
     { title: "Nombre", key: "full_name" },
     { title: "Tipo de educación", key: "type_education_name" },
@@ -55,6 +57,8 @@ const optionsFilter = ref({
     relationsGeneral: {
       all: ["identity_document", "full_name"],
       typeEducation: ["name"],
+      grade: ["name"],
+      section: ["name"],
     },
   },
   dialog: {
@@ -75,6 +79,14 @@ const optionsFilter = ref({
             title: "Sin foto"
           }],
       },
+      // {
+      //   input_type: "selectInfinite",
+      //   title: 'Grado',
+      //   key: 'grade',
+      //   search_key: 'grade_id',
+      //   multiple: true,
+      //   api: "selectInfiniteGrade",
+      // },
     ],
   }
 })
