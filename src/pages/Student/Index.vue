@@ -113,6 +113,21 @@ const deleteData = async (id: number) => {
 };
 
 
+//EXCEL
+const loading = reactive({ excel: false })
+const downloadExcel = async () => {
+  loading.excel = true;
+
+  const { data, response } = await useApi("/student-excelExport").post({
+    searchQuery: tableFullNew.value.optionsTable.searchQuery,
+  })
+  loading.excel = false;
+
+  if (response.value?.ok && data.value) {
+    downloadExcelBase64(data.value.excel, "Lista de estudiantes")
+  }
+}
+
 
 </script>
 
@@ -125,6 +140,12 @@ const deleteData = async (id: number) => {
           Listado de estudiantes
         </div>
         <div class="app-teacher-search-filter d-flex align-center flex-wrap gap-4">
+          <VBtn :loading="loading.excel" :disabled="loading.excel" size="38" color="primary" icon
+            @click="downloadExcel()">
+            <VIcon icon="tabler-file-spreadsheet"></VIcon>
+            <VTooltip location="top" transition="scale-transition" activator="parent" text="Descargar Excel">
+            </VTooltip>
+          </VBtn>
           <VBtn color="primary" @click="changeScreen()">
             Crear Estudiante
           </VBtn>
