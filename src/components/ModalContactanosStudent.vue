@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import coordinadoraImg from "@/assets/general/corrdinadora.jpg";
+import userPng from "@/assets/general/user.png";
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import type { VForm } from "vuetify/components/VForm";
 
@@ -42,50 +43,85 @@ defineExpose({
       <VCard>
         <VCardText>
           <h2 class="large-text">📞 Cualquier duda, reprogramación de pruebas o revisión</h2>
-          <div class="contact-info">
-            <div class="teacher-photo">
-              <img :src="coordinadoraImg" alt="Lcda. Dayanna Cario" />
-            </div>
-            <div class="contact-details">
-              <p><strong>Comuníquese con:</strong></p>
-              <p><strong>Lcda. Dayanna Cario</strong></p>
-              <p>
-                <strong>WhatsApp:</strong> <a href="https://wa.me/5804247087181" target="_blank">wa.me/5804247087181</a>
-              </p>
-              <p>
-                <strong>Correo electrónico:</strong> <a
-                  href="mailto:cvvevaluaciondayannacario@gmail.com">cvvevaluaciondayannacario@gmail.com</a>
-              </p>
-              <p>¡Estamos para servirle!</p>
-            </div>
-          </div>
 
           <v-divider></v-divider>
 
           <!-- New Contact Information -->
           <div class="additional-contact-info">
-            <h3 class="section-title">Otros contactos importantes</h3>
+            <!-- <h3 class="section-title">Otros contactos importantes</h3> -->
 
+            <!-- Contact 1: Lcda. Dayanna Cario -->
             <div class="contact-card">
-              <p class="section-subtitle">Coordinadora de Educación Preescolar</p>
-              <p><strong>Lcda. Erika Casanova</strong></p>
-              <p><strong>Teléfono:</strong> <a href="tel:+5804247468350">0424 7468350</a></p>
+              <div class="contact-info">
+                <div class="teacher-photo">
+                  <!-- Placeholder image for Dayanna Cario (we'll add this later) -->
+                  <img :src="coordinadoraImg" alt="Lcda. Dayanna Cario" />
+                </div>
+                <div class="contact-details">
+                  <p class="section-subtitle">Coordinadora de Evaluación de Bachillerato</p>
+                  <p><strong>Lcda. Dayanna Cario</strong></p>
+                  <p><strong>WhatsApp:</strong> <a href="https://wa.me/5804247087181"
+                      target="_blank">wa.me/5804247087181</a></p>
+                  <p><strong>Correo electrónico:</strong> <a
+                      href="mailto:cvvevaluaciondayannacario@gmail.com">cvvevaluaciondayannacario@gmail.com</a></p>
+                </div>
+              </div>
+            </div>
+            <v-divider></v-divider>
+
+
+            <!-- Contact 2: Lcda. Erika Casanova -->
+            <div class="contact-card">
+              <div class="contact-info">
+                <div class="teacher-photo">
+                  <!-- Placeholder image for Erika Casanova -->
+                  <img :src="userPng" alt="Lcda. Erika Casanova" />
+                </div>
+                <div class="contact-details">
+                  <p class="section-subtitle">Coordinadora de Educación Preescolar</p>
+                  <p><strong>Lcda. Erika Casanova</strong></p>
+                  <p><strong>Teléfono:</strong> <a href="tel:+5804247468350">0424 7468350</a></p>
+                </div>
+              </div>
+            </div>
+            <v-divider></v-divider>
+
+
+            <!-- Contact 3: Lcda. Yennifer Herrera -->
+            <div class="contact-card">
+              <div class="contact-info">
+                <div class="teacher-photo">
+                  <!-- Placeholder image for Yennifer Herrera -->
+                  <img :src="userPng" alt="Lcda. Yennifer Herrera" />
+                </div>
+                <div class="contact-details">
+                  <p class="section-subtitle">Coordinadora de Educación Primaria</p>
+                  <p><strong>Lcda. Yennifer Herrera</strong></p>
+                  <p><strong>Teléfono:</strong> <a href="tel:+5804247655582">0424 7655582</a></p>
+                </div>
+              </div>
+            </div>
+            <v-divider></v-divider>
+
+
+            <!-- Contact 4: Departamento de Administración -->
+            <div class="contact-card">
+              <div class="contact-info">
+                <div class="teacher-photo">
+                  <!-- Placeholder image for Nieves Uribe -->
+                  <img :src="userPng" alt="Nieves Uribe" />
+                </div>
+                <div class="contact-details">
+                  <p class="section-subtitle">Departamento de Administración</p>
+                  <ul>
+                    <li><strong>Nieves Uribe:</strong> <a href="tel:+5804246455555">0424 6455555</a></li>
+                    <li><strong>Verónica Martínez:</strong> <a href="tel:+5804143933375">0414 3933375</a></li>
+                    <li><strong>María Guerrero:</strong> <a href="tel:+5804121602584">0412 1602584</a></li>
+                  </ul>
+                </div>
+              </div>
             </div>
 
-            <div class="contact-card">
-              <p class="section-subtitle">Coordinadora de Educación Primaria</p>
-              <p><strong>Lcda. Yennifer Herrera</strong></p>
-              <p><strong>Teléfono:</strong> <a href="tel:+5804247655582">0424 7655582</a></p>
-            </div>
-
-            <div class="contact-card">
-              <p class="section-subtitle">Departamento de Administración</p>
-              <ul>
-                <li><strong>Nieves Uribe:</strong> <a href="tel:+5804246455555">0424 6455555</a></li>
-                <li><strong>Verónica Martínez:</strong> <a href="tel:+5804143933375">0414 3933375</a></li>
-                <li><strong>María Guerrero:</strong> <a href="tel:+5804121602584">0412 1602584</a></li>
-              </ul>
-            </div>
           </div>
         </VCardText>
       </VCard>
