@@ -59,7 +59,7 @@ const goView = (id: string) => {
         <div class="activity">
 
           <VAvatar v-if="item.image" color="primary" variant="tonal" size="170" @click="goView(item.id)">
-            <VImg :src="item.image" />
+            <VImg :src="storageBack(item.image)" />
           </VAvatar>
 
           <h3 class="mt-1">{{ item.title }}</h3>

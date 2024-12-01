@@ -31,8 +31,8 @@ const { companies } = defineProps({
               borderRadius: '90px 20px 0 0',
               backgroundColor: `${data.backgroundColor}`,
             }">
-              <VImg :style="{ borderRadius: '20px 20px 0 0' }" :src="data.image_principal" height="240" cover
-                class="team-image" />
+              <VImg :style="{ borderRadius: '20px 20px 0 0' }" :src="storageBack(data.image_principal)" height="240"
+                cover class="team-image" />
             </div>
             <VCardText class="text-center pa-4" :style="{
               border: `1px solid ${data.borderColor}`,
