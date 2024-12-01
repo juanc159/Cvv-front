@@ -4,7 +4,7 @@ import type { Notification } from '@layouts/types'
 
 interface Props {
   notifications: Notification[]
-  badgeProps?: unknown
+  badgeProps?: object
   location?: any
 }
 interface Emit {
@@ -21,8 +21,9 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emit>()
 
-const isAllMarkRead = computed(() => props.notifications.some(item => item.isSeen === false),
-)
+const isAllMarkRead = computed(() => {
+  return props.notifications.some(item => item.isSeen === false)
+})
 
 const markAllReadOrUnread = () => {
   const allNotificationsIds = props.notifications.map(item => item.id)
@@ -36,6 +37,13 @@ const markAllReadOrUnread = () => {
 const totalUnseenNotifications = computed(() => {
   return props.notifications.filter(item => item.isSeen === false).length
 })
+
+const toggleReadUnread = (isSeen: boolean, Id: number) => {
+  if (isSeen)
+    emit('unread', [Id])
+  else
+    emit('read', [Id])
+}
 </script>
 
 <template>
@@ -44,35 +52,46 @@ const totalUnseenNotifications = computed(() => {
       v-bind="props.badgeProps"
       :model-value="props.notifications.some(n => !n.isSeen)"
       color="error"
-      :content="totalUnseenNotifications"
-      class="notification-badge"
+      dot
+      offset-x="2"
+      offset-y="3"
     >
-      <VIcon
-        size="26"
-        icon="tabler-bell"
-      />
+      <VIcon icon="tabler-bell" />
     </VBadge>
 
     <VMenu
       activator="parent"
       width="380px"
       :location="props.location"
-      offset="14px"
+      offset="12px"
       :close-on-content-click="false"
     >
       <VCard class="d-flex flex-column">
         <!-- 👉 Header -->
         <VCardItem class="notification-section">
-          <VCardTitle class="text-lg">
+          <VCardTitle class="text-h6">
             Notifications
           </VCardTitle>
 
           <template #append>
+            <VChip
+              v-show="props.notifications.some(n => !n.isSeen)"
+              size="small"
+              color="primary"
+              class="me-2"
+            >
+              {{ totalUnseenNotifications }} New
+            </VChip>
             <IconBtn
               v-show="props.notifications.length"
+              size="34"
               @click="markAllReadOrUnread"
             >
-              <VIcon :icon="!isAllMarkRead ? 'tabler-mail' : 'tabler-mail-opened' " />
+              <VIcon
+                size="20"
+                color="high-emphasis"
+                :icon="!isAllMarkRead ? 'tabler-mail' : 'tabler-mail-opened' "
+              />
 
               <VTooltip
                 activator="parent"
@@ -106,50 +125,59 @@ const totalUnseenNotifications = computed(() => {
               >
                 <!-- Slot: Prepend -->
                 <!-- Handles Avatar: Image, Icon, Text -->
-                <template #prepend>
-                  <VListItemAction start>
-                    <VAvatar
-                      size="40"
-                      :color="notification.color && notification.icon ? notification.color : undefined"
-                      :image="notification.img || undefined"
-                      :icon="notification.icon || undefined"
-                      :variant="notification.img ? undefined : 'tonal' "
+                <div class="d-flex align-start gap-3">
+                  <VAvatar
+                    :color="notification.color && !notification.img ? notification.color : undefined"
+                    :variant="notification.img ? undefined : 'tonal' "
+                  >
+                    <span v-if="notification.text">{{ avatarText(notification.text) }}</span>
+                    <VImg
+                      v-if="notification.img"
+                      :src="notification.img"
+                    />
+                    <VIcon
+                      v-if="notification.icon"
+                      :icon="notification.icon"
+                    />
+                  </VAvatar>
+
+                  <div>
+                    <p class="text-sm font-weight-medium mb-1">
+                      {{ notification.title }}
+                    </p>
+                    <p
+                      class="text-body-2 mb-2"
+                      style=" letter-spacing: 0.4px !important; line-height: 18px;"
                     >
-                      <span v-if="notification.text">{{ avatarText(notification.text) }}</span>
-                    </VAvatar>
-                  </VListItemAction>
-                </template>
+                      {{ notification.subtitle }}
+                    </p>
+                    <p
+                      class="text-sm text-disabled mb-0"
+                      style=" letter-spacing: 0.4px !important; line-height: 18px;"
+                    >
+                      {{ notification.time }}
+                    </p>
+                  </div>
+                  <VSpacer />
 
-                <VListItemTitle class="font-weight-medium">
-                  {{ notification.title }}
-                </VListItemTitle>
-                <VListItemSubtitle>{{ notification.subtitle }}</VListItemSubtitle>
-                <span class="text-xs text-disabled">{{ notification.time }}</span>
-
-                <!-- Slot: Append -->
-                <template #append>
-                  <div class="d-flex flex-column align-center gap-4">
-                    <VBadge
-                      dot
+                  <div class="d-flex flex-column align-end">
+                    <VIcon
+                      size="10"
+                      icon="tabler-circle-filled"
                       :color="!notification.isSeen ? 'primary' : '#a8aaae'"
-                      :class="`${notification.isSeen ? 'visible-in-hover' : ''} ms-1`"
-                      @click.stop="$emit(notification.isSeen ? 'unread' : 'read', [notification.id])"
+                      :class="`${notification.isSeen ? 'visible-in-hover' : ''}`"
+                      class="mb-2"
+                      @click.stop="toggleReadUnread(notification.isSeen, notification.id)"
                     />
 
-                    <div style="block-size: 28px; inline-size: 28px;">
-                      <IconBtn
-                        size="small"
-                        class="visible-in-hover"
-                        @click="$emit('remove', notification.id)"
-                      >
-                        <VIcon
-                          size="20"
-                          icon="tabler-x"
-                        />
-                      </IconBtn>
-                    </div>
+                    <VIcon
+                      size="20"
+                      icon="tabler-x"
+                      class="visible-in-hover"
+                      @click="$emit('remove', notification.id)"
+                    />
                   </div>
-                </template>
+                </div>
               </VListItem>
             </template>
 
@@ -166,14 +194,17 @@ const totalUnseenNotifications = computed(() => {
         <VDivider />
 
         <!-- 👉 Footer -->
-        <VCardActions
+        <VCardText
           v-show="props.notifications.length"
-          class="notification-footer"
+          class="pa-4"
         >
-          <VBtn block>
+          <VBtn
+            block
+            size="small"
+          >
             View All Notifications
           </VBtn>
-        </VCardActions>
+        </VCardText>
       </VCard>
     </VMenu>
   </IconBtn>
@@ -181,11 +212,8 @@ const totalUnseenNotifications = computed(() => {
 
 <style lang="scss">
 .notification-section {
-  padding: 14px !important;
-}
-
-.notification-footer {
-  padding: 6px !important;
+  padding-block: 0.75rem;
+  padding-inline: 1rem;
 }
 
 .list-item-hover-class {
@@ -204,17 +232,7 @@ const totalUnseenNotifications = computed(() => {
   .v-list-item {
     border-radius: 0 !important;
     margin: 0 !important;
-
-    &[tabindex="-2"]:not(.v-list-item--active) {
-      &:hover,
-      &:focus-visible {
-        color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
-
-        .v-list-item-subtitle {
-          color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
-        }
-      }
-    }
+    padding-block: 0.75rem !important;
   }
 }
 

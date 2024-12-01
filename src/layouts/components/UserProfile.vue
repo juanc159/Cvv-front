@@ -1,56 +1,48 @@
 <script setup lang="ts">
 
+import { router } from "@/plugins/1.router";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
 const authenticationStore = useAuthenticationStore();
-
 const { company, user } = storeToRefs(authenticationStore);
-const router = useRouter();
+
 const logout = () => {
-
-  let urlLogout = "Login"
-  if (authenticationStore.user.type_user == "admin") {
-    urlLogout = "Login"
-  }
-  if (authenticationStore.user.type_user == "student") {
-    urlLogout = "Login-Estudent"
-  }
-  if (authenticationStore.user.type_user == "teacher") {
-    urlLogout = "Login-Teacher"
-  }
-  authenticationStore.logout();
-  router.push({
-    name: urlLogout
-  });
-};
-
-/* Limpia los datos del storage */
-const clearStorage = () => {
-  company.value = {};
-  authenticationStore.getMenuData;
+  router.push({ name: "Login" });
+  authenticationStore.logout()
 };
 
 
 const avatarData = computed(() => {
-  // Asegúrate de que `full_name` no esté vacío
-  const fullName = authenticationStore.user?.full_name || '';
-  // Si `full_name` no está vacío, procesar las iniciales
-  if (fullName) {
-    return fullName
+  if (user.value) {
+    return String(user.value?.name?.split(" ")[0]) + ' ' + String(user.value?.surname?.split(" ")[0]) || "Administrador"
   }
+  return ""
+})
 
-  return 'S/N'; // Retorna 'A' si `full_name` está vacío
-});
+
+/* Limpia los datos del storage */
+const changeCompany = () => {
+  company.value = {};
+  authenticationStore.getMenuData;
+  router.push({ name: "Company-List" });
+
+};
+
+
+
+//ModalChangePassword 
+const refModalChangePassword = ref()
+
+const openModalPassword = () => {
+  refModalChangePassword.value.openDialog(user.value.id)
+}
 </script>
 
 <template>
   <VBadge dot location="bottom right" offset-x="3" offset-y="3" bordered color="success">
-    <VAvatar class="cursor-pointer" color="primary" variant="tonal" size="50">
-      <VImg v-if="authenticationStore.user?.photo" :src="authenticationStore.user?.photo" />
-      <div v-else>
-        {{ avatarText(avatarData) }}
-      </div>
-
+    <VAvatar class="cursor-pointer" color="primary" variant="tonal">
+      <!-- <VImg :src="avatar1" /> -->
+      {{ avatarText(avatarData) }}
 
       <!-- SECTION Menu -->
       <VMenu activator="parent" width="230" location="bottom end" offset="14px">
@@ -60,11 +52,14 @@ const avatarData = computed(() => {
             <template #prepend>
               <VListItemAction start>
                 <VBadge dot location="bottom right" offset-x="3" offset-y="3" color="success">
-                  <VAvatar v-if="authenticationStore.user?.photo" color="primary" variant="tonal">
-                    <VImg :src="authenticationStore.user?.photo" />
-                  </VAvatar>
+                  <!-- <VAvatar
+                    color="primary"
+                    variant="tonal"
+                  >
+                    <VImg :src="avatar1" />
+                  </VAvatar> -->
 
-                  <VAvatar v-else color="primary" variant="tonal" size="50">
+                  <VAvatar color="primary" variant="tonal">
                     {{ avatarText(avatarData) }}
                   </VAvatar>
                 </VBadge>
@@ -72,19 +67,34 @@ const avatarData = computed(() => {
             </template>
 
             <VListItemTitle class="font-weight-semibold">
-              {{ user.full_name }}
+              {{ user?.full_name }}
             </VListItemTitle>
-            <!-- <VListItemSubtitle>Admin</VListItemSubtitle> -->
+            <VListItemSubtitle>
+              {{ user?.rol_name }}
+            </VListItemSubtitle>
           </VListItem>
 
-          <!-- 👉 Cambiar empresa -->
-          <VListItem v-if="company.id && !user.company_id" :to="{ name: 'Company-Index' }" @click="clearStorage">
+
+
+          <VListItem v-if="company.id && !user.company_id" @click="changeCompany">
             <template #prepend>
-              <VIcon class="me-2" icon="tabler-logout" size="22" />
+              <VIcon class="me-2" icon="tabler-building" size="22" />
             </template>
 
             <VListItemTitle>Cambiar Empresa</VListItemTitle>
           </VListItem>
+
+          <VListItem @click="openModalPassword">
+            <template #prepend>
+              <VIcon class="me-2" icon="tabler-lock" size="22" />
+            </template>
+
+            <VListItemTitle>Cambiar Constraseña</VListItemTitle>
+          </VListItem>
+
+
+
+          <!-- Divider -->
           <VDivider class="my-2" />
 
           <!-- 👉 Logout -->
@@ -93,11 +103,16 @@ const avatarData = computed(() => {
               <VIcon class="me-2" icon="tabler-logout" size="22" />
             </template>
 
-            <VListItemTitle>Terminar sesión</VListItemTitle>
+            <VListItemTitle>Cerrar Sesión</VListItemTitle>
           </VListItem>
+
         </VList>
       </VMenu>
       <!-- !SECTION -->
     </VAvatar>
+
+    <ModalChangePassword ref="refModalChangePassword" />
+
+
   </VBadge>
 </template>

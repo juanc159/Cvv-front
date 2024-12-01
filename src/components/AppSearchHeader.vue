@@ -5,13 +5,19 @@ interface Props {
   title?: string
   subtitle?: string
   customClass?: string
+  placeholder?: string
+  density?: 'comfortable' | 'compact' | 'default'
+  isReverse?: boolean
 }
 
 defineOptions({
   inheritAttrs: false,
 })
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  density: 'comfortable',
+  isReverse: false,
+})
 </script>
 
 <template>
@@ -23,28 +29,29 @@ const props = defineProps<Props>()
     :style="`background: url(${AppSearchHeaderBg});`"
   >
     <VCardText>
-      <h3 class="text-h3 font-weight-medium">
-        {{ props.title }}
-      </h3>
-
-      <!-- 👉 Search Input -->
-      <VTextField
-        v-bind="$attrs"
-        placeholder="Search a question..."
-        class="search-header-input mx-auto my-3"
-        density="comfortable"
+      <slot name="title">
+        <h4 class="text-h4 mb-2 font-weight-medium">
+          {{ props.title }}
+        </h4>
+      </slot>
+      <div
+        class="d-flex"
+        :class="isReverse ? 'flex-column' : 'flex-column-reverse' "
       >
-        <template #prepend-inner>
-          <VIcon
-            icon="tabler-search"
-            size="23"
+        <p class="mb-0">
+          {{ props.subtitle }}
+        </p>
+        <!-- 👉 Search Input -->
+        <div>
+          <AppTextField
+            v-bind="$attrs"
+            class="search-header-input mx-auto my-4"
+            :placeholder="props.placeholder"
+            :density="props.density"
+            prepend-inner-icon="tabler-search"
           />
-        </template>
-      </VTextField>
-
-      <p class="mb-0">
-        {{ props.subtitle }}
-      </p>
+        </div>
+      </div>
     </VCardText>
   </VCard>
 </template>
@@ -59,13 +66,7 @@ const props = defineProps<Props>()
 .search-header-input {
   border-radius: 0.375rem !important;
   background-color: rgb(var(--v-theme-surface));
-  max-inline-size: 40.125rem !important;
-
-  .v-field__prepend-inner {
-    i {
-      inset-block-start: 3px !important;
-    }
-  }
+  max-inline-size: 28.125rem !important;
 }
 
 @media (max-width: 37.5rem) {

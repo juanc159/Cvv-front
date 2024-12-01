@@ -50,64 +50,90 @@ watch(() => props.modelValue, () => {
   <div>
     <div
       v-if="editor"
-      class="d-flex gap-3 pa-2 flex-wrap align-center"
+      class="d-flex gap-2 py-2 px-6 flex-wrap align-center editor"
     >
-      <VIcon
-        class="font-weight-medium"
-        icon="tabler-bold"
+      <IconBtn
+        size="small"
+        rounded
+        :variant="editor.isActive('bold') ? 'tonal' : 'text'"
         :color="editor.isActive('bold') ? 'primary' : 'default'"
-        size="20"
         @click="editor.chain().focus().toggleBold().run()"
-      />
+      >
+        <VIcon icon="tabler-bold" />
+      </IconBtn>
 
-      <VIcon
+      <IconBtn
+        size="small"
+        rounded
+        :variant="editor.isActive('underline') ? 'tonal' : 'text'"
         :color="editor.isActive('underline') ? 'primary' : 'default'"
-        icon="tabler-underline"
-        size="20"
         @click="editor.commands.toggleUnderline()"
-      />
+      >
+        <VIcon icon="tabler-underline" />
+      </IconBtn>
 
-      <VIcon
+      <IconBtn
+        size="small"
+        rounded
+        :variant="editor.isActive('italic') ? 'tonal' : 'text'"
         :color="editor.isActive('italic') ? 'primary' : 'default'"
-        icon="tabler-italic"
-        size="20"
         @click="editor.chain().focus().toggleItalic().run()"
-      />
+      >
+        <VIcon
+          icon="tabler-italic"
+          class="font-weight-medium"
+        />
+      </IconBtn>
 
-      <VIcon
-        icon="tabler-strikethrough"
-        size="20"
+      <IconBtn
+        size="small"
+        rounded
+        :variant="editor.isActive('strike') ? 'tonal' : 'text'"
         :color="editor.isActive('strike') ? 'primary' : 'default'"
         @click="editor.chain().focus().toggleStrike().run()"
-      />
+      >
+        <VIcon icon="tabler-strikethrough" />
+      </IconBtn>
 
-      <VIcon
+      <IconBtn
+        size="small"
+        rounded
+        :variant="editor.isActive({ textAlign: 'left' }) ? 'tonal' : 'text'"
         :color="editor.isActive({ textAlign: 'left' }) ? 'primary' : 'default'"
-        icon="tabler-align-left"
-        size="20"
         @click="editor.chain().focus().setTextAlign('left').run()"
-      />
+      >
+        <VIcon icon="tabler-align-left" />
+      </IconBtn>
 
-      <VIcon
-        icon="tabler-align-center"
-        size="20"
+      <IconBtn
+        size="small"
+        rounded
         :color="editor.isActive({ textAlign: 'center' }) ? 'primary' : 'default'"
+        :variant="editor.isActive({ textAlign: 'center' }) ? 'tonal' : 'text'"
         @click="editor.chain().focus().setTextAlign('center').run()"
-      />
+      >
+        <VIcon icon="tabler-align-center" />
+      </IconBtn>
 
-      <VIcon
+      <IconBtn
+        size="small"
+        rounded
+        :variant="editor.isActive({ textAlign: 'right' }) ? 'tonal' : 'text'"
         :color="editor.isActive({ textAlign: 'right' }) ? 'primary' : 'default'"
-        icon="tabler-align-right"
-        size="20"
         @click="editor.chain().focus().setTextAlign('right').run()"
-      />
+      >
+        <VIcon icon="tabler-align-right" />
+      </IconBtn>
 
-      <VIcon
+      <IconBtn
+        size="small"
+        rounded
+        :variant="editor.isActive({ textAlign: 'justify' }) ? 'tonal' : 'text'"
         :color="editor.isActive({ textAlign: 'justify' }) ? 'primary' : 'default'"
-        icon="tabler-align-justified"
-        size="20"
         @click="editor.chain().focus().setTextAlign('justify').run()"
-      />
+      >
+        <VIcon icon="tabler-align-justified" />
+      </IconBtn>
     </div>
 
     <VDivider />
@@ -123,6 +149,7 @@ watch(() => props.modelValue, () => {
 .ProseMirror {
   padding: 0.5rem;
   min-block-size: 15vh;
+  outline: none;
 
   p {
     margin-block-end: 0;

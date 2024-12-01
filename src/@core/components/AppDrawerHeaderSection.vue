@@ -1,13 +1,11 @@
 <script setup lang="ts">
-interface Props {
+const props = defineProps<{
   title: string
-}
-interface Emit {
-  (e: 'cancel', el: MouseEvent): void
-}
-const props = defineProps<Props>()
+}>()
 
-defineEmits<Emit>()
+defineEmits<{
+  (e: 'cancel', el: MouseEvent): void
+}>()
 </script>
 
 <template>
@@ -20,13 +18,11 @@ defineEmits<Emit>()
     <slot name="beforeClose" />
 
     <IconBtn
-      variant="tonal"
-      class="rounded"
-      size="32"
-      @click="$emit('cancel')"
+      size="small"
+      @click="$emit('cancel', $event)"
     >
       <VIcon
-        size="18"
+        size="24"
         icon="tabler-x"
       />
     </IconBtn>

@@ -13,12 +13,12 @@ export const emailValidator = (value: unknown) => {
   if (isEmpty(value))
     return true
 
-  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  const re = /^(?:[^<>()[\]\\.,;:\s@"]+(?:\.[^<>()[\]\\.,;:\s@"]+)*|".+")@(?:\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\]|(?:[a-z\-\d]+\.)+[a-z]{2,})$/i
 
   if (Array.isArray(value))
-    return value.every(val => re.test(String(val))) || 'El campo Correo electrónico debe ser un correo electrónico válido.'
+    return value.every(val => re.test(String(val))) || 'El campo de correo electrónico debe ser un correo electrónico válido'
 
-  return re.test(String(value)) || 'El campo Correo electrónico debe ser un correo electrónico válido.'
+  return re.test(String(value)) || 'El campo de correo electrónico debe ser un correo electrónico válido'
 }
 
 // 👉 Password Validator
@@ -27,7 +27,7 @@ export const passwordValidator = (password: string) => {
 
   const validPassword = regExp.test(password)
 
-  return validPassword || 'El campo debe contener al menos una mayúscula, una minúscula, un carácter especial y un dígito con un mínimo de 8 caracteres.'
+  return validPassword || ' El campo debe contener al menos una mayúscula, una minúscula, un carácter especial y un dígito con un mínimo de 8 caracteres.'
 }
 
 // 👉 Confirm Password Validator
@@ -48,9 +48,9 @@ export const integerValidator = (value: unknown) => {
     return true
 
   if (Array.isArray(value))
-    return value.every(val => /^-?[0-9]+$/.test(String(val))) || 'Este campo debe ser un número entero.'
+    return value.every(val => /^-?\d+$/.test(String(val))) || 'Este campo debe ser un número entero'
 
-  return /^-?[0-9]+$/.test(String(value)) || 'Este campo debe ser un número entero.'
+  return /^-?\d+$/.test(String(value)) || 'Este campo debe ser un número entero'
 }
 
 // 👉 Regex Validator
@@ -73,7 +73,7 @@ export const alphaValidator = (value: unknown) => {
   if (isEmpty(value))
     return true
 
-  return /^[A-Z]*$/i.test(String(value)) || 'El campo Alfa sólo puede contener caracteres alfabéticos.'
+  return /^[A-Z]*$/i.test(String(value)) || 'El campo sólo puede contener caracteres alfabéticos'
 }
 
 // 👉 URL Validator
@@ -81,9 +81,9 @@ export const urlValidator = (value: unknown) => {
   if (isEmpty(value))
     return true
 
-  const re = /^(http[s]?:\/\/){0,1}(www\.){0,1}[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,5}[\.]{0,1}/
+  const re = /^https?:\/\/[^\s$.?#].\S*$/
 
-  return re.test(String(value)) || 'La URL no es válida.'
+  return re.test(String(value)) || 'La URL no es válida'
 }
 
 // 👉 Length Validator
@@ -91,7 +91,7 @@ export const lengthValidator = (value: unknown, length: number) => {
   if (isEmpty(value))
     return true
 
-  return String(value).length === length || `El campo Carácter mínimo debe tener al menos ${length} caracteres`
+  return String(value).length === length || `"La longitud del campo debe ser ${length} caracteres."`
 }
 
 // 👉 Alpha-dash Validator
@@ -101,5 +101,5 @@ export const alphaDashValidator = (value: unknown) => {
 
   const valueAsString = String(value)
 
-  return /^[0-9A-Z_-]*$/i.test(valueAsString) || 'Todos los caracteres no son válidos.'
+  return /^[\w-]*$/.test(valueAsString) || 'Todos los caracteres no son válidos'
 }

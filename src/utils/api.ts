@@ -12,9 +12,3 @@ export const $api = ofetch.create({
     }
   },
 })
-
-export const $web = ofetch.create({
-  baseURL: import.meta.env.VITE_API_BASE_BACK,
-  async onRequest({ options }) {
-  },
-})

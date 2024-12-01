@@ -11,7 +11,15 @@ const props = withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-  <IconBtn v-bind="{ ...$attrs }" variant="elevated" class="v-dialog-close-btn">
-    <VIcon :icon="props.icon" :size="props.iconSize" />
+  <IconBtn
+    variant="elevated"
+    size="30"
+    :ripple="false"
+    class="v-dialog-close-btn"
+  >
+    <VIcon
+      :icon="props.icon"
+      :size="props.iconSize"
+    />
   </IconBtn>
 </template>

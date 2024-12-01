@@ -1,12 +1,17 @@
 <script lang="ts" setup>
-import type { Component } from 'vue'
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
-import { VNodeRenderer } from './VNodeRenderer'
 import { layoutConfig } from '@layouts'
 import { VerticalNavGroup, VerticalNavLink, VerticalNavSectionTitle } from '@layouts/components'
 import { useLayoutConfigStore } from '@layouts/stores/config'
 import { injectionKeyIsVerticalNavHovered } from '@layouts/symbols'
 import type { NavGroup, NavLink, NavSectionTitle, VerticalNavItems } from '@layouts/types'
+import type { Component } from 'vue'
+import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
+import { VNodeRenderer } from './VNodeRenderer'
+
+import { useAuthenticationStore } from "@/stores/useAuthenticationStore"
+const authenticationStore = useAuthenticationStore();
+const { company, user } = storeToRefs(authenticationStore);
+
 
 interface Props {
   tag?: string | Component
@@ -54,88 +59,71 @@ const handleNavScroll = (evt: Event) => {
 }
 
 const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered)
+
+
+const titleGeneral = computed(() => {
+  var texto = company.value.name ?? layoutConfig.app.title;
+
+  var longitudMaxima = 9; // Puedes ajustar esto según sea necesario
+
+  if (texto.length <= longitudMaxima) {
+    return texto;
+  } else {
+    return texto.slice(0, longitudMaxima) + "...";
+  }
+})
 </script>
 
 <template>
-  <Component
-    :is="props.tag"
-    ref="refNav"
-    class="layout-vertical-nav"
-    :class="[
-      {
-        'overlay-nav': configStore.isLessThanOverlayNavBreakpoint,
-        'hovered': isHovered,
-        'visible': isOverlayNavActive,
-        'scrolled': isVerticalNavScrolled,
-      },
-    ]"
-  >
+  <Component :is="props.tag" ref="refNav" class="layout-vertical-nav" :class="[
+    {
+      'overlay-nav': configStore.isLessThanOverlayNavBreakpoint,
+      'hovered': isHovered,
+      'visible': isOverlayNavActive,
+      'scrolled': isVerticalNavScrolled,
+    },
+  ]">
     <!-- 👉 Header -->
     <div class="nav-header">
       <slot name="nav-header">
-        <RouterLink
-          to="/"
-          class="app-logo app-title-wrapper"
-        >
-          <VNodeRenderer :nodes="layoutConfig.app.logo" />
+        <RouterLink :to="{ name: 'Home' }" class="app-logo app-title-wrapper">
+
+          <VImg v-if="company?.logo" style="width: 80px;" :src="storageBack(company?.logo)">
+          </VImg>
+          <VNodeRenderer v-else :nodes="layoutConfig.app.logo" />
 
           <Transition name="vertical-nav-app-title">
-            <h1
-              v-show="!hideTitleAndIcon"
-              class="app-logo-title leading-normal"
-            >
-              {{ layoutConfig.app.title }}
+            <h1 v-show="!hideTitleAndIcon" class="app-logo-title">
+              {{ titleGeneral }}
             </h1>
           </Transition>
         </RouterLink>
         <!-- 👉 Vertical nav actions -->
         <!-- Show toggle collapsible in >md and close button in <md -->
-        <Component
-          :is="layoutConfig.app.iconRenderer || 'div'"
-          v-show="configStore.isVerticalNavCollapsed"
-          class="header-action d-none nav-unpin"
-          :class="configStore.isVerticalNavCollapsed && 'd-lg-block'"
-          v-bind="layoutConfig.icons.verticalNavUnPinned"
-          @click="configStore.isVerticalNavCollapsed = !configStore.isVerticalNavCollapsed"
-        />
-        <Component
-          :is="layoutConfig.app.iconRenderer || 'div'"
-          v-show="!configStore.isVerticalNavCollapsed"
-          class="header-action d-none nav-pin"
-          :class="!configStore.isVerticalNavCollapsed && 'd-lg-block'"
-          v-bind="layoutConfig.icons.verticalNavPinned"
-          @click="configStore.isVerticalNavCollapsed = !configStore.isVerticalNavCollapsed"
-        />
-        <Component
-          :is="layoutConfig.app.iconRenderer || 'div'"
-          class="header-action d-lg-none"
-          v-bind="layoutConfig.icons.close"
-          @click="toggleIsOverlayNavActive(false)"
-        />
+        <div class="header-action">
+          <Component :is="layoutConfig.app.iconRenderer || 'div'" v-show="configStore.isVerticalNavCollapsed"
+            class="d-none nav-unpin" :class="configStore.isVerticalNavCollapsed && 'd-lg-block'"
+            v-bind="layoutConfig.icons.verticalNavUnPinned"
+            @click="configStore.isVerticalNavCollapsed = !configStore.isVerticalNavCollapsed" />
+          <Component :is="layoutConfig.app.iconRenderer || 'div'" v-show="!configStore.isVerticalNavCollapsed"
+            class="d-none nav-pin" :class="!configStore.isVerticalNavCollapsed && 'd-lg-block'"
+            v-bind="layoutConfig.icons.verticalNavPinned"
+            @click="configStore.isVerticalNavCollapsed = !configStore.isVerticalNavCollapsed" />
+          <Component :is="layoutConfig.app.iconRenderer || 'div'" class="d-lg-none" v-bind="layoutConfig.icons.close"
+            @click="toggleIsOverlayNavActive(false)" />
+        </div>
       </slot>
     </div>
     <slot name="before-nav-items">
       <div class="vertical-nav-items-shadow" />
     </slot>
-    <slot
-      name="nav-items"
-      :update-is-vertical-nav-scrolled="updateIsVerticalNavScrolled"
-    >
-      <PerfectScrollbar
-        :key="configStore.isAppRTL"
-        tag="ul"
-        class="nav-items"
-        :options="{ wheelPropagation: false }"
-        @ps-scroll-y="handleNavScroll"
-      >
-        <Component
-          :is="resolveNavItemComponent(item)"
-          v-for="(item, index) in navItems"
-          :key="index"
-          :item="item"
-        />
+    <slot name="nav-items" :update-is-vertical-nav-scrolled="updateIsVerticalNavScrolled">
+      <PerfectScrollbar :key="configStore.isAppRTL" tag="ul" class="nav-items" :options="{ wheelPropagation: false }"
+        @ps-scroll-y="handleNavScroll">
+        <Component :is="resolveNavItemComponent(item)" v-for="(item, index) in navItems" :key="index" :item="item" />
       </PerfectScrollbar>
     </slot>
+    <slot name="after-nav-items" />
   </Component>
 </template>
 
@@ -148,7 +136,8 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered)
   .app-logo-title {
     font-size: 1.375rem;
     font-weight: 700;
-    line-height: 1.75rem;
+    letter-spacing: 0.25px;
+    line-height: 1.5rem;
     text-transform: capitalize;
   }
 }
@@ -180,6 +169,7 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered)
 
       @at-root {
         #{variables.$selector-vertical-nav-mini} .nav-header .header-action {
+
           &.nav-pin,
           &.nav-unpin {
             display: none !important;
@@ -219,7 +209,7 @@ const hideTitleAndIcon = configStore.isVerticalNavMini(isHovered)
 }
 
 // Small screen vertical nav transition
-@media (max-width:1279px) {
+@media (max-width: 1279px) {
   .layout-vertical-nav {
     &:not(.visible) {
       transform: translateX(-#{variables.$layout-vertical-nav-width});

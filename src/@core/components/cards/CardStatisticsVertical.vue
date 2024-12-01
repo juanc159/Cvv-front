@@ -22,14 +22,21 @@ const props = withDefaults(defineProps<Props>(), {
         size="42"
         variant="tonal"
         :color="props.color"
-        :icon="props.icon"
-        class="mb-3"
-      />
+        rounded
+        class="mb-2"
+      >
+        <VIcon
+          :icon="props.icon"
+          size="26"
+        />
+      </VAvatar>
 
-      <h6 class="text-lg font-weight-medium">
+      <h5 class="text-h5">
         {{ props.stats }}
-      </h6>
-      <span class="text-sm">{{ props.title }}</span>
+      </h5>
+      <div class="text-sm">
+        {{ props.title }}
+      </div>
     </VCardText>
 
     <VueApexCharts

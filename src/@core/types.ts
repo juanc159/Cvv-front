@@ -24,7 +24,7 @@ export interface CustomInputContent {
   desc?: string
   value: string
   subtitle?: string
-  icon?: string
+  icon?: string | object
   images?: string
 }
 

@@ -8,8 +8,6 @@ definePage({
   },
 });
 
-import { VDataTable } from "vuetify/labs/VDataTable";
-
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
 const authenticationStore = useAuthenticationStore();
@@ -82,8 +80,6 @@ const openModalUploadExcelNomina = () => {
 const refModalChangePassword = ref()
 
 const openModalPassword = () => {
-  refModalChangePassword.value.componentData.module = "Teacher"
-
   refModalChangePassword.value.openDialog(user.value.id, false)
 }
 

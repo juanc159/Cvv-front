@@ -1,40 +1,40 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 definePage({
-  name: "root",
-  path: "/root",
+  path: "/home",
+  name: "Home",
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
+    requiredPermission: "menu.home",
   },
-});
+})
+
+import { useAuthenticationStore } from '@/stores/useAuthenticationStore';
+
+const { company, user } = storeToRefs(useAuthenticationStore())
+
 </script>
+
 <template>
   <div>
-    <VCard class="mb-6" title="Kick start your project 🚀">
-      <VCardText>All the best for your new project.</VCardText>
+    <VCard class="mb-6">
+      <VCardTitle>Bienvenido a: {{ company.name }}</VCardTitle>
       <VCardText>
-        Please make sure to read our
-        <a
-          href="https://demos.pixinvent.com/vuexy-vuejs-admin-template/documentation/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-decoration-none"
-        >
-          Template Documentation
-        </a>
-        to understand where to go from here and how to use our template.
+        <!-- <DataCount /> -->
       </VCardText>
-    </VCard>
-
-    <VCard title="Want to integrate JWT? 🔒">
-      <VCardText
-        >We carefully crafted JWT flow so you can implement JWT with ease and
-        with minimum efforts.</VCardText
-      >
-      <VCardText
-        >Please read our JWT Documentation to get more out of JWT
-        authentication.</VCardText
-      >
+      <VCardText>
+        <VRow>
+          <VCol cols="12">
+            <CountAllData />
+          </VCol>
+          <VCol cols="12" md="6">
+            <StudentByTypeEducation />
+          </VCol>
+          <VCol cols="12" md="6">
+            <StudentPhoto />
+          </VCol>
+        </VRow>
+      </VCardText>
     </VCard>
   </div>
 </template>

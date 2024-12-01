@@ -22,7 +22,21 @@ export function useToast() {
     })
   }
 
+
+  const toastValidation = (validation:any) => {
+    for (const key in validation.errors) {
+      toast(
+        "El campo " + validation.errors[key].id + " es obligatorio",
+        "",
+        "danger"
+      );
+    }
+
+  }
+
+
   return {
     toast,
+    toastValidation
   }
 }

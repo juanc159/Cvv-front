@@ -63,25 +63,24 @@ const paymentProvidersData = [
     title: 'Checkout.com',
     providers: [visa, masterCard],
   },
-
 ]
 </script>
 
 <template>
   <VDialog
     :model-value="props.isDialogVisible"
-    max-width="900"
+    :width="$vuetify.display.smAndDown ? 'auto' : 900"
     @update:model-value="dialogVisibleUpdate"
   >
     <DialogCloseBtn @click="emit('update:isDialogVisible', false)" />
-    <VCard class="refer-and-earn-dialog">
-      <!-- 👉 dialog close btn -->
 
-      <VCardText class="pa-8 pa-sm-16">
-        <h3 class="text-h3 text-center mb-2">
+    <VCard class="pa-2 pa-sm-10">
+      <VCardText>
+        <!-- 👉 Title -->
+        <h4 class="text-h4 text-center mb-2">
           Select Payment Providers
-        </h3>
-        <p class="text-sm-body-1 text-center text-disabled">
+        </h4>
+        <p class="text-body-1 text-center mb-6">
           Third-party payment providers
         </p>
 
@@ -89,11 +88,11 @@ const paymentProvidersData = [
           v-for="(item, index) in paymentProvidersData"
           :key="index"
         >
-          <div class="d-flex flex-column flex-sm-row justify-space-between align-start gap-2 flex-wrap py-4">
-            <div class="text-high-emphasis font-weight-medium">
+          <div class="d-flex flex-column flex-sm-row justify-space-between gap-4 flex-wrap py-4">
+            <h6 class="text-h6">
               {{ item.title }}
-            </div>
-            <div class="d-flex gap-2 flex-wrap">
+            </h6>
+            <div class="d-flex gap-4 flex-wrap">
               <img
                 v-for="(img, iterator) in item.providers"
                 :key="iterator"
@@ -103,7 +102,7 @@ const paymentProvidersData = [
               >
             </div>
           </div>
-          <VDivider />
+          <VDivider v-if="index !== paymentProvidersData.length - 1" />
         </div>
       </VCardText>
     </VCard>

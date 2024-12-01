@@ -81,7 +81,7 @@ const passwordSaved = () => {
         <VCol cols="12" sm="4" md="12" lg="5" class="member-pricing-bg text-center">
           <div class="membership-pricing d-flex flex-column align-center   h-100 justify-center">
             <VAvatar v-if="authenticationStore.user?.photo" color="primary" variant="tonal" size="250">
-              <VImg :src="authenticationStore.user?.photo" />
+              <VImg :src="storageBack(authenticationStore.user?.photo)" />
             </VAvatar>
 
             <VAvatar v-else color="primary" variant="tonal" size="50">
@@ -117,7 +117,7 @@ const passwordSaved = () => {
           <VCardText class="d-flex justify-center">
             <div class="me-auto pe-4">
               <p class="d-flex align-center mb-6">
-                <VBtn :loading="loading.btnPdf" @click="openPdfPreview(user)" :disabled="!user.pdf" variant="outlined">
+                <VBtn :loading="loading.btnPdf" @click="openPdfPreview(user)" variant="outlined">
                   <VIcon icon="tabler-download"></VIcon>
                   <span>Descargar Notas</span>
                 </VBtn>

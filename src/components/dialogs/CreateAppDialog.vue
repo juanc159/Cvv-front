@@ -14,35 +14,35 @@ const currentStep = ref(0)
 
 const createApp = [
   {
-    icon: 'tabler-clipboard',
-    title: 'Details',
+    icon: 'tabler-file-text',
+    title: 'DETAILS',
     subtitle: 'Enter Details',
   },
   {
-    icon: 'tabler-box',
-    title: 'Frameworks',
+    icon: 'tabler-id',
+    title: 'FRAMEWORKS',
     subtitle: 'Select Framework',
   },
   {
     icon: 'tabler-database',
-    title: 'Database',
+    title: 'DATABASE',
     subtitle: 'Select Database',
   },
   {
     icon: 'tabler-credit-card',
-    title: 'Billing',
+    title: 'BILLING',
     subtitle: 'Payment Details',
   },
   {
     icon: 'tabler-check',
-    title: 'Submit',
-    subtitle: 'submit',
+    title: 'SUBMIT',
+    subtitle: 'Submit',
   },
 ]
 
 const categories = [
   {
-    icon: 'tabler-briefcase',
+    icon: 'tabler-file-text',
     color: 'info',
     title: 'CRM Application',
     subtitle: 'Scales with any business',
@@ -80,18 +80,18 @@ const frameworks = [
     slug: 'angular-framework',
   },
   {
+    icon: 'tabler-brand-vue',
+    color: 'success',
+    title: 'Vue',
+    subtitle: 'JS web frameworks',
+    slug: 'js-framework',
+  },
+  {
     icon: 'tabler-brand-html5',
     color: 'warning',
     title: 'HTML',
     subtitle: 'Progressive Framework',
     slug: 'html-framework',
-  },
-  {
-    icon: 'tabler-brand-python',
-    color: 'primary',
-    title: 'Python',
-    subtitle: 'js web frameworks',
-    slug: 'js-framework',
   },
 ]
 
@@ -121,13 +121,13 @@ const databases = [
 
 const createAppData = ref({
   category: 'crm-application',
-  framework: 'vue-framework',
+  framework: 'js-framework',
   database: 'firebase-database',
   cardNumber: null,
   cardName: '',
   cardExpiry: '',
   cardCvv: '',
-  isSave: false,
+  isSave: true,
 })
 
 const dialogVisibleUpdate = (val: boolean) => {
@@ -135,7 +135,7 @@ const dialogVisibleUpdate = (val: boolean) => {
   currentStep.value = 0
 }
 
-watch(props, () => {
+watch(() => props, () => {
   if (!props.isDialogVisible)
     currentStep.value = 0
 })
@@ -151,6 +151,7 @@ const onSubmit = () => {
   <VDialog
     :model-value="props.isDialogVisible"
     max-width="900"
+    min-height="590"
     @update:model-value="dialogVisibleUpdate"
   >
     <!-- 👉 dialog close btn -->
@@ -158,12 +159,16 @@ const onSubmit = () => {
       size="small"
       @click="emit('update:isDialogVisible', false)"
     />
-    <VCard class="create-app-dialog">
-      <VCardText class="pa-5 pa-sm-10">
-        <h3 class="text-h3 text-center mb-2">
+    <VCard
+      class="create-app-dialog"
+      min-height="590"
+    >
+      <VCardText class="pa-5 pa-sm-16">
+        <!-- 👉 Title -->
+        <h4 class="text-h4 text-center mb-2">
           Create App
-        </h3>
-        <p class="text-sm text-center mb-8">
+        </h4>
+        <p class="text-body-1 text-center mb-6">
           Provide data with this form to create your app.
         </p>
 
@@ -178,7 +183,7 @@ const onSubmit = () => {
               v-model:current-step="currentStep"
               direction="vertical"
               :items="createApp"
-              icon-size="24"
+              icon-size="22"
               class="stepper-icon-step-bg"
             />
           </VCol>
@@ -195,11 +200,14 @@ const onSubmit = () => {
             >
               <!-- 👉 category -->
               <VWindowItem>
-                <AppTextField label="Application Name" />
+                <AppTextField
+                  label="Application Name"
+                  placeholder="Application Name"
+                />
 
-                <h6 class="text-h6 my-4">
+                <h5 class="text-h5 mt-6 mb-4">
                   Category
-                </h6>
+                </h5>
                 <VRadioGroup v-model="createAppData.category">
                   <VList class="card-list">
                     <VListItem
@@ -209,16 +217,22 @@ const onSubmit = () => {
                     >
                       <template #prepend>
                         <VAvatar
-                          size="48"
+                          size="46"
                           rounded
                           variant="tonal"
                           :color="category.color"
-                          :icon="category.icon"
-                        />
+                        >
+                          <VIcon
+                            :icon="category.icon"
+                            size="30"
+                          />
+                        </VAvatar>
                       </template>
 
-                      <VListItemTitle class="mb-1">
-                        {{ category.title }}
+                      <VListItemTitle>
+                        <h6 class="text-h6 mb-1">
+                          {{ category.title }}
+                        </h6>
                       </VListItemTitle>
                       <VListItemSubtitle>
                         {{ category.subtitle }}
@@ -234,9 +248,9 @@ const onSubmit = () => {
 
               <!-- 👉 Frameworks -->
               <VWindowItem>
-                <h6 class="text-h6 mb-4">
+                <h5 class="text-h5 mb-4">
                   Select Framework
-                </h6>
+                </h5>
                 <VRadioGroup v-model="createAppData.framework">
                   <VList class="card-list">
                     <VListItem
@@ -246,16 +260,21 @@ const onSubmit = () => {
                     >
                       <template #prepend>
                         <VAvatar
-                          size="48"
+                          size="46"
                           rounded
                           variant="tonal"
                           :color="framework.color"
                         >
-                          <VIcon :icon="framework.icon" />
+                          <VIcon
+                            :icon="framework.icon"
+                            size="30"
+                          />
                         </VAvatar>
                       </template>
-                      <VListItemTitle class="mb-1">
-                        {{ framework.title }}
+                      <VListItemTitle>
+                        <h6 class="text-h6 mb-1">
+                          {{ framework.title }}
+                        </h6>
                       </VListItemTitle>
                       <VListItemSubtitle>
                         {{ framework.subtitle }}
@@ -272,12 +291,12 @@ const onSubmit = () => {
               <VWindowItem>
                 <AppTextField
                   label="Database Name"
-                  placeholder="userDB"
+                  placeholder="UserDB"
                 />
 
-                <h6 class="text-h6 my-4">
+                <h5 class="text-h5 mt-6 mb-4">
                   Select Database Engine
-                </h6>
+                </h5>
                 <VRadioGroup v-model="createAppData.database">
                   <VList class="card-list">
                     <VListItem
@@ -287,16 +306,21 @@ const onSubmit = () => {
                     >
                       <template #prepend>
                         <VAvatar
-                          size="48"
+                          size="46"
                           rounded
                           variant="tonal"
                           :color="database.color"
                         >
-                          <VIcon :icon="database.icon" />
+                          <VIcon
+                            :icon="database.icon"
+                            size="30"
+                          />
                         </VAvatar>
                       </template>
-                      <VListItemTitle class="mb-1">
-                        {{ database.title }}
+                      <VListItemTitle>
+                        <h6 class="text-h6 mb-1">
+                          {{ database.title }}
+                        </h6>
                       </VListItemTitle>
                       <VListItemSubtitle>
                         {{ database.subtitle }}
@@ -311,7 +335,7 @@ const onSubmit = () => {
 
               <!-- 👉 Billing form -->
               <VWindowItem>
-                <h6 class="text-h6 mb-4">
+                <h6 class="text-h6 mb-6">
                   Payment Details
                 </h6>
 
@@ -370,10 +394,10 @@ const onSubmit = () => {
               </VWindowItem>
 
               <VWindowItem class="text-center">
-                <h6 class="text-h6 mb-2">
-                  Submit 🥳
-                </h6>
-                <p class="text-sm mb-6">
+                <h5 class="text-h5 mb-1">
+                  Submit
+                </h5>
+                <p class="text-sm mb-4">
                   Submit to kickstart your project.
                 </p>
 
@@ -385,7 +409,7 @@ const onSubmit = () => {
               </VWindowItem>
             </VWindow>
 
-            <div class="d-flex justify-space-between mt-8">
+            <div class="d-flex justify-space-between mt-6">
               <VBtn
                 variant="tonal"
                 color="secondary"
@@ -406,11 +430,6 @@ const onSubmit = () => {
                 @click="onSubmit"
               >
                 submit
-                <VIcon
-                  icon="tabler-check"
-                  end
-                  class="flip-in-rtl"
-                />
               </VBtn>
 
               <VBtn
@@ -435,6 +454,6 @@ const onSubmit = () => {
 
 <style lang="scss">
 .stepper-content .card-list {
-  --v-card-list-gap: 24px;
+  --v-card-list-gap: 16px;
 }
 </style>

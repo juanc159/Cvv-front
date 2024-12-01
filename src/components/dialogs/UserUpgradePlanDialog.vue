@@ -30,60 +30,56 @@ const dialogModelValueUpdate = (val: boolean) => {
 <template>
   <!-- 👉 upgrade plan -->
   <VDialog
-    :width="$vuetify.display.smAndDown ? 'auto' : 560"
+    :width="$vuetify.display.smAndDown ? 'auto' : 650"
     :model-value="props.isDialogVisible"
     @update:model-value="dialogModelValueUpdate"
   >
     <!-- Dialog close btn -->
     <DialogCloseBtn @click="dialogModelValueUpdate(false)" />
 
-    <VCard class="py-8">
-      <!-- 👉 dialog close btn -->
-      <DialogCloseBtn
-        variant="text"
-        size="small"
-        @click="$emit('update:isDialogVisible', false)"
-      />
-
-      <VCardItem class="text-center">
-        <VCardTitle class="text-h5 mb-5">
+    <VCard class="pa-2 pa-sm-10">
+      <VCardText>
+        <!-- 👉 Title -->
+        <h4 class="text-h4 text-center mb-2">
           Upgrade Plan
-        </VCardTitle>
-
-        <VCardSubtitle>
+        </h4>
+        <p class="text-body-1 text-center mb-6">
           Choose the best plan for user.
-        </VCardSubtitle>
-      </VCardItem>
+        </p>
 
-      <VCardText class="d-flex align-center flex-column flex-sm-nowrap px-15">
-        <CustomRadios
-          v-model:selected-radio="selectedPlan"
-          :radio-content="plansList"
-          :grid-column="{ cols: '12', sm: '6' }"
-        />
-        <VBtn class="mt-5">
-          Upgrade
-        </VBtn>
-      </VCardText>
+        <div class="d-flex justify-space-between flex-column flex-sm-row gap-4">
+          <AppSelect
+            v-model="selectedPlan"
+            :items="plansList"
+            label="Choose a plan"
+            placeholder="Basic"
+          />
+          <VBtn
+            class="align-self-end"
+            :block="$vuetify.display.xs"
+          >
+            Upgrade
+          </VBtn>
+        </div>
 
-      <VDivider class="my-3" />
+        <VDivider class="my-6" />
 
-      <VCardText class="px-15">
-        <p class="font-weight-medium mb-2">
+        <p class="text-body-1 mb-1">
           User current plan is standard plan
         </p>
-        <div class="d-flex justify-space-between flex-wrap">
-          <div class="d-flex align-center me-3">
-            <sup class="text-primary">$</sup>
-            <h3 class="text-h3 text-primary">
+        <div class="d-flex justify-space-between align-center flex-wrap">
+          <div class="d-flex align-center gap-1 me-3">
+            <sup class="text-body-1 text-primary">$</sup>
+            <h1 class="text-h1 text-primary">
               99
-            </h3>
-            <sub class="text-body-1 mt-3">/ month</sub>
+            </h1>
+            <sub class="text-body-2 mt-5">
+              / month
+            </sub>
           </div>
           <VBtn
             color="error"
             variant="tonal"
-            class="mt-3"
             @click="isConfirmDialogVisible = true"
           >
             Cancel Subscription

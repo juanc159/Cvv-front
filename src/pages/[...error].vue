@@ -25,7 +25,7 @@ definePage({
 
     <VBtn
       to="/"
-      class="mb-12"
+      class="mb-11"
     >
       Back to Home
     </VBtn>
@@ -34,16 +34,18 @@ definePage({
     <div class="misc-avatar w-100 text-center">
       <VImg
         :src="misc404"
-        alt="Coming Soon"
-        :max-width="200"
+        alt="error 404"
+        :max-height="$vuetify.display.smAndDown ? 350 : 500"
         class="mx-auto"
       />
     </div>
 
-    <VImg
-      :src="authThemeMask"
+    <img
       class="misc-footer-img d-none d-md-block"
-    />
+      :src="authThemeMask"
+      alt="misc-footer-img"
+      height="320"
+    >
   </div>
 </template>
 

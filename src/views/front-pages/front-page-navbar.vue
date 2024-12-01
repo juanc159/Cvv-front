@@ -101,7 +101,7 @@ const menu = ref<
   },
   {
     title: "Acceso",
-    to: "Login-Estudent",
+    to: "Login",
     hash: "",
     icon: "tabler-lock-access",
   },

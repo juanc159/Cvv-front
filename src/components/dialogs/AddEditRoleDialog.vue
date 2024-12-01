@@ -131,7 +131,7 @@ watch(permissions, () => {
 }, { deep: true })
 
 // if rolePermissions is not empty, then set permissions
-watch(props, () => {
+watch(() => props, () => {
   if (props.rolePermissions && props.rolePermissions.permissions.length) {
     role.value = props.rolePermissions.name
     permissions.value = permissions.value.map(permission => {
@@ -177,18 +177,16 @@ const onReset = () => {
     <!-- 👉 Dialog close btn -->
     <DialogCloseBtn @click="onReset" />
 
-    <VCard class="pa-sm-8 pa-5">
-      <!-- 👉 Title -->
-      <VCardItem class="text-center">
-        <VCardTitle class="text-h3 mb-3">
+    <VCard class="pa-sm-10 pa-2">
+      <VCardText>
+        <!-- 👉 Title -->
+        <h4 class="text-h4 text-center mb-2">
           {{ props.rolePermissions.name ? 'Edit' : 'Add New' }} Role
-        </VCardTitle>
-        <p class="text-base mb-0">
+        </h4>
+        <p class="text-body-1 text-center mb-6">
           Set Role Permissions
         </p>
-      </VCardItem>
 
-      <VCardText class="mt-6">
         <!-- 👉 Form -->
         <VForm ref="refPermissionForm">
           <!-- 👉 Role name -->
@@ -198,17 +196,19 @@ const onReset = () => {
             placeholder="Enter Role Name"
           />
 
-          <h6 class="text-h4 mt-8 mb-3">
+          <h5 class="text-h5 my-6">
             Role Permissions
-          </h6>
+          </h5>
 
           <!-- 👉 Role Permissions -->
 
-          <VTable class="permission-table text-no-wrap">
+          <VTable class="permission-table text-no-wrap mb-6">
             <!-- 👉 Admin  -->
             <tr>
               <td>
-                Administrator Access
+                <h6 class="text-h6">
+                  Administrator Access
+                </h6>
               </td>
               <td colspan="3">
                 <div class="d-flex justify-end">
@@ -227,7 +227,11 @@ const onReset = () => {
               :key="permission.name"
             >
               <tr>
-                <td>{{ permission.name }}</td>
+                <td>
+                  <h6 class="text-h6">
+                    {{ permission.name }}
+                  </h6>
+                </td>
                 <td>
                   <div class="d-flex justify-end">
                     <VCheckbox
@@ -257,7 +261,7 @@ const onReset = () => {
           </VTable>
 
           <!-- 👉 Actions button -->
-          <div class="d-flex align-center justify-center gap-3 mt-6">
+          <div class="d-flex align-center justify-center gap-4">
             <VBtn @click="onSubmit">
               Submit
             </VBtn>

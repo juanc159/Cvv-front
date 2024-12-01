@@ -3,10 +3,6 @@ export default {
     icon: true,
     color: 'default',
     variant: 'text',
-    density: 'comfortable',
-    VIcon: {
-      size: 22,
-    },
   },
   VAlert: {
     density: 'comfortable',
@@ -18,10 +14,6 @@ export default {
     // ℹ️ Remove after next release
     variant: 'flat',
   },
-
-  // VImg: {
-  //   eager: true,
-  // },
   VBadge: {
     // set v-badge default color to primary
     color: 'primary',
@@ -29,11 +21,24 @@ export default {
   VBtn: {
     // set v-btn default color to primary
     color: 'primary',
-    VProgressCircular: {
-    },
+    class: 'text-none',
   },
   VChip: {
-    size: 'small',
+    label: true,
+  },
+  VDataTable: {
+    VPagination: {
+      showFirstLastPage: true,
+      firstIcon: 'tabler-chevrons-left',
+      lastIcon: 'tabler-chevrons-right',
+    },
+  },
+  VDataTableServer: {
+    VPagination: {
+      showFirstLastPage: true,
+      firstIcon: 'tabler-chevrons-left',
+      lastIcon: 'tabler-chevrons-right',
+    },
   },
   VExpansionPanel: {
     expandIcon: 'tabler-chevron-right',
@@ -44,13 +49,22 @@ export default {
     collapseIcon: 'tabler-chevron-right',
   },
   VList: {
-    density: 'comfortable',
+    color: 'primary',
+    density: 'compact',
     VCheckboxBtn: {
       density: 'compact',
     },
+    VListItem: {
+      ripple: false,
+      VAvatar: {
+        size: 40,
+      },
+    },
+  },
+  VMenu: {
+    offset: '2px',
   },
   VPagination: {
-    activeColor: 'primary',
     density: 'comfortable',
     variant: 'tonal',
   },
@@ -87,19 +101,17 @@ export default {
   VSelect: {
     variant: 'outlined',
     color: 'primary',
-    density: 'compact',
+    density: 'comfortable',
     hideDetails: 'auto',
     VChip: {
-      color: 'primary',
       label: true,
     },
   },
   VRangeSlider: {
     // set v-range-slider default color to primary
     color: 'primary',
-    trackColor: 'rgb(var(--v-theme-on-surface),0.06)',
     trackSize: 6,
-    thumbSize: 7,
+    thumbSize: 22,
     density: 'comfortable',
     thumbLabel: true,
     hideDetails: 'auto',
@@ -108,81 +120,73 @@ export default {
     // set v-rating default color to primary
     color: 'warning',
   },
-  VProgressCircular: {
-    // set v-progress-circular default color to primary
-    color: 'red',
-  },
   VProgressLinear: {
-    height: 12,
+    height: 6,
     roundedBar: true,
     rounded: true,
-    color: 'primary',
+    bgColor: 'rgba(var(--v-track-bg))',
   },
   VSlider: {
-    // set v-slider default color to primary
+    // set v-range-slider default color to primary
     color: 'primary',
-    trackColor: 'rgb(var(--v-theme-on-surface),0.06)',
+    thumbLabel: true,
     hideDetails: 'auto',
-    thumbSize: 7,
+    thumbSize: 22,
     trackSize: 6,
+    elevation: 4,
   },
   VTextField: {
     variant: 'outlined',
-    density: 'compact',
+    density: 'comfortable',
     color: 'primary',
     hideDetails: 'auto',
   },
   VAutocomplete: {
     variant: 'outlined',
     color: 'primary',
-    density: 'compact',
+    density: 'comfortable',
     hideDetails: 'auto',
     menuProps: {
       contentClass: 'app-autocomplete__content v-autocomplete__content',
     },
     VChip: {
-      color: 'primary',
       label: true,
     },
   },
   VCombobox: {
     variant: 'outlined',
-    density: 'compact',
+    density: 'comfortable',
     color: 'primary',
     hideDetails: 'auto',
     VChip: {
-      color: 'primary',
       label: true,
     },
   },
   VFileInput: {
     variant: 'outlined',
-    density: 'compact',
+    density: 'comfortable',
     color: 'primary',
     hideDetails: 'auto',
   },
   VTextarea: {
     variant: 'outlined',
-    density: 'compact',
+    density: 'comfortable',
     color: 'primary',
     hideDetails: 'auto',
+  },
+  VSnackbar: {
+    VBtn: {
+      density: 'comfortable',
+    },
   },
   VSwitch: {
     // set v-switch default color to primary
     inset: true,
     color: 'primary',
     hideDetails: 'auto',
+    ripple: false,
   },
-  VTimeline: {
-    lineThickness: 1,
-  },
-
-  VDataTable: {
-    VDataTableFooter: {
-      VBtn: {
-        density: 'comfortable',
-        color: 'default',
-      },
-    },
+  VNavigationDrawer: {
+    touchless: true,
   },
 }

@@ -1,5 +1,5 @@
 import type { ThemeInstance } from 'vuetify'
-import { hexToRgb } from '@layouts/utils'
+import { hexToRgb } from '@core/utils/colorConverter'
 
 // 👉 Colors variables
 const colorVariables = (themeColors: ThemeInstance['themes']['value']['colors']) => {
@@ -148,7 +148,6 @@ export const getBarChartConfig = (themeColors: ThemeInstance['themes']['value'][
         borderRadius: 8,
         barHeight: '30%',
         horizontal: true,
-        startingShape: 'rounded',
       },
     },
     grid: {
@@ -262,7 +261,7 @@ export const getRadialBarChartConfig = (themeColors: ThemeInstance['themes']['va
         hollow: { size: '30%' },
         track: {
           margin: 15,
-          background: themeColors.colors['grey-100'],
+          background: themeColors.variables['track-bg'],
         },
         dataLabels: {
           name: {
