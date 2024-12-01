@@ -40,13 +40,8 @@ declare module 'vue-router/auto-routes' {
     'second-page': RouteRecordInfo<'second-page', '/second-page', Record<never, never>, Record<never, never>>,
     'Service-List': RouteRecordInfo<'Service-List', '/Service/List', Record<never, never>, Record<never, never>>,
     'Service-Form': RouteRecordInfo<'Service-Form', 'service-form/:action/:id?', Record<never, never>, Record<never, never>>,
-<<<<<<< HEAD
-    'Student-Form': RouteRecordInfo<'Student-Form', '/student-form/:action/:id?', Record<never, never>, Record<never, never>>,
-    'Student-Index': RouteRecordInfo<'Student-Index', '/Student/Index', Record<never, never>, Record<never, never>>,
-=======
     'Student-List': RouteRecordInfo<'Student-List', '/Student/List', Record<never, never>, Record<never, never>>,
     'Student-Form': RouteRecordInfo<'Student-Form', 'student-form/:action/:id?', Record<never, never>, Record<never, never>>,
->>>>>>> origin/main
     'Subject-List': RouteRecordInfo<'Subject-List', '/Subject/List', Record<never, never>, Record<never, never>>,
     'Subject-Form': RouteRecordInfo<'Subject-Form', 'subject-form/:action/:id?', Record<never, never>, Record<never, never>>,
     'Teacher-Order': RouteRecordInfo<'Teacher-Order', '/teacher-Order', Record<never, never>, Record<never, never>>,
