@@ -26,9 +26,9 @@ const optionsTable = {
     company_id: authenticationStore.company.id,
   },
   headers: [
-    { key: 'path', title: 'Imagen' },
-    { key: "is_active", title: 'Estado', },
-    { key: 'actions', title: 'Acciones' },
+    { key: 'path', title: 'Imagen', sortable: false },
+    { key: "is_active", title: 'Estado', sortable: false },
+    { key: 'actions', title: 'Acciones', sortable: false },
   ],
   actions: {
     changeStatus: {

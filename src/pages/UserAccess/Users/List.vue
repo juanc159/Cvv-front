@@ -24,11 +24,11 @@ const optionsTable = {
     company_id: company.value.id
   },
   headers: [
-    { key: 'full_name', title: 'Nombre Completo' },
-    { key: 'email', title: 'Email' },
-    { key: 'role_name', title: 'Rol' },
-    { key: "is_active", title: 'Estado', },
-    { key: 'actions', title: 'Acciones' },
+    { key: 'full_name', title: 'Nombre Completo', sortable: false },
+    { key: 'email', title: 'Email', sortable: false },
+    { key: 'role_name', title: 'Rol', sortable: false },
+    { key: "is_active", title: 'Estado', sortable: false },
+    { key: 'actions', title: 'Acciones', sortable: false },
   ],
   actions: {
     changeStatus: {

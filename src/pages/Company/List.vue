@@ -23,10 +23,10 @@ const tableFull = ref()
 const optionsTable = {
   url: "/company/list",
   headers: [
-    { key: 'name', title: 'Nombre compañia' },
-    { key: 'slogan', title: 'Eslogan' },
-    { key: "is_active", title: 'Estado', },
-    { key: 'actions', title: 'Acciones' },
+    { key: 'name', title: 'Nombre compañia', sortable: false },
+    { key: 'slogan', title: 'Eslogan', sortable: false },
+    { key: "is_active", title: 'Estado', sortable: false },
+    { key: 'actions', title: 'Acciones', sortable: false },
   ],
   actions: {
     changeStatus: {

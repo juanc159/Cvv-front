@@ -26,10 +26,10 @@ const optionsTable = {
     company_id: authenticationStore.company.id,
   },
   headers: [
-    { key: 'type_education_name', title: 'Tipo de educación' },
-    { key: 'name', title: 'Nombre' },
-    { key: 'code', title: 'Código' },
-    { key: 'actions', title: 'Acciones' },
+    { key: 'type_education_name', title: 'Tipo de educación', sortable: false },
+    { key: 'name', title: 'Nombre', sortable: false },
+    { key: 'code', title: 'Código', sortable: false },
+    { key: 'actions', title: 'Acciones', sortable: false },
   ],
   actions: {
     changeStatus: {

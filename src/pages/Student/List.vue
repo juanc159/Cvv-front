@@ -26,13 +26,13 @@ const optionsTable = {
     company_id: authenticationStore.company.id,
   },
   headers: [
-    { title: "Acciones", key: "actions" },
-    { title: "Foto ", key: "photo" },
-    { title: "Grado ", key: "grade_name" },
-    { title: "Sección ", key: "section_name" },
-    { title: "Cédula ", key: "identity_document" },
-    { title: "Nombre", key: "full_name" },
-    { title: "Tipo de educación", key: "type_education_name" },
+    { title: "Acciones", key: "actions", sortable: false },
+    { title: "Foto ", key: "photo", sortable: false },
+    { title: "Grado ", key: "grade_name", sortable: false },
+    { title: "Sección ", key: "section_name", sortable: false },
+    { title: "Cédula ", key: "identity_document", sortable: false },
+    { title: "Nombre", key: "full_name", sortable: false },
+    { title: "Tipo de educación", key: "type_education_name", sortable: false },
 
 
   ],
