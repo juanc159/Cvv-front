@@ -26,7 +26,7 @@ onMounted(async () => {
   <div class="landing-page-wrapper">
     <swiper-container navigation="true" events-prefix="swiper-">
       <swiper-slide v-for="swiperImg in banners" :key="swiperImg">
-        <VImg :src="swiperImg.path" />
+        <VImg :src="storageBack(swiperImg.path)" />
       </swiper-slide>
     </swiper-container>
 
