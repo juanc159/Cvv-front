@@ -6,10 +6,10 @@ interface UserData {
   username: string
   role: string
   country: string
-  contact: string
-  email: string
+  contact: string | undefined
+  email: string | undefined
   currentPlan: string
-  status: string
+  status: string | undefined
   avatar: string
   taskDone: number | null
   projectDone: number | null
@@ -52,7 +52,7 @@ const emit = defineEmits<Emit>()
 const userData = ref<UserData>(structuredClone(toRaw(props.userData)))
 const isUseAsBillingAddress = ref(false)
 
-watch(props, () => {
+watch(() => props, () => {
   userData.value = structuredClone(toRaw(props.userData))
 })
 
@@ -74,24 +74,23 @@ const dialogModelValueUpdate = (val: boolean) => {
 
 <template>
   <VDialog
-    :width="$vuetify.display.smAndDown ? 'auto' : 677"
+    :width="$vuetify.display.smAndDown ? 'auto' : 900"
     :model-value="props.isDialogVisible"
     @update:model-value="dialogModelValueUpdate"
   >
     <!-- Dialog close btn -->
     <DialogCloseBtn @click="dialogModelValueUpdate(false)" />
 
-    <VCard class="pa-sm-8 pa-5">
-      <VCardItem class="text-center">
-        <VCardTitle class="text-h3 mb-3">
+    <VCard class="pa-sm-10 pa-2">
+      <VCardText>
+        <!-- 👉 Title -->
+        <h4 class="text-h4 text-center mb-2">
           Edit User Information
-        </VCardTitle>
-        <p class="mb-0">
+        </h4>
+        <p class="text-body-1 text-center mb-6">
           Updating user details will receive a privacy audit.
         </p>
-      </VCardItem>
 
-      <VCardText>
         <!-- 👉 Form -->
         <VForm
           class="mt-6"
@@ -104,9 +103,9 @@ const dialogModelValueUpdate = (val: boolean) => {
               md="6"
             >
               <AppTextField
-                v-model="userData.fullName"
-                label="Full Name"
-                placeholder="John Doe"
+                v-model="userData.fullName.split(' ')[0]"
+                label="First Name"
+                placeholder="John"
               />
             </VCol>
 
@@ -116,9 +115,18 @@ const dialogModelValueUpdate = (val: boolean) => {
               md="6"
             >
               <AppTextField
+                v-model="userData.fullName.split(' ')[1]"
+                label="Last Name"
+                placeholder="Doe"
+              />
+            </VCol>
+
+            <!-- 👉 Username -->
+            <VCol cols="12">
+              <AppTextField
                 v-model="userData.username"
                 label="Username"
-                placeholder="johndoe"
+                placeholder="john.doe.007"
               />
             </VCol>
 
@@ -129,7 +137,7 @@ const dialogModelValueUpdate = (val: boolean) => {
             >
               <AppTextField
                 v-model="userData.email"
-                label="Billing Email"
+                label="Email"
                 placeholder="johndoe@email.com"
               />
             </VCol>
@@ -139,10 +147,11 @@ const dialogModelValueUpdate = (val: boolean) => {
               cols="12"
               md="6"
             >
-              <AppTextField
+              <AppSelect
                 v-model="userData.status"
                 label="Status"
                 placeholder="Active"
+                :items="['Active', 'Inactive', 'Pending']"
               />
             </VCol>
 
@@ -153,7 +162,7 @@ const dialogModelValueUpdate = (val: boolean) => {
             >
               <AppTextField
                 v-model="userData.taxId"
-                label="Tax Id"
+                label="Tax ID"
                 placeholder="123456789"
               />
             </VCol>
@@ -165,7 +174,7 @@ const dialogModelValueUpdate = (val: boolean) => {
             >
               <AppTextField
                 v-model="userData.contact"
-                label="Contact"
+                label="Phone Number"
                 placeholder="+1 9876543210"
               />
             </VCol>
@@ -175,12 +184,14 @@ const dialogModelValueUpdate = (val: boolean) => {
               cols="12"
               md="6"
             >
-              <AppTextField
+              <AppSelect
                 v-model="userData.language"
+                closable-chips
                 chips
                 multiple
                 label="Language"
                 placeholder="English"
+                :items="['English', 'Spanish', 'French']"
               />
             </VCol>
 
@@ -189,10 +200,11 @@ const dialogModelValueUpdate = (val: boolean) => {
               cols="12"
               md="6"
             >
-              <AppTextField
+              <AppSelect
                 v-model="userData.country"
                 label="Country"
                 placeholder="United States"
+                :items="['United States', 'United Kingdom', 'France']"
               />
             </VCol>
 

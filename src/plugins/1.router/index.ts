@@ -1,11 +1,9 @@
+import { setupLayouts } from 'virtual:generated-layouts'
 import type { App } from 'vue'
 
-import { setupLayouts } from 'virtual:generated-layouts'
 import type { RouteRecordRaw } from 'vue-router/auto'
-// eslint-disable-next-line import/no-unresolved
-import { createRouter, createWebHistory } from 'vue-router/auto'
 
-import { useAuthenticationStore } from '@/stores/useAuthenticationStore'
+import { createRouter, createWebHistory } from 'vue-router/auto'
 
 function recursiveLayouts(route: RouteRecordRaw): RouteRecordRaw {
   if (route.children) {
@@ -30,27 +28,6 @@ const router = createRouter({
     ...[...pages].map(route => recursiveLayouts(route)),
   ],
 })
-
-router.beforeEach((to, from, next) => {
-
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-  const authenticationStore = useAuthenticationStore() // obtiene el usuario actual
-  const { isAuthenticate, permissions } = storeToRefs(authenticationStore)
-
-
-  if (requiresAuth && !isAuthenticate.value) {
-    next('/login') // redirige al usuario al login si la ruta requiere autenticación y el usuario no está autenticado
-  }
-  else {
-    const requiredPermission = to.meta.requiredPermission
-    if (requiredPermission && isAuthenticate.value && !permissions.value.includes(requiredPermission))
-      next('/unauthorized') // redirige al usuario a una página de error si no tiene los permisos necesarios para acceder a la ruta
-
-    else
-      next() // permite el acceso a la ruta
-  }
-})
-
 
 export { router }
 

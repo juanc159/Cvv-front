@@ -94,9 +94,10 @@ const onCancel = () => {
           class="my-4"
           style=" block-size: 88px;inline-size: 88px; pointer-events: none;"
         >
-          <span class="text-3xl">
-            <VIcon icon="tabler-check" />
-          </span>
+          <VIcon
+            icon="tabler-check"
+            size="38"
+          />
         </VBtn>
 
         <h1 class="text-h4 mb-4">

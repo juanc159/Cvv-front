@@ -11,7 +11,6 @@ const componentData = reactive({
   isDialogVisible: false,
   isLoading: false,
   first_time: false,
-  module: "Student",
   statuses: [],
   form: {
     id: null as null | string | number,
@@ -34,13 +33,11 @@ const handleDialogVisible = () => {
   componentData.isDialogVisible = !componentData.isDialogVisible;
 };
 
-const openDialog = async (id: null | number | string, first_time: boolean = false) => {
+const openDialog = async (id: null | number | string) => {
   handleClearForm();
   handleDialogVisible();
 
   componentData.form.id = id;
-  componentData.first_time = first_time;
-
 };
 
 const submitForm = async () => {
@@ -50,17 +47,16 @@ const submitForm = async () => {
 
     componentData.isLoading = true;
 
-    const { response, data } = await useApi(`changePassword`).post({
+    const { response, data } = await useApi(`/user/changePassword`).post({
       id: componentData.form.id,
       new_password: componentData.form.new_password,
-      module: componentData.module,
     });
     componentData.isLoading = false;
 
     if (response.value?.ok && data.value?.code == 200) {
       handleDialogVisible();
 
-      emit("execute", true);
+      emit("execute");
     }
 
     if (data.value.code == 422) {
@@ -73,7 +69,6 @@ const refForm = ref<VForm>();
 
 defineExpose({
   openDialog,
-  componentData
 });
 
 const isPasswordVisible = ref(false);
@@ -104,7 +99,7 @@ const isPasswordVisible = ref(false);
                 <AppTextField clearable v-model="componentData.form.new_password" label="Contraseña"
                   placeholder="············" :type="isPasswordVisible ? 'text' : 'password'" :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'
                     " @click:append-inner="isPasswordVisible = !isPasswordVisible" :rules="[requiredValidator]"
-                  :error-messages="errorsBack.new_password" @keypress="errorsBack.new_password = ''" />
+                  :error-messages="errorsBack.new_password" @input="errorsBack.new_password = ''" />
               </VCol>
               <VCol cols="12">
                 <span>

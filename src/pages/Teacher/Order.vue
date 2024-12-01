@@ -9,17 +9,12 @@ definePage({
   },
 });
 
-
 onMounted(async () => {
 })
-
-
-
 
 const loading = reactive({
   form: false
 })
-
 
 interface ITeachers {
   subject_name: string,

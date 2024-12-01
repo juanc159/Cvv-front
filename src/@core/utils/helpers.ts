@@ -32,6 +32,8 @@ export const isToday = (date: Date) => {
 }
 
 
+
+
 export const descargarArchivo = (path: string, name: string | null = null) => {
 
   // Divide la URL por las barras diagonales '/' para obtener las partes
@@ -98,3 +100,13 @@ export const downloadExcelBase64 = (
     link.click();
   }
 };
+
+
+export function onlyNumbersKeyPress(event: any) {
+  if ((!/[0-9,-]/.test(event.key))) {
+    event.preventDefault();
+  }
+}
+export function storageBack(path: string) {
+  return BASE_BACK_STORAGE + path
+} 

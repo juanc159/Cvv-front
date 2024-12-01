@@ -64,18 +64,19 @@ const paymentMethodsData = [
 <template>
   <VDialog
     :model-value="props.isDialogVisible"
-    max-width="900"
+    :width="$vuetify.display.smAndDown ? 'auto' : 750"
     @update:model-value="dialogVisibleUpdate"
   >
     <!-- 👉 dialog close btn -->
     <DialogCloseBtn @click="emit('update:isDialogVisible', false)" />
 
-    <VCard class="refer-and-earn-dialog">
-      <VCardText class="pa-5 pa-sm-16">
-        <h3 class="text-h3 text-center mb-2">
+    <VCard class="pa-2 pa-sm-10">
+      <VCardText>
+        <!-- 👉 Title -->
+        <h4 class="text-h4 text-center mb-2">
           Add payment methods
-        </h3>
-        <p class="text-sm-body-1 text-center text-disabled">
+        </h4>
+        <p class="text-body-1 text-center mb-6">
           Supported payment methods
         </p>
 
@@ -83,21 +84,23 @@ const paymentMethodsData = [
           v-for="(item, index) in paymentMethodsData"
           :key="index"
         >
-          <div class="d-flex justify-space-between align-center py-4 text-high-emphasis font-weight-medium gap-x-4">
+          <div class="d-flex justify-space-between align-center py-4 gap-x-4">
             <div class="d-flex align-center">
               <VImg
                 :src="item.img.value"
                 height="30"
                 width="50"
-                class="me-3"
+                class="me-4"
               />
-              <div>{{ item.title }}</div>
+              <h6 class="text-h6">
+                {{ item.title }}
+              </h6>
             </div>
-            <div class="d-none d-sm-block">
+            <div class="d-none d-sm-block text-body-1">
               {{ item.type }}
             </div>
           </div>
-          <VDivider />
+          <VDivider v-if="index !== paymentMethodsData.length - 1" />
         </div>
       </VCardText>
     </VCard>

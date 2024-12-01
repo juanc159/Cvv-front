@@ -1,63 +1,124 @@
 <script lang="ts" setup>
+import { useToast } from '@/composables/useToast';
+import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
+import { router } from '@/plugins/1.router';
+import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
+import type { VForm } from 'vuetify/components/VForm';
+
 definePage({
+  path: "grade-form/:action/:id?",
   name: "Grade-Form",
-  path: "/grade-form/:action/:id?",
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
-    requiredPermission: "grade.index",
+    requiredPermission: "grade.list",
   },
 });
 
-import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
-import { useCrudGradeStore } from "@/pages/Grade/Store/useCrudGradeStore";
-import { router } from "@/plugins/1.router";
-import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
-import { VForm } from "vuetify/components";
-const route = useRoute();
-const { toast } = useToast();
-const formValidation = ref<VForm>();
-const storeGrade = useCrudGradeStore();
 const authenticationStore = useAuthenticationStore();
-const { form, loading, typeEducations } = storeToRefs(storeGrade);
 
+const { toast } = useToast()
 const errorsBack = ref<IErrorsBack>({});
+const disabledFiledsView = ref<boolean>(false);
+const route = useRoute()
+const formValidation = ref<VForm>()
+const loading = reactive({
+  form: false,
+})
 
+const typeEducations = ref<Array<{
+  value: string,
+  title: string,
+}>>([])
 
-const submitForm = async () => {
-  form.value.company_id = authenticationStore.company.id;
-  const validation = await formValidation.value?.validate();
-  if (validation?.valid) {
-    const data = await storeGrade.fetchSave();
-    if (data?.code === 200) {
-      errorsBack.value = {};
-      await formValidation.value?.resetValidation();
-      router.push({ name: "Grade-Index" })
+const form = ref({
+  id: null as string | null,
+  type_education_id: null as string | null,
+  name: null as string | null,
+  subjects: [] as Array<object>,
+  company_id: null as string | null,
+});
 
-    }
-    if (data?.code === 422) errorsBack.value = data.errors ?? {}; // muestra error del back
-  } else {
-    toast("Faltan Campos Por Diligenciar", "", "danger");
+const clearForm = () => {
+  for (const key in form.value) {
+    form.value[key] = null
   }
-};
+  form.value.subjects = []
+}
 
+const fetchDataForm = async () => {
 
-onMounted(async () => {
-  storeGrade.clearForm();
+  form.value.id = route.params.id || null
 
-  await storeGrade.fetchDataForm(
-    Number(route.params.id),
-    route.params.action
+  const url = form.value.id ? `/grade/${form.value.id}/edit` : `/grade/create`
+
+  loading.form = true
+  const { data, response } = await useApi<any>(
+    createUrl(`${url}`, {
+      query: {
+        company_id: authenticationStore.company.id
+      },
+    })
   );
 
-  const info = JSON.parse(JSON.stringify(form.value))
-  await chageTypeEducation(info.type_education_id)
-  form.value.subjects = info.subjects
+
+  loading.form = false
+
+  if (response.value?.ok && data.value) {
+    typeEducations.value = data.value.typeEducations
 
 
+    //formulario 
+    if (data.value.form) {
+      form.value = data.value.form
+
+      const info = JSON.parse(JSON.stringify(form.value))
+      await chageTypeEducation(info.type_education_id)
+      form.value.subjects = info.subjects
+    }
+  }
+}
+
+const submitForm = async () => {
+  const validation = await formValidation.value?.validate()
+  if (validation?.valid) {
+
+    form.value.company_id = authenticationStore.company.id;
+
+    const url = form.value.id ? `/grade/update/${form.value.id}` : `/grade/store`
+
+    loading.form = true;
+    const { data, response } = await useApi(url).post(form.value);
+    loading.form = false;
+
+    if (response.value?.ok && data.value) {
+
+      if (data.value.code == 200) {
+        router.push({ name: 'Grade-List' })
+      }
+    }
+    if (data.value.code === 422) errorsBack.value = data.value.errors ?? {};
+
+  }
+  else {
+    toast('Faltan Campos Por Diligenciar', '', 'danger')
+  }
+}
+
+if (route.params.action == 'view') disabledFiledsView.value = true
+
+onMounted(async () => {
+  clearForm()
+  await fetchDataForm()
+})
 
 
+// Computed que verifica si al menos uno de los valores es true
+const isLoading = computed(() => {
+  return Object.values(loading).some(value => value);
 });
+
+
 
 const subjects = ref<Array<object>>([])
 
@@ -72,30 +133,30 @@ const chageTypeEducation = async (event: any) => {
 }
 
 
-
 </script>
+
 
 <template>
   <div>
-    <VCard>
+    <VCard :disabled="loading.form" :loading="loading.form">
+      <VCardTitle class="d-flex justify-space-between">
+        <span>
+          Formulario grado
+        </span>
+      </VCardTitle>
       <VCardText>
-        <VRow>
-          <VCol>
-            <HeaderAlertView sub-title="Formulario Grado" :action="String($route.params.action)" btn-action="list"
-              :validate-crud="true" :btn-back="true" @changeScreenBack="$router.back" />
-          </VCol>
-        </VRow>
-        <VForm ref="formValidation" lazy-validation>
+
+        <VForm ref="formValidation" @submit.prevent="() => { }" :disabled="disabledFiledsView">
           <VRow>
             <VCol cols="12" sm="3">
               <AppSelect clearable v-model="form.type_education_id" :rules="[requiredValidator]"
-                :error-messages="errorsBack.type_education_id" label="Tipo" @change="errorsBack.type_education_id = ''"
+                :error-messages="errorsBack.type_education_id" label="Tipo" @input="errorsBacktype_education_id = ''"
                 :requiredField="true" :items="typeEducations" @update:model-value="chageTypeEducation($event)">
               </AppSelect>
             </VCol>
             <VCol cols="12" sm="3">
               <AppTextField clearable v-model="form.name" :rules="[requiredValidator]" :error-messages="errorsBack.name"
-                label="Nombre" @keypress="errorsBack.name = ''" :requiredField="true">
+                label="Nombre" @input="errorsBack.name = ''" :requiredField="true">
               </AppTextField>
             </VCol>
 
@@ -105,15 +166,17 @@ const chageTypeEducation = async (event: any) => {
               </AppSelect>
             </VCol>
           </VRow>
+
         </VForm>
 
-        <VRow>
-          <VCol cols="12" class="d-flex justify-center">
-            <VBtn :loading="loading.form" color="primary" @click="submitForm()">
-              Guardar
-            </VBtn>
-          </VCol>
-        </VRow>
+      </VCardText>
+
+      <VCardText class="d-flex justify-end gap-3 flex-wrap mt-5">
+        <BtnBack :disabled="isLoading" :loading="isLoading" />
+        <VBtn v-if="!disabledFiledsView" :disabled="isLoading" :loading="isLoading" @click="submitForm()"
+          color="primary">
+          Guardar
+        </VBtn>
       </VCardText>
     </VCard>
   </div>

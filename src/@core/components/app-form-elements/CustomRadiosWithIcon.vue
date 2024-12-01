@@ -15,8 +15,9 @@ const props = defineProps<Props>()
 
 const emit = defineEmits<Emit>()
 
-const updateSelectedOption = (value: string) => {
-  emit('update:selectedRadio', value)
+const updateSelectedOption = (value: string | null) => {
+  if (value !== null)
+    emit('update:selectedRadio', value)
 }
 </script>
 
@@ -24,6 +25,7 @@ const updateSelectedOption = (value: string) => {
   <VRadioGroup
     v-if="props.radioContent"
     :model-value="props.selectedRadio"
+    class="custom-input-wrapper"
     @update:model-value="updateSelectedOption"
   >
     <VRow>
@@ -42,11 +44,11 @@ const updateSelectedOption = (value: string) => {
                 v-bind="item.icon"
                 class="text-high-emphasis"
               />
-              <h6 class="cr-title text-base">
+              <h6 class="text-h6">
                 {{ item.title }}
               </h6>
 
-              <p class="text-sm mb-0 clamp-text">
+              <p class="text-body-2 mb-0">
                 {{ item.desc }}
               </p>
             </div>
@@ -65,14 +67,10 @@ const updateSelectedOption = (value: string) => {
 .custom-radio-icon {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: 0.5rem;
 
   .v-radio {
-    margin-block-end: -0.25rem;
-  }
-
-  .cr-title {
-    font-weight: 500;
+    margin-block-end: -0.5rem;
   }
 }
 </style>

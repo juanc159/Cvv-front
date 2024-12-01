@@ -22,7 +22,7 @@ const errorsBack = ref<IErrorsBack>({});
 const formValidation = ref<VForm>();
 const formValidationDownload = ref<VForm>();
 const typeEducations = ref<Array<object>>([])
-const archive = ref(useImageUpload());
+const archive = ref(useFileUpload());
 archive.value.allowedExtensions = ["xls", "xlsx"]
 const selectedSwitch = ref<boolean>(false)
 
@@ -74,9 +74,10 @@ const dowloadNomina = async () => {
 
     const search = typeEducations.value.find(ele => ele.value == formDownload.value.type_education_id)
     const { data, response } = await useApi<any>(
-      createUrl(`/teacher-downloadAllConsolidated`, {
+      createUrl(`/note-downloadAllConsolidated`, {
         query: {
-          type_education_id: formDownload.value.type_education_id
+          type_education_id: formDownload.value.type_education_id,
+          company_id: authenticationStore.company.id,
         },
       })
     );

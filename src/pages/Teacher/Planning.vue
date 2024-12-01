@@ -9,10 +9,8 @@ definePage({
   },
 });
 
-import { useImageUpload } from "@/composables/useImageUpload";
 import { router } from "@/plugins/1.router";
 import { VForm } from "vuetify/components";
-import { VDataTable } from "vuetify/labs/VDataTable";
 
 const route = useRoute();
 const { toast } = useToast();
@@ -22,7 +20,7 @@ const fileValidation = ref<VForm>();
 const arrayValidation = ref<Array<string | boolean>>([]);
 
 // File
-const archive = ref(useImageUpload());
+const archive = ref(useFileUpload());
 const aExtImage = ["jpg", "jpeg", "png", "pdf", "ppsx", "pptx"];
 archive.value.allowedExtensions = aExtImage;
 
@@ -30,7 +28,7 @@ const submitForm = async () => {
 
   const formData = new FormData()
 
-  formData.append("teacher_id", JSON.stringify(teacher.value.id))
+  formData.append("teacher_id", teacher.value.id)
 
   let cant = 0
   teacher.value.complementaries.forEach(element => {
@@ -89,7 +87,7 @@ onMounted(async () => {
 
       element.subjects.forEach(element2 => {
 
-        dynamicVariables['file-' + element2.value] = ref(useImageUpload());
+        dynamicVariables['file-' + element2.value] = ref(useFileUpload());
 
         dynamicVariables['file-' + element2.value].allowedExtensions = ["jpg", "jpeg", "png", "pdf", "ppsx", "pptx"]
 

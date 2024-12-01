@@ -1,61 +1,152 @@
 <script lang="ts" setup>
+import { useToast } from '@/composables/useToast';
+import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
+import { router } from '@/plugins/1.router';
+import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
+import type { VForm } from 'vuetify/components/VForm';
+
 definePage({
+  path: "teacher-form/:action/:id?",
   name: "Teacher-Form",
-  path: "/teacher-form/:action/:id?",
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
-    requiredPermission: "teacher.index",
+    requiredPermission: "teacher.list",
   },
 });
 
-import { useImageUpload } from "@/composables/useImageUpload";
-import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
-import { useCrudTeacherStore } from "@/pages/Teacher/Store/useCrudTeacherStore";
-import { router } from "@/plugins/1.router";
-import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
-import { VForm } from "vuetify/components";
-import { VDataTable } from "vuetify/labs/VDataTable";
-
-const route = useRoute();
-const { toast } = useToast();
-const formValidation = ref<VForm>();
-const fileValidation = ref<VForm>();
-const complementaryValidation = ref<VForm>();
-const storeTeacher = useCrudTeacherStore();
 const authenticationStore = useAuthenticationStore();
-const { form, loading, jobPositions, typeEducations, sections } = storeToRefs(storeTeacher);
+
+const { toast } = useToast()
 const errorsBack = ref<IErrorsBack>({});
+const disabledFiledsView = ref<boolean>(false);
+const route = useRoute()
+const formValidation = ref<VForm>()
+const complementaryValidation = ref<VForm>();
+const loading = reactive({
+  form: false,
+})
+
+const typeEducations = ref<Array<{
+  value: string,
+  title: string,
+}>>([])
+const jobPositions = ref<Array<{
+  value: string,
+  title: string,
+}>>([])
+const sections = ref<Array<{
+  value: string,
+  title: string,
+}>>([])
+
+const form = ref({
+  id: null as string | null,
+  type_education_id: null as string | null,
+  job_position_id: null as string | null,
+  name: null as string | null,
+  last_name: null as string | null,
+  email: null as string | null,
+  password: null as string | null,
+  phone: null as string | null,
+  photo: null as string | null | File,
+  company_id: null as string | null,
+  complementaries: [] as Array<object>,
+});
+
+const clearForm = () => {
+  for (const key in form.value) {
+    form.value[key] = null
+  }
+  form.value.complementaries = []
+}
+
+const fetchDataForm = async () => {
+
+  form.value.id = route.params.id || null
+
+  const url = form.value.id ? `/teacher/${form.value.id}/edit` : `/teacher/create`
+
+  loading.form = true
+  const { data, response } = await useApi<any>(
+    createUrl(url, {
+      query: {
+        company_id: authenticationStore.company.id
+      },
+    })
+  );
+
+  loading.form = false
+
+  if (response.value?.ok && data.value) {
+    typeEducations.value = data.value.typeEducations
+    jobPositions.value = data.value.jobPositions
+    sections.value = data.value.sections
+
+    //formulario 
+    if (data.value.form) {
+      form.value = data.value.form
+    }
+  }
+}
+
+const submitForm = async () => {
+  const validation = await formValidation.value?.validate()
+  if (validation?.valid) {
+
+    form.value.company_id = authenticationStore.company.id;
+
+    const formData = new FormData();
+    for (const key in form.value) {
+      if (!["complementaries"].includes(key)) {
+        formData.append(key, form.value[key])
+      }
+    }
+    formData.append("complementaries", JSON.stringify(form.value.complementaries))
+
+    const url = form.value.id ? `/teacher/update/${form.value.id}` : `/teacher/store`
+
+    console.log("url", url);
+
+    loading.form = true;
+    const { data, response } = await useApi(url).post(formData);
+    loading.form = false;
+
+    if (response.value?.ok && data.value) {
+
+      if (data.value.code == 200) {
+        router.push({ name: 'Teacher-List' })
+      }
+    }
+    if (data.value.code === 422) errorsBack.value = data.value.errors ?? {};
+
+  }
+  else {
+    toast('Faltan Campos Por Diligenciar', '', 'danger')
+  }
+}
+
+if (route.params.action == 'view') disabledFiledsView.value = true
+
+onMounted(async () => {
+  clearForm()
+  await fetchDataForm()
+})
+
+
+// Computed que verifica si al menos uno de los valores es true
+const isLoading = computed(() => {
+  return Object.values(loading).some(value => value);
+});
+
+
 
 const arrayValidation = ref<Array<string | boolean>>([]);
-
 // File
-const archive = ref(useImageUpload());
+const archive = ref(useFileUpload());
 const aExtImage = ["jpg", "jpeg", "png"];
 archive.value.allowedExtensions = aExtImage;
 
-const submitForm = async () => {
-  form.value.company_id = authenticationStore.company.id;
-  form.value.complementaries = arrayComplementary.value;
-  const validation = await formValidation.value?.validate();
-  if (validation?.valid) {
-    const data = await storeTeacher.fetchSave();
-    if (data?.code === 200) {
-      arrayValidation.value = [];
-      errorsBack.value = {};
-      archive.value.clearData();
-      await formValidation.value?.resetValidation();
-      router.push({ name: "Teacher-Index" })
-
-    }
-    if (data?.code === 422) errorsBack.value = data.errors ?? {}; // muestra error del back
-
-
-
-  } else {
-    toast("Faltan Campos Por Diligenciar", "", "danger");
-  }
-};
 
 const addPhoto = (e: Event) => {
   archive.value.handleImageSelected(e);
@@ -64,27 +155,30 @@ const addPhoto = (e: Event) => {
   }, 1000);
 };
 
-onMounted(async () => {
-  storeTeacher.clearForm();
-
-  await storeTeacher.fetchDataForm(
-    Number(route.params.id),
-    route.params.action
-  );
-
-  arrayComplementary.value = JSON.parse(JSON.stringify(form.value.complementaries))
-});
-
 watch(
   form,
   (newValue, oldValue) => {
-    if (!newValue.id) arrayValidation.value.photo = [requiredValidator(archive.value.imageUrl)]
-    else arrayValidation.value["photo"] = []
+    if (!newValue.id) {
+      arrayValidation.value.photo = [requiredValidator(archive.value.imageUrl)]
+      arrayValidation.value.password = [requiredValidator]
+    }
+    else {
+      arrayValidation.value["photo"] = []
+      arrayValidation.value["password"] = []
+    }
   },
   { deep: true }
 );
 
-//COMPLEMENTARY
+
+//Información complementaria
+const headers = [
+  { title: "Grado o nivel", key: "grade_name" },
+  { title: "Sección", key: "section_name" },
+  { title: "Materias", key: "subjects" },
+  { title: "Acciones", key: "actions" },
+];
+
 const formComplementary = ref<{
   grade_id: null | number
   section_id: null | number
@@ -94,14 +188,6 @@ const formComplementary = ref<{
   section_id: null,
   subjects: [],
 })
-const arrayComplementary = ref<Array<object>>([])
-
-const headers = [
-  { title: "Grado o nivel", key: "grade_name" },
-  { title: "Sección", key: "section_name" },
-  { title: "Materias", key: "subjects" },
-  { title: "Acciones", key: "actions" },
-];
 
 const clearFormComplementary = () => {
   formComplementary.value = {
@@ -111,17 +197,14 @@ const clearFormComplementary = () => {
   }
 }
 
-const grades = ref([])
-const subjects = ref([])
 const addInfo = async () => {
   const validation = await complementaryValidation.value?.validate();
   if (validation?.valid) {
     const searchGrade = gradesFilter.value.find(ele => ele.value == formComplementary.value.grade_id)
     const searchSection = sections.value.find(ele => ele.value == formComplementary.value.section_id)
-
     const subjectsData = subjectsFilter.value.filter(ele => formComplementary.value.subjects.includes(ele.value))
 
-    arrayComplementary.value.push({
+    form.value.complementaries.push({
       id: null,
       grade_id: formComplementary.value.grade_id,
       grade_name: searchGrade.title,
@@ -138,17 +221,8 @@ const addInfo = async () => {
 
 }
 const deleteInfo = (index: number) => {
-  if (arrayComplementary.value[index].id) arrayComplementary.value[index].delete = 1
-  else arrayComplementary.value.splice(index, 1)
-
+  form.value.complementaries.splice(index, 1)
 }
-
-const arrayElementsComplementaries = computed(() => {
-  return arrayComplementary.value.filter(ele => ele.delete != 1);
-});
-
-
-
 
 const gradesFilter = computed(() => {
   if (form.value.type_education_id) {
@@ -156,6 +230,7 @@ const gradesFilter = computed(() => {
   }
   return []
 })
+
 const subjectsFilter = computed(() => {
   if (formComplementary.value.grade_id) {
     return gradesFilter.value.find(ele => ele.value == formComplementary.value.grade_id).subjects
@@ -163,20 +238,20 @@ const subjectsFilter = computed(() => {
   return []
 })
 
-
 </script>
+
 
 <template>
   <div>
-    <VCard :loading="loading.form" :disabled="loading.form">
+    <VCard :disabled="loading.form" :loading="loading.form">
+      <VCardTitle class="d-flex justify-space-between">
+        <span>
+          Formulario docente
+        </span>
+      </VCardTitle>
       <VCardText>
-        <VRow>
-          <VCol>
-            <HeaderAlertView sub-title="Formulario Teacher" :action="String($route.params.action)" btn-action="list"
-              :validate-crud="true" :btn-back="true" @changeScreenBack="$router.back" />
-          </VCol>
-        </VRow>
-        <VForm ref="formValidation" lazy-validation>
+
+        <VForm ref="formValidation" @submit.prevent="() => { }" :disabled="disabledFiledsView">
           <VRow>
             <VCol cols="12" sm="3">
               <AppSelect :items="typeEducations" clearable :rules="[requiredValidator]" v-model="form.type_education_id"
@@ -189,29 +264,29 @@ const subjectsFilter = computed(() => {
             </VCol>
             <VCol cols="12" sm="3">
               <AppTextField clearable v-model="form.name" :rules="[requiredValidator]" :error-messages="errorsBack.name"
-                label="Nombre" @keypress="errorsBack.name = ''" :requiredField="true">
+                label="Nombre" @input="errorsBack.name = ''" :requiredField="true">
               </AppTextField>
             </VCol>
             <VCol cols="12" sm="3">
               <AppTextField clearable v-model="form.last_name" :rules="[requiredValidator]"
-                :error-messages="errorsBack.last_name" label="Apellido" @keypress="errorsBack.last_name = ''"
+                :error-messages="errorsBack.last_name" label="Apellido" @input="errorsBack.last_name = ''"
                 :requiredField="true">
               </AppTextField>
             </VCol>
             <VCol cols="12" sm="3">
               <AppTextField clearable v-model="form.email" :rules="[requiredValidator, emailValidator]"
-                :error-messages="errorsBack.email" label="Correo" @keypress="errorsBack.email = ''"
-                :requiredField="true">
+                :error-messages="errorsBack.email" label="Correo" @input="errorsBack.email = ''" :requiredField="true">
               </AppTextField>
             </VCol>
             <VCol cols="12" sm="3">
               <AppTextField clearable v-model="form.password" :error-messages="errorsBack.password" label="Contraseña"
-                @keypress="errorsBack.password = ''">
+                @input="errorsBack.password = ''" :requiredField="form.id ? false : true"
+                :rules="arrayValidation['password']">
               </AppTextField>
             </VCol>
             <VCol cols="12" sm="3">
               <AppTextField clearable v-model="form.phone" :rules="[requiredValidator]"
-                :error-messages="errorsBack.phone" label="Teléfono" @keypress="errorsBack.phone = ''"
+                :error-messages="errorsBack.phone" label="Teléfono" @input="errorsBack.phone = ''"
                 :requiredField="true">
               </AppTextField>
             </VCol>
@@ -229,13 +304,16 @@ const subjectsFilter = computed(() => {
           <VRow>
             <VCol cols="12" class="d-flex justify-center ">
               <div style=" block-size: 200px;inline-size: 200px;">
-                <VImg :src="archive.imageUrl ?? form.photo"></VImg>
+                <VImg :src="archive.imageUrl ?? storageBack(form.photo)"></VImg>
               </div>
             </VCol>
           </VRow>
 
         </VForm>
 
+      </VCardText>
+
+      <VCardText>
         <VForm ref="complementaryValidation" lazy-validation>
           <VRow>
             <VCol cols="12">
@@ -259,7 +337,7 @@ const subjectsFilter = computed(() => {
               <VBtn color="success" @click="addInfo()">Agregar</VBtn>
             </VCol>
             <VCol cols="12">
-              <VDataTable :headers="headers" :items="arrayElementsComplementaries" :items-per-page="999">
+              <VDataTable :headers="headers" :items="form.complementaries" :items-per-page="999">
                 <template #item.subjects="{ item }">
                   <VChip color="primary" class="mr-2" v-for="(element, index) in item.subjects" :key="index">{{
                     element.title }}
@@ -278,16 +356,14 @@ const subjectsFilter = computed(() => {
             </VCol>
           </VRow>
         </VForm>
+      </VCardText>
 
-
-
-        <VRow>
-          <VCol cols="12" class="d-flex justify-center">
-            <VBtn :loading="loading.form" color="primary" @click="submitForm()">
-              Guardar
-            </VBtn>
-          </VCol>
-        </VRow>
+      <VCardText class="d-flex justify-end gap-3 flex-wrap mt-5">
+        <BtnBack :disabled="isLoading" :loading="isLoading" />
+        <VBtn v-if="!disabledFiledsView" :disabled="isLoading" :loading="isLoading" @click="submitForm()"
+          color="primary">
+          Guardar
+        </VBtn>
       </VCardText>
     </VCard>
   </div>

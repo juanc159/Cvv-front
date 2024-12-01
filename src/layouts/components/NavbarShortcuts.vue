@@ -7,7 +7,7 @@ const shortcuts = [
     to: { name: 'apps-calendar' },
   },
   {
-    icon: 'tabler-file',
+    icon: 'tabler-file-dollar',
     title: 'Invoice App',
     subtitle: 'Manage Accounts',
     to: { name: 'apps-invoice-list' },
@@ -19,13 +19,13 @@ const shortcuts = [
     to: { name: 'apps-user-list' },
   },
   {
-    icon: 'tabler-lock',
+    icon: 'tabler-users',
     title: 'Role Management',
     subtitle: 'Permission',
     to: { name: 'apps-roles' },
   },
   {
-    icon: 'tabler-layout-dashboard',
+    icon: 'tabler-device-desktop-analytics',
     title: 'Dashboard',
     subtitle: 'Dashboard Analytics',
     to: { name: 'dashboards-analytics' },

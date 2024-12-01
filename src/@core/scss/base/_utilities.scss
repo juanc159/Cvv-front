@@ -1,8 +1,9 @@
 @use "@configured-variables" as variables;
 @use "@layouts/styles/mixins" as layoutsMixins;
 
-// 👉 Demo spacers
-// TODO: Use vuetify SCSS variable here
+/* 👉 Demo spacers */
+
+/* TODO: Use vuetify SCSS variable here; */
 $card-spacer-content: 16px;
 
 .demo-space-x {
@@ -57,14 +58,20 @@ $card-spacer-content: 16px;
   color: rgba(211, 212, 220);
 }
 
-.text-link{
-  &:not(:hover){
-    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity))
+.text-link {
+  &:not(:hover) {
+    color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity));
+  }
+}
+
+.text-link {
+  &:not(:hover) {
+    color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity));
   }
 }
 
 .bg-var-theme-background {
-  background-color: rgba(var(--v-theme-on-background), 0.08) !important;
+  background-color: rgba(var(--v-theme-on-background), var(--v-hover-opacity)) !important;
 }
 
 .bg-global-primary {
@@ -117,7 +124,6 @@ $card-spacer-content: 16px;
 
     .v-btn--icon.v-btn--density-default {
       block-size: calc(var(--v-btn-height) + -10px);
-      color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
       inline-size: calc(var(--v-btn-height) + -8px);
 
       &.v-btn--active {
@@ -135,6 +141,7 @@ $card-spacer-content: 16px;
       .v-btn__content {
         .v-icon {
           block-size: 8px !important;
+          font-size: 8px !important;
           inline-size: 8px !important;
         }
       }
@@ -171,5 +178,12 @@ $card-spacer-content: 16px;
     color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
     font-size: 14px;
     line-height: 1.25rem;
+  }
+
+  .timeline-chip {
+    border-radius: 6px;
+    background: rgba(var(--v-theme-on-surface), var(--v-hover-opacity));
+    padding-block: 5px;
+    padding-inline: 10px;
   }
 }

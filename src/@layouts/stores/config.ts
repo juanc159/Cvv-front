@@ -42,11 +42,14 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   // 👉 Horizontal Nav Type
   const horizontalNavType = ref(layoutConfig.horizontalNav.type)
 
+  //  👉 Horizontal Nav Popover Offset
+  const horizontalNavPopoverOffset = ref(layoutConfig.horizontalNav.popoverOffset)
+
   // 👉 Footer Type
   const footerType = ref(layoutConfig.footer.type)
 
   // 👉 Misc
-  const isLessThanOverlayNavBreakpoint = useMediaQuery(`(max-width: ${layoutConfig.app.overlayNavFromBreakpoint}px)`)
+  const isLessThanOverlayNavBreakpoint = computed(() => useMediaQuery(`(max-width: ${layoutConfig.app.overlayNavFromBreakpoint}px)`).value)
 
   // 👉 Layout Classes
   const _layoutClasses = computed(() => {
@@ -102,6 +105,7 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
     isNavbarBlurEnabled,
     isVerticalNavCollapsed,
     horizontalNavType,
+    horizontalNavPopoverOffset,
     footerType,
     isLessThanOverlayNavBreakpoint,
     isAppRTL,

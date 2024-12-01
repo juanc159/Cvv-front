@@ -26,7 +26,7 @@ const onSubmit = () => {
   emit('update:permissionName', currentPermissionName.value)
 }
 
-watch(props, () => {
+watch(() => props, () => {
   currentPermissionName.value = props.permissionName
 })
 </script>
@@ -40,18 +40,16 @@ watch(props, () => {
     <!-- 👉 dialog close btn -->
     <DialogCloseBtn @click="onReset" />
 
-    <VCard class="pa-sm-8 pa-5">
-      <!-- 👉 Title -->
-      <VCardItem class="text-center">
-        <VCardTitle class="text-h5">
+    <VCard class="pa-2 pa-sm-10">
+      <VCardText>
+        <!-- 👉 Title -->
+        <h4 class="text-h4 text-center mb-2">
           {{ props.permissionName ? 'Edit' : 'Add' }} Permission
-        </VCardTitle>
-        <VCardSubtitle>
+        </h4>
+        <p class="text-body-1 text-center mb-6">
           {{ props.permissionName ? 'Edit' : 'Add' }}  permission as per your requirements.
-        </VCardSubtitle>
-      </VCardItem>
+        </p>
 
-      <VCardText class="mt-1">
         <!-- 👉 Form -->
         <VForm>
           <VAlert
@@ -60,20 +58,20 @@ watch(props, () => {
             variant="tonal"
             class="mb-6"
           >
-            By editing the permission name, you might break the system permissions functionality. Please ensure you're absolutely certain before proceeding.
+            <template #text>
+              By {{ props.permissionName ? 'editing' : 'adding' }} the permission name, you might break the system permissions functionality.
+            </template>
           </VAlert>
 
           <!-- 👉 Role name -->
-          <div class="d-flex align-end gap-3 mb-3">
+          <div class="d-flex gap-4 mb-6 flex-wrap flex-column flex-sm-row">
             <AppTextField
               v-model="currentPermissionName"
-              density="compact"
-              label="Permission Name"
               placeholder="Enter Permission Name"
             />
 
             <VBtn @click="onSubmit">
-              Update
+              {{ props.permissionName ? 'Update' : 'Add' }}
             </VBtn>
           </div>
 

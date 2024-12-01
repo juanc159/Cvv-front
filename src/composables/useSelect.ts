@@ -1,13 +1,11 @@
 import { ref, watch } from 'vue'
 
-export function useSelect(fun, arrayData, countLinks, filterDta) {
-  const searchQuery = ref<string>("")
+export function useSelect(fun, arrayData = [], countLinks = 0, filterDta = {}) {
+  const searchQueryInfinite = ref<string>("")
   const dataNueva = ref<Array<object>>([])
   const page = ref<number>(1)
   const totalLinks = ref<number>(1)
   const filterInterno = ref<object>({})
-
-
 
   const prev = async () => {
     page.value--
@@ -28,7 +26,7 @@ export function useSelect(fun, arrayData, countLinks, filterDta) {
   const search = async () => {
     let filter = {
       page: page.value,
-      searchQuery: searchQuery.value
+      searchQueryInfinite: searchQueryInfinite.value
     }
     for (const key in filterDta) {
       filter[key] = filterDta[key]
@@ -39,11 +37,14 @@ export function useSelect(fun, arrayData, countLinks, filterDta) {
 
     await fun(filter)
 
+    dataNueva.value = [];
+    dataNueva.value.push(...arrayData.value)
+
   }
 
   let timeoutId = null;
 
-  watch(searchQuery, async (newQuestion, oldQuestion) => {
+  watch(searchQueryInfinite, async (newQuestion, oldQuestion) => {
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
@@ -52,7 +53,7 @@ export function useSelect(fun, arrayData, countLinks, filterDta) {
     page.value = 1
     let filter = {
       page: page.value,
-      searchQuery: newQuestion
+      searchQueryInfinite: newQuestion
     }
     for (const key in filterDta) {
       filter[key] = filterDta[key]
@@ -64,20 +65,24 @@ export function useSelect(fun, arrayData, countLinks, filterDta) {
 
 
     timeoutId = setTimeout(async () => {
-      // Lógica para llamar a tu API aquí
-      console.log('Ejecutando búsqueda: ');
+      // Lógica para llamar a tu API aquí 
       await fun(filter)
+
+      dataNueva.value = [];
+      if (arrayData && arrayData.value !== undefined) {
+        dataNueva.value.push(...arrayData.value)
+      }
+      if (countLinks && countLinks.value !== undefined) {
+        totalLinks.value = countLinks.value
+      }
     }, 300); // Puedes ajustar el tiempo de espera según tus necesidades
 
 
 
-    dataNueva.value = [];
-    dataNueva.value.push(...arrayData.value)
-    totalLinks.value = countLinks.value
   })
 
   return {
-    searchQuery,
+    searchQueryInfinite,
     dataNueva,
     page,
     filterInterno,

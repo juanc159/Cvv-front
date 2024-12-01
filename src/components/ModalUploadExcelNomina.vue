@@ -32,7 +32,7 @@ const form = ref({
   archive: null as null | File,
 })
 
-const archive = ref(useImageUpload());
+const archive = ref(useFileUpload());
 archive.value.allowedExtensions = ["xls", "xlsx"]
 
 const typeEducations = ref<Array<object>>([])
