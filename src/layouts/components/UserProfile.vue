@@ -42,7 +42,7 @@ const openModalPassword = () => {
   <VBadge dot location="bottom right" offset-x="3" offset-y="3" bordered color="success">
     <VAvatar class="cursor-pointer" color="primary" variant="tonal">
       <!-- <VImg :src="avatar1" /> -->
-      {{ avatarText(avatarData) }}
+      {{ avatarText(user.full_name) }}
 
       <!-- SECTION Menu -->
       <VMenu activator="parent" width="230" location="bottom end" offset="14px">
@@ -60,7 +60,7 @@ const openModalPassword = () => {
                   </VAvatar> -->
 
                   <VAvatar color="primary" variant="tonal">
-                    {{ avatarText(avatarData) }}
+                    {{ avatarText(user.full_name) }}
                   </VAvatar>
                 </VBadge>
               </VListItemAction>
