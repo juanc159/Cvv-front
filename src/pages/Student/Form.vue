@@ -1,76 +1,142 @@
 <script lang="ts" setup>
+import { useToast } from '@/composables/useToast';
+import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
+import { router } from '@/plugins/1.router';
+import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
+import type { VForm } from 'vuetify/components/VForm';
+
+
 definePage({
+  path: "student-form/:action/:id?",
   name: "Student-Form",
-  path: "/student-form/:action/:id?",
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
-    requiredPermission: "student.index",
+    requiredPermission: "student.list",
   },
 });
 
-import { useImageUpload } from "@/composables/useImageUpload";
-import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
-import { useCrudStudentStore } from "@/pages/Student/Store/useCrudStudentStore";
-import { router } from "@/plugins/1.router";
-import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
-import { VForm } from "vuetify/components";
-
-const route = useRoute();
-const { toast } = useToast();
-const formValidation = ref<VForm>();
-const storeStudent = useCrudStudentStore();
 const authenticationStore = useAuthenticationStore();
-const { form, loading, typeEducations, sections } = storeToRefs(storeStudent);
+
+const { toast } = useToast()
 const errorsBack = ref<IErrorsBack>({});
+const disabledFiledsView = ref<boolean>(false);
+const route = useRoute()
+const formValidation = ref<VForm>()
+const loading = reactive({
+  form: false,
+})
+
+const typeEducations = ref<Array<{
+  value: string,
+  title: string,
+}>>([])
+const sections = ref<Array<{
+  value: string,
+  title: string,
+}>>([])
+
+const form = ref({
+  id: null as string | null,
+  type_education_id: null as string | null,
+  grade_id: null as string | null,
+  section_id: null as string | null,
+  identity_document: null as string | null,
+  full_name: null as string | null,
+  photo: null as string | null | File,
+  company_id: null as string | null,
+});
+
+const clearForm = () => {
+  for (const key in form.value) {
+    form.value[key] = null
+  }
+}
+
+const fetchDataForm = async () => {
+
+  form.value.id = route.params.id || null
+
+  const url = form.value.id ? `/student/${form.value.id}/edit` : `/student/create`
+
+  loading.form = true
+  const { response, data } = await useApi(url).get();
+  loading.form = false
+
+  if (response.value?.ok && data.value) {
+    typeEducations.value = data.value.typeEducations
+    sections.value = data.value.sections
+
+
+    //formulario 
+    if (data.value.form) {
+      form.value = data.value.form
+    }
+  }
+}
+
+const submitForm = async () => {
+  const validation = await formValidation.value?.validate()
+  if (validation?.valid) {
+
+    form.value.company_id = authenticationStore.company.id;
+
+    const url = form.value.id ? `/student/update/${form.value.id}` : `/student/store`
+
+    const formData = new FormData();
+    for (const key in form.value) {
+      if (!["arrayDetails"].includes(key)) {
+        formData.append(key, form.value[key])
+      }
+    }
+
+    loading.form = true;
+    const { data, response } = await useApi(url).post(formData);
+    loading.form = false;
+
+    if (response.value?.ok && data.value) {
+
+      if (data.value.code == 200) {
+        router.push({ name: 'Student-List' })
+      }
+    }
+    if (data.value.code === 422) errorsBack.value = data.value.errors ?? {};
+
+  }
+  else {
+    toast('Faltan Campos Por Diligenciar', '', 'danger')
+  }
+}
+
+if (route.params.action == 'view') disabledFiledsView.value = true
+
+onMounted(async () => {
+  clearForm()
+  await fetchDataForm()
+})
+
+
+// Computed que verifica si al menos uno de los valores es true
+const isLoading = computed(() => {
+  return Object.values(loading).some(value => value);
+});
+
 
 
 // File
-const archive = ref(useImageUpload());
+const archive = ref(useFileUpload());
 const aExtImage = ["jpg", "jpeg", "png"];
 archive.value.allowedExtensions = aExtImage;
 
-const submitForm = async () => {
-  form.value.company_id = authenticationStore.company.id;
-
-  const validation = await formValidation.value?.validate();
-  if (validation?.valid) {
-    const data = await storeStudent.fetchSave();
-    if (data?.code === 200) {
-      errorsBack.value = {};
-      archive.value.clearData();
-      await formValidation.value?.resetValidation();
-      router.push({ name: "Student-Index" })
-
-    }
-    if (data?.code === 422) errorsBack.value = data.errors ?? {}; // muestra error del back
-
-
-
-  } else {
-    toast("Faltan Campos Por Diligenciar", "", "danger");
-  }
-};
-
 const addPhoto = (e: Event) => {
-  loading.value.form = true
+  loading.form = true
   archive.value.handleImageSelected(e);
   setTimeout(() => {
     form.value.photo = archive.value.imageFile;
-    loading.value.form = false
+    loading.form = false
 
   }, 1000);
 };
-
-onMounted(async () => {
-  storeStudent.clearForm();
-
-  await storeStudent.fetchDataForm(
-    Number(route.params.id),
-    route.params.action
-  );
-
-});
 
 const gradesFilter = computed(() => {
   if (form.value.type_education_id) {
@@ -81,17 +147,18 @@ const gradesFilter = computed(() => {
 
 </script>
 
+
 <template>
   <div>
-    <VCard :loading="loading.form" :disabled="loading.form">
+    <VCard :disabled="loading.form" :loading="loading.form">
+      <VCardTitle class="d-flex justify-space-between">
+        <span>
+          Formulario estudiante
+        </span>
+      </VCardTitle>
       <VCardText>
-        <VRow>
-          <VCol>
-            <HeaderAlertView sub-title="Formulario Student" :action="String($route.params.action)" btn-action="list"
-              :validate-crud="true" :btn-back="true" @changeScreenBack="$router.back" />
-          </VCol>
-        </VRow>
-        <VForm ref="formValidation" lazy-validation>
+
+        <VForm ref="formValidation" @submit.prevent="() => { }" :disabled="disabledFiledsView">
           <VRow>
             <VCol cols="12" sm="3">
               <AppSelect :items="typeEducations" clearable :rules="[requiredValidator]" v-model="form.type_education_id"
@@ -112,13 +179,13 @@ const gradesFilter = computed(() => {
             <VCol cols="12" sm="3">
               <AppTextField clearable v-model="form.identity_document" :rules="[requiredValidator]"
                 :error-messages="errorsBack.identity_document" label="Cédula de identidad"
-                @keypress="errorsBack.identity_document = ''" :requiredField="true">
+                @input="errorsBack.identity_document = ''" :requiredField="true">
               </AppTextField>
             </VCol>
 
             <VCol cols="12" sm="6">
               <AppTextField clearable v-model="form.full_name" :rules="[requiredValidator]"
-                :error-messages="errorsBack.full_name" label="Nombre completo" @keypress="errorsBack.full_name = ''"
+                :error-messages="errorsBack.full_name" label="Nombre completo" @input="errorsBack.full_name = ''"
                 :requiredField="true">
               </AppTextField>
             </VCol>
@@ -136,20 +203,22 @@ const gradesFilter = computed(() => {
           <VRow>
             <VCol cols="12" class="d-flex justify-center ">
               <div style=" block-size: 200px;inline-size: 200px;">
-                <VImg :src="archive.imageUrl ?? form.photo"></VImg>
+                <VImg :src="archive.imageUrl ?? storageBack(form.photo)" alt="alt"></VImg>
+
               </div>
             </VCol>
           </VRow>
 
         </VForm>
 
-        <VRow>
-          <VCol cols="12" class="d-flex justify-center">
-            <VBtn :loading="loading.form" color="primary" @click="submitForm()">
-              Guardar
-            </VBtn>
-          </VCol>
-        </VRow>
+      </VCardText>
+
+      <VCardText class="d-flex justify-end gap-3 flex-wrap mt-5">
+        <BtnBack :disabled="isLoading" :loading="isLoading" />
+        <VBtn v-if="!disabledFiledsView" :disabled="isLoading" :loading="isLoading" @click="submitForm()"
+          color="primary">
+          Guardar
+        </VBtn>
       </VCardText>
     </VCard>
   </div>
