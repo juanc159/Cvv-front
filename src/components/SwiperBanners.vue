@@ -31,7 +31,7 @@ if (data.value.code == 200) {
   <swiper-container :autoplay="{ delay: 5000, disableOnInteraction: false }" style="margin-block-start: 6rem"
     v-if="banners.length > 0" navigation="true" events-prefix="swiper-">
     <swiper-slide pagination="true" v-for="(item, index) in banners" :key="index">
-      <VImg :src="item.path" />
+      <VImg :src="storageBack(item.path)" />
     </swiper-slide>
   </swiper-container>
 </template>

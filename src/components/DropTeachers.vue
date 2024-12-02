@@ -63,7 +63,7 @@ const saveOrder = async () => {
             @dragstart="dragstart(index)" @dragover="dragover" @drop="drop(index)" @dragend="dragend">
             <div
               :style="{ maxHeight: '185px', minHeight: '185px', borderRadius: '90px 20px 0 0', backgroundColor: `${item.backgroundColor}` }">
-              <VImg :src="item.photo" height="240" class="team-image" />
+              <VImg :src="storageBack(item.photo)" height="240" class="team-image" />
             </div>
             <VCardText class="text-center pa-4"
               :style="{ border: `1px solid ${item.backgroundColor}`, borderBlockStart: 'none', borderRadius: '0 0 6px 6px', boxSizing: 'border-box' }">
