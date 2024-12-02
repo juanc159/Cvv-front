@@ -117,7 +117,7 @@ const passwordSaved = () => {
           <VCardText class="d-flex justify-center">
             <div class="me-auto pe-4">
               <p class="d-flex align-center mb-6">
-                <VBtn :loading="loading.btnPdf" @click="openPdfPreview(user)" variant="outlined">
+                <VBtn :loading="loading.btnPdf" @click="openPdfPreview(user)" :disabled="!user.pdf" variant="outlined">
                   <VIcon icon="tabler-download"></VIcon>
                   <span>Descargar Notas</span>
                 </VBtn>
