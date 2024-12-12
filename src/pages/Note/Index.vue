@@ -25,21 +25,39 @@ const typeEducations = ref<Array<object>>([])
 const archive = ref(useFileUpload());
 archive.value.allowedExtensions = ["xls", "xlsx"]
 const selectedSwitch = ref<boolean>(false)
+const selectedNotes = ref({});
 
 
 onMounted(async () => {
+  await loadDataVisualizeNotes()
 
   loading.form = true
   const { data, response } = await useApi('note-dataForm').get()
-  loading.form = false
 
   if (response.value?.ok && data.value) {
     typeEducations.value = data.value.typeEducations
 
     selectedSwitch.value = data.value.blockData
   }
+  loading.form = false
 })
 
+const loadDataVisualizeNotes = async () => {
+  const { data, response } = await useApi('/type_educations/visualization/show').get()
+  if (response.value?.ok && data.value) {
+    selectedNotes.value = data.value.selectedNotes
+
+
+    // typeEducations.value.forEach(element => {
+    //   selectedNotes[element.value] = {}
+    //   for (let index = 1; index <= element.cantNotes; index++) {
+
+    //     selectedNotes[element.value]["note_" + index] = false
+    //   }
+    // });
+  }
+
+}
 
 const submitForm = async () => {
   form.value.archive = archive.value.imageFile;
@@ -112,15 +130,23 @@ const selectValueLabel = computed(() => {
 });
 
 
+const submitFormVisualization = async () => {
+
+  loading.form = true
+  const { data, response } = await useApi('/type_educations/visualization/store').post({
+    selectedNotes: selectedNotes.value
+  })
+  loading.form = false
 
 
+};
 </script>
 
 <template>
   <div>
 
 
-    <VCard :disabled="loading.form" :loading="loading.form">
+    <!-- <VCard :disabled="loading.form" :loading="loading.form">
       <VCardTitle primary-title>Cargar Notas</VCardTitle>
       <VCardText>
         <VForm ref="formValidation" lazy-validation>
@@ -184,6 +210,47 @@ const selectValueLabel = computed(() => {
           </VCol>
         </VRow>
       </VCardText>
+    </VCard> -->
+
+    <VCard :disabled="loading.form" :loading="loading.form" class="mt-3" title="Visualización de las notas">
+      <VCardText v-for="typeEducation in typeEducations" :key="typeEducation.value">
+        <VDivider />
+        <VRow>
+          <VCol>
+            <span>{{ typeEducation.title }}</span>
+          </VCol>
+        </VRow>
+        <VRow>
+          <VCol cols="12" sm="4" v-for="(note, index) in typeEducation.cantNotes" :key="index">
+            <div class="demo-space-x">
+              <VSwitch v-model="selectedNotes[typeEducation.value]['note_' + note]" :label="'Nota ' + note"
+                color="success" />
+            </div>
+          </VCol>
+        </VRow>
+      </VCardText>
+      <VCardText>
+        <VRow>
+          <VCol cols="12" class="d-flex justify-center">
+            <VBtn :loading="loading.form" :disabled="loading.form" color="primary" @click="submitFormVisualization()">
+              Guardar Visualización
+            </VBtn>
+          </VCol>
+        </VRow>
+      </VCardText>
+
+
+      <!-- <VCardText>
+        <VRow>
+          <VCol cols="12" sm="4">
+            <div class="demo-space-x">
+              <VSwitch v-model="selectedSwitch" @update:model-value="changeStatus($event)" :label="selectValueLabel"
+                color="success" />
+            </div>
+
+          </VCol>
+        </VRow>
+      </VCardText> -->
     </VCard>
   </div>
 </template>

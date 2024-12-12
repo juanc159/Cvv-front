@@ -2,6 +2,9 @@
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import type { VForm } from "vuetify/components/VForm";
 
+import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
+const authenticationStore = useAuthenticationStore();
+
 const errorsBack = ref<IErrorsBack>({});
 const emit = defineEmits(["execute"]);
 const { toast } = useToast();
@@ -50,6 +53,7 @@ const submitForm = async () => {
     const { response, data } = await useApi(`/user/changePassword`).post({
       id: componentData.form.id,
       new_password: componentData.form.new_password,
+      type_user: authenticationStore.user.type_user,
     });
     componentData.isLoading = false;
 
