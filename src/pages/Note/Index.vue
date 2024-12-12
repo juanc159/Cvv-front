@@ -146,7 +146,7 @@ const submitFormVisualization = async () => {
   <div>
 
 
-    <!-- <VCard :disabled="loading.form" :loading="loading.form">
+    <VCard :disabled="loading.form" :loading="loading.form">
       <VCardTitle primary-title>Cargar Notas</VCardTitle>
       <VCardText>
         <VForm ref="formValidation" lazy-validation>
@@ -210,7 +210,7 @@ const submitFormVisualization = async () => {
           </VCol>
         </VRow>
       </VCardText>
-    </VCard> -->
+    </VCard>
 
     <VCard :disabled="loading.form" :loading="loading.form" class="mt-3" title="Visualización de las notas">
       <VCardText v-for="typeEducation in typeEducations" :key="typeEducation.value">
@@ -238,19 +238,6 @@ const submitFormVisualization = async () => {
           </VCol>
         </VRow>
       </VCardText>
-
-
-      <!-- <VCardText>
-        <VRow>
-          <VCol cols="12" sm="4">
-            <div class="demo-space-x">
-              <VSwitch v-model="selectedSwitch" @update:model-value="changeStatus($event)" :label="selectValueLabel"
-                color="success" />
-            </div>
-
-          </VCol>
-        </VRow>
-      </VCardText> -->
     </VCard>
   </div>
 </template>
