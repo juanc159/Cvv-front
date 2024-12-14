@@ -28,7 +28,8 @@ const avatarData = computed(() => {
 
 
 const loading = reactive({
-  btnPdf: false
+  btnPdf: false,
+  boletin: false,
 })
 const openPdfPreview = async (obj: object) => {
 
@@ -40,6 +41,12 @@ const openPdfPreview = async (obj: object) => {
     openPdfBase64(data.value.pdf)
   }
 
+}
+const openBoletinPreview = async (obj: object) => {
+  loading.boletin = true
+  const namePdf = `boletin_${obj.identity_document}.pdf`
+  await downloadFileV2(obj.boletin, namePdf)
+  loading.boletin = false
 }
 
 
@@ -124,7 +131,8 @@ const passwordSaved = () => {
               </p>
 
               <p class="d-flex align-center mb-0">
-                <VBtn disabled variant="outlined">
+                <VBtn :loading="loading.boletin" @click="openBoletinPreview(user)" :disabled="!user.pdf"
+                  variant="outlined">
                   <VIcon icon="tabler-download"></VIcon>
                   <span>Descargar Boletin</span>
                 </VBtn>

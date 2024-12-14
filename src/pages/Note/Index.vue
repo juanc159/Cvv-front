@@ -46,15 +46,6 @@ const loadDataVisualizeNotes = async () => {
   const { data, response } = await useApi('/type_educations/visualization/show').get()
   if (response.value?.ok && data.value) {
     selectedNotes.value = data.value.selectedNotes
-
-
-    // typeEducations.value.forEach(element => {
-    //   selectedNotes[element.value] = {}
-    //   for (let index = 1; index <= element.cantNotes; index++) {
-
-    //     selectedNotes[element.value]["note_" + index] = false
-    //   }
-    // });
   }
 
 }
@@ -237,6 +228,12 @@ const submitFormVisualization = async () => {
             </VBtn>
           </VCol>
         </VRow>
+      </VCardText>
+    </VCard>
+
+    <VCard title="Carga de archivos masivos" class="mt-3">
+      <VCardText>
+        <DragAndDrop />
       </VCardText>
     </VCard>
   </div>

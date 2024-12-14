@@ -1,3 +1,5 @@
+const { toast } = useToast();
+
 // 👉 IsEmpty
 export const isEmpty = (value: unknown): boolean => {
   if (value === null || value === undefined || value === '')
@@ -109,4 +111,48 @@ export function onlyNumbersKeyPress(event: any) {
 }
 export function storageBack(path: string) {
   return BASE_BACK_STORAGE + path
-} 
+}
+
+
+export const downloadFileV2 = async (
+  fileJson: string,
+  newFileName: string = "archivo"
+) => {
+  if (fileJson) {
+    try {
+      // Codifica el nombre del archivo para usarlo en la URL
+      const encodedFileName = encodeURIComponent(fileJson);
+
+      // Realiza una solicitud GET al servidor con el nombre del archivo como parámetro
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_BACK
+        }/api/file/download?file=${encodedFileName}`
+      );
+
+      if (!response.ok) {
+        toast("Error", "Error al descargar el archivo", "danger");
+      }
+
+      // Convierte la respuesta en un Blob
+      const blob = await response.blob();
+
+      // Crea una URL para el Blob
+      const url = window.URL.createObjectURL(blob);
+
+      // Crea un enlace y simula un clic para descargar el archivo
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = newFileName; // Nombre del archivo para la descarga
+
+      // Añade el enlace al DOM y simula el clic
+      document.body.appendChild(link);
+      link.click();
+
+      // Limpieza
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
+};
