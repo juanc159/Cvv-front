@@ -14,7 +14,7 @@ interface FileData {
 }
 
 const fileData = ref<FileData[]>([])
-const { open, onChange } = useFileDialog({ accept: 'image/*' })
+const { open, onChange } = useFileDialog({})
 
 function onDrop(DroppedFiles: File[] | null) {
   DroppedFiles?.forEach(file => {

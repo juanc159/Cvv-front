@@ -126,7 +126,7 @@ export const downloadFileV2 = async (
       // Realiza una solicitud GET al servidor con el nombre del archivo como parámetro
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_BACK
-        }/api/file/download?file=${encodedFileName}`
+        }api/file/download?file=${encodedFileName}`
       );
 
       if (!response.ok) {
