@@ -8,12 +8,7 @@ import { VForm } from "vuetify/components";
 const authenticationStore = useAuthenticationStore();
 
 const { toast } = useToast();
-const loading = reactive({
-  form: false,
-  download_notes: false,
-  block_uploading_of_grades_to_teachers: false,
-  viewing_notes: false,
-})
+const loading = reactive({ form: false, excel: false })
 const form = ref<{
   company_id: null | number
   type_education_id: null | number
@@ -84,7 +79,7 @@ const dowloadNomina = async () => {
   const validation = await formValidationDownload.value?.validate();
 
   if (validation?.valid) {
-    loading.download_notes = true;
+    loading.excel = true;
 
     const search = typeEducations.value.find(ele => ele.value == formDownload.value.type_education_id)
     const { data, response } = await useApi<any>(
@@ -96,7 +91,7 @@ const dowloadNomina = async () => {
       })
     );
 
-    loading.download_notes = false;
+    loading.excel = false;
 
     if (response.value?.ok && data.value) {
       downloadExcelBase64(data.value.excel, "Consolidado " + search?.title)
@@ -112,28 +107,12 @@ const dowloadNomina = async () => {
 const changeStatus = async (
   value: any
 ) => {
-  loading.block_uploading_of_grades_to_teachers = true
   const { data, response } = await useApi(`/note-blockPayrollUpload`).post({
     value: value,
   });
   // if (data.value.code === 200) toast("Éxito", data.value.message, "success");
   if (response.value?.ok && data.value) {
   };
-  loading.block_uploading_of_grades_to_teachers = false
-
-};
-
-const resetOptionDownloadPdf = async (
-  value: any
-) => {
-  loading.block_uploading_of_grades_to_teachers = true
-  const { data, response } = await useApi(`/note-resetOptionDownloadPdf`).post({
-    company_id: authenticationStore.company.id,
-  });
-  if (response.value?.ok && data.value) {
-  };
-  loading.block_uploading_of_grades_to_teachers = false
-
 };
 
 const selectValueLabel = computed(() => {
@@ -144,11 +123,11 @@ const selectValueLabel = computed(() => {
 
 const submitFormVisualization = async () => {
 
-  loading.viewing_notes = true
+  loading.form = true
   const { data, response } = await useApi('/type_educations/visualization/store').post({
     selectedNotes: selectedNotes.value
   })
-  loading.viewing_notes = false
+  loading.form = false
 
 
 };
@@ -156,7 +135,9 @@ const submitFormVisualization = async () => {
 
 <template>
   <div>
-    <VCard :disabled="loading.form" :loading="loading.form" v-if="hasPermission('note.upload_notes')">
+
+
+    <VCard :disabled="loading.form" :loading="loading.form">
       <VCardTitle primary-title>Cargar Notas</VCardTitle>
       <VCardText>
         <VForm ref="formValidation" lazy-validation>
@@ -184,8 +165,7 @@ const submitFormVisualization = async () => {
       </VCardText>
     </VCard>
 
-    <VCard :disabled="loading.download_notes" :loading="loading.download_notes" class="mt-3"
-      v-if="hasPermission('note.download_notes')">
+    <VCard :disabled="loading.form" :loading="loading.form" class="mt-3">
       <VCardTitle primary-title>Descargar Notas</VCardTitle>
       <VCardText>
         <VForm ref="formValidationDownload" lazy-validation>
@@ -199,8 +179,7 @@ const submitFormVisualization = async () => {
           </VRow>
           <VRow>
             <VCol cols="12" class="d-flex justify-center">
-              <VBtn :loading="loading.download_notes" :disabled="loading.download_notes" color="primary"
-                @click="dowloadNomina()">
+              <VBtn :loading="loading.excel" :disabled="loading.excel" color="primary" @click="dowloadNomina()">
                 Descargar
               </VBtn>
             </VCol>
@@ -209,46 +188,22 @@ const submitFormVisualization = async () => {
       </VCardText>
     </VCard>
 
-    <VRow>
-      <VCol cols="4">
-        <VCard :disabled="loading.block_uploading_of_grades_to_teachers"
-          :loading="loading.block_uploading_of_grades_to_teachers" class="mt-3"
-          v-if="hasPermission('note.block_uploading_of_grades_to_teachers')">
-          <VCardTitle primary-title>Bloquear carga de notas a los profesores</VCardTitle>
-          <VCardText>
-            <VRow>
-              <VCol cols="12" sm="4">
-                <div class="demo-space-x">
-                  <VSwitch v-model="selectedSwitch" @update:model-value="changeStatus($event)" :label="selectValueLabel"
-                    color="success" />
-                </div>
+    <VCard :disabled="loading.form" :loading="loading.form" class="mt-3">
+      <VCardTitle primary-title>Bloquear carga de notas a los profesores</VCardTitle>
+      <VCardText>
+        <VRow>
+          <VCol cols="12" sm="4">
+            <div class="demo-space-x">
+              <VSwitch v-model="selectedSwitch" @update:model-value="changeStatus($event)" :label="selectValueLabel"
+                color="success" />
+            </div>
 
-              </VCol>
-            </VRow>
-          </VCardText>
-        </VCard>
-      </VCol>
-      <VCol cols="4">
-        <VCard :disabled="loading.block_uploading_of_grades_to_teachers"
-          :loading="loading.block_uploading_of_grades_to_teachers" class="mt-3"
-          v-if="hasPermission('note.reset_option_download_pdf')">
-          <VCardTitle primary-title>Reinicar opción descarga pdf y boletin</VCardTitle>
-          <VCardText>
-            <VRow>
-              <VCol cols="12" sm="4">
-                <div class="demo-space-x">
-                  <VBtn color="success" @click="resetOptionDownloadPdf">Reinicar</VBtn>
-                </div>
+          </VCol>
+        </VRow>
+      </VCardText>
+    </VCard>
 
-              </VCol>
-            </VRow>
-          </VCardText>
-        </VCard>
-      </VCol>
-    </VRow>
-
-    <VCard :disabled="loading.viewing_notes" :loading="loading.viewing_notes" class="mt-3"
-      title="Visualización de las notas" v-if="hasPermission('note.viewing_notes')">
+    <VCard :disabled="loading.form" :loading="loading.form" class="mt-3" title="Visualización de las notas">
       <VCardText v-for="typeEducation in typeEducations" :key="typeEducation.value">
         <VDivider />
         <VRow>
@@ -276,7 +231,7 @@ const submitFormVisualization = async () => {
       </VCardText>
     </VCard>
 
-    <VCard title="Carga de archivos masivos" class="mt-3" v-if="hasPermission('note.bulk_file_upload')">
+    <VCard title="Carga de archivos masivos" class="mt-3">
       <VCardText>
         <DragAndDrop />
       </VCardText>

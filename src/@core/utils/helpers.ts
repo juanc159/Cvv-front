@@ -1,4 +1,5 @@
 const { toast } = useToast();
+import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
 // 👉 IsEmpty
 export const isEmpty = (value: unknown): boolean => {
@@ -156,3 +157,17 @@ export const downloadFileV2 = async (
     }
   }
 };
+
+export const hasPermission = (permissionName: string) => {
+  const authenticationStore = useAuthenticationStore();
+  const { permissions } = storeToRefs(authenticationStore);
+
+  return permissions.value.some((permission) => permission === permissionName);
+};
+
+export function limitText(text: string, limit: number): string {
+  if (text.length <= limit) {
+    return text;
+  }
+  return text.substring(0, limit) + '...';
+}

@@ -29,6 +29,7 @@ declare module 'vue-router/auto-routes' {
     'Grade-List': RouteRecordInfo<'Grade-List', '/Grade/List', Record<never, never>, Record<never, never>>,
     'Home': RouteRecordInfo<'Home', '/home', Record<never, never>, Record<never, never>>,
     'Login': RouteRecordInfo<'Login', '/login', Record<never, never>, Record<never, never>>,
+    'Note-Index': RouteRecordInfo<'Note-Index', '/Note/Components/Index', Record<never, never>, Record<never, never>>,
     'Note-Index': RouteRecordInfo<'Note-Index', '/Note/Index', Record<never, never>, Record<never, never>>,
     'Pw-home': RouteRecordInfo<'Pw-home', '/', Record<never, never>, Record<never, never>>,
     'Pw-GradeSectionNotes': RouteRecordInfo<'Pw-GradeSectionNotes', '/gradeSectionNotes/:school_id/:grade_id/:section_id', Record<never, never>, Record<never, never>>,

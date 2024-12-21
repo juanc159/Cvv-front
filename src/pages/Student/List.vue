@@ -110,6 +110,17 @@ const openModalQuestion = (id: number) => {
   refModalQuestion.value.componentData.title = "¿Seguro desea reiniciar la contraseña al registro?"
 }
 
+
+const isDialogVisibleShowPicture = ref<boolean>(false)
+const dataStudent = ref<string | null>(null)
+const openModalShowPicture = (data: string | null = null) => {
+  isDialogVisibleShowPicture.value = true
+  dataStudent.value = data
+}
+const closeModalShowPicture = () => {
+  dataStudent.value = null
+  isDialogVisibleShowPicture.value = false
+}
 </script>
 
 <template>
@@ -132,8 +143,9 @@ const openModalQuestion = (id: number) => {
         <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
 
           <template #item.photo="{ item }">
-            <div>
-              <VAvatar v-if="item.photo" color="primary" variant="tonal" size="50">
+            <div class="my-3 ">
+              <VAvatar rounded size="120" v-if="item.photo" color="primary" variant="tonal"
+                class="user-profile-avatar mx-auto" style="cursor: pointer;" @click="openModalShowPicture(item)">
                 <VImg :src="storageBack(item.photo)" />
               </VAvatar>
 
@@ -158,6 +170,20 @@ const openModalQuestion = (id: number) => {
     </VCard>
 
     <ModalQuestion ref="refModalQuestion" @success="resetPassword" />
+
+
+    <VDialog v-model="isDialogVisibleShowPicture" max-width="40rem">
+      <DialogCloseBtn @click="closeModalShowPicture()" />
+      <VCard v-if="dataStudent">
+        <VCardText class="text-center">
+          <h3>{{ dataStudent.full_name }}</h3>
+          <VAvatar rounded size="520" color="primary" variant="tonal" class="user-profile-avatar mx-auto">
+            <VImg :src="storageBack(dataStudent.photo)" />
+          </VAvatar>
+        </VCardText>
+      </VCard>
+    </VDialog>
+
 
   </div>
 </template>
