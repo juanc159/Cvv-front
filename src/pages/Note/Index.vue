@@ -232,12 +232,12 @@ const submitFormVisualization = async () => {
         <VCard :disabled="loading.block_uploading_of_grades_to_teachers"
           :loading="loading.block_uploading_of_grades_to_teachers" class="mt-3"
           v-if="hasPermission('note.reset_option_download_pdf')">
-          <VCardTitle primary-title>Reinicar opción descarga pdf y boletin</VCardTitle>
+          <VCardTitle primary-title>Reiniciar opción descarga pdf y boletin</VCardTitle>
           <VCardText>
             <VRow>
               <VCol cols="12" sm="4">
                 <div class="demo-space-x">
-                  <VBtn color="success" @click="resetOptionDownloadPdf">Reinicar</VBtn>
+                  <VBtn color="primary" @click="resetOptionDownloadPdf">Reiniciar</VBtn>
                 </div>
 
               </VCol>
