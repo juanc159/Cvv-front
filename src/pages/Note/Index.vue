@@ -152,6 +152,15 @@ const submitFormVisualization = async () => {
 
 
 };
+
+//ModalQuestion
+const refModalQuestion = ref()
+
+const openModalQuestion = () => {
+  refModalQuestion.value.openModal()
+  refModalQuestion.value.componentData.subTitle = "Esta seguro que desea activar a todos los estudiantes en un estado insolventes"
+}
+
 </script>
 
 <template>
@@ -237,7 +246,7 @@ const submitFormVisualization = async () => {
             <VRow>
               <VCol cols="12" sm="4">
                 <div class="demo-space-x">
-                  <VBtn color="primary" @click="resetOptionDownloadPdf">Reiniciar</VBtn>
+                  <VBtn color="primary" @click="openModalQuestion">Reiniciar</VBtn>
                 </div>
 
               </VCol>
@@ -281,5 +290,7 @@ const submitFormVisualization = async () => {
         <DragAndDrop />
       </VCardText>
     </VCard>
+
+    <ModalQuestion ref="refModalQuestion" @success="resetOptionDownloadPdf" />
   </div>
 </template>
