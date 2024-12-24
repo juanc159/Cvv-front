@@ -158,7 +158,7 @@ const refModalQuestion = ref()
 
 const openModalQuestion = () => {
   refModalQuestion.value.openModal()
-  refModalQuestion.value.componentData.subTitle = "Esta seguro que desea activar a todos los estudiantes en un estado insolventes"
+  refModalQuestion.value.componentData.title = "Esta seguro que desea activar a todos los estudiantes en un estado insolventes"
 }
 
 </script>
