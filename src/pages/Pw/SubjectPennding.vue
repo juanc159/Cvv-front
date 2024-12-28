@@ -54,8 +54,8 @@ if (data.value.code == 200) {
           </div>
         </div>
         <VRow>
-          <VCol v-if="students_pending_subject">
-            <h2 class=" font-weight-bold mb-6">
+          <VCol>
+            <h2 class=" font-weight-bold mb-6" v-if="students_pending_subject">
               <a target="_blank" :href="students_pending_subject">
                 LISTADO DE ESTUDIANTES CON MATERIA PENDIENTE
               </a>
