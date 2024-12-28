@@ -56,7 +56,10 @@
     "vue3-apexcharts": "1.5.3",
     "vue3-perfect-scrollbar": "2.0.0",
     "vuetify": "3.6.13",
-    "webfontloader": "1.6.28"
+    "webfontloader": "1.6.28",
+    "y-indexeddb": "^9.0.12",
+    "y-websocket": "^2.1.0",
+    "yjs": "^13.6.21"
   },
   "devDependencies": {
     "@antfu/eslint-config-vue": "0.43.1",

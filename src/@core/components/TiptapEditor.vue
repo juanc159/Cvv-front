@@ -48,100 +48,55 @@ watch(() => props.modelValue, () => {
 
 <template>
   <div>
-    <div
-      v-if="editor"
-      class="d-flex gap-2 py-2 px-6 flex-wrap align-center editor"
-    >
-      <IconBtn
-        size="small"
-        rounded
-        :variant="editor.isActive('bold') ? 'tonal' : 'text'"
-        :color="editor.isActive('bold') ? 'primary' : 'default'"
-        @click="editor.chain().focus().toggleBold().run()"
-      >
+    <div v-if="editor" class="d-flex gap-2 py-2 px-6 flex-wrap align-center editor">
+      <IconBtn size="small" rounded :variant="editor.isActive('bold') ? 'tonal' : 'text'"
+        :color="editor.isActive('bold') ? 'primary' : 'default'" @click="editor.chain().focus().toggleBold().run()">
         <VIcon icon="tabler-bold" />
       </IconBtn>
 
-      <IconBtn
-        size="small"
-        rounded
-        :variant="editor.isActive('underline') ? 'tonal' : 'text'"
-        :color="editor.isActive('underline') ? 'primary' : 'default'"
-        @click="editor.commands.toggleUnderline()"
-      >
+      <IconBtn size="small" rounded :variant="editor.isActive('underline') ? 'tonal' : 'text'"
+        :color="editor.isActive('underline') ? 'primary' : 'default'" @click="editor.commands.toggleUnderline()">
         <VIcon icon="tabler-underline" />
       </IconBtn>
 
-      <IconBtn
-        size="small"
-        rounded
-        :variant="editor.isActive('italic') ? 'tonal' : 'text'"
-        :color="editor.isActive('italic') ? 'primary' : 'default'"
-        @click="editor.chain().focus().toggleItalic().run()"
-      >
-        <VIcon
-          icon="tabler-italic"
-          class="font-weight-medium"
-        />
+      <IconBtn size="small" rounded :variant="editor.isActive('italic') ? 'tonal' : 'text'"
+        :color="editor.isActive('italic') ? 'primary' : 'default'" @click="editor.chain().focus().toggleItalic().run()">
+        <VIcon icon="tabler-italic" class="font-weight-medium" />
       </IconBtn>
 
-      <IconBtn
-        size="small"
-        rounded
-        :variant="editor.isActive('strike') ? 'tonal' : 'text'"
-        :color="editor.isActive('strike') ? 'primary' : 'default'"
-        @click="editor.chain().focus().toggleStrike().run()"
-      >
+      <IconBtn size="small" rounded :variant="editor.isActive('strike') ? 'tonal' : 'text'"
+        :color="editor.isActive('strike') ? 'primary' : 'default'" @click="editor.chain().focus().toggleStrike().run()">
         <VIcon icon="tabler-strikethrough" />
       </IconBtn>
 
-      <IconBtn
-        size="small"
-        rounded
-        :variant="editor.isActive({ textAlign: 'left' }) ? 'tonal' : 'text'"
+      <IconBtn size="small" rounded :variant="editor.isActive({ textAlign: 'left' }) ? 'tonal' : 'text'"
         :color="editor.isActive({ textAlign: 'left' }) ? 'primary' : 'default'"
-        @click="editor.chain().focus().setTextAlign('left').run()"
-      >
+        @click="editor.chain().focus().setTextAlign('left').run()">
         <VIcon icon="tabler-align-left" />
       </IconBtn>
 
-      <IconBtn
-        size="small"
-        rounded
-        :color="editor.isActive({ textAlign: 'center' }) ? 'primary' : 'default'"
+      <IconBtn size="small" rounded :color="editor.isActive({ textAlign: 'center' }) ? 'primary' : 'default'"
         :variant="editor.isActive({ textAlign: 'center' }) ? 'tonal' : 'text'"
-        @click="editor.chain().focus().setTextAlign('center').run()"
-      >
+        @click="editor.chain().focus().setTextAlign('center').run()">
         <VIcon icon="tabler-align-center" />
       </IconBtn>
 
-      <IconBtn
-        size="small"
-        rounded
-        :variant="editor.isActive({ textAlign: 'right' }) ? 'tonal' : 'text'"
+      <IconBtn size="small" rounded :variant="editor.isActive({ textAlign: 'right' }) ? 'tonal' : 'text'"
         :color="editor.isActive({ textAlign: 'right' }) ? 'primary' : 'default'"
-        @click="editor.chain().focus().setTextAlign('right').run()"
-      >
+        @click="editor.chain().focus().setTextAlign('right').run()">
         <VIcon icon="tabler-align-right" />
       </IconBtn>
 
-      <IconBtn
-        size="small"
-        rounded
-        :variant="editor.isActive({ textAlign: 'justify' }) ? 'tonal' : 'text'"
+      <IconBtn size="small" rounded :variant="editor.isActive({ textAlign: 'justify' }) ? 'tonal' : 'text'"
         :color="editor.isActive({ textAlign: 'justify' }) ? 'primary' : 'default'"
-        @click="editor.chain().focus().setTextAlign('justify').run()"
-      >
+        @click="editor.chain().focus().setTextAlign('justify').run()">
         <VIcon icon="tabler-align-justified" />
       </IconBtn>
     </div>
 
     <VDivider />
 
-    <EditorContent
-      ref="editorRef"
-      :editor="editor"
-    />
+    <EditorContent ref="editorRef" :editor="editor" />
   </div>
 </template>
 
