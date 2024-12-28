@@ -179,7 +179,7 @@ const deleteFile = (obj: object, index: number, value: number) => {
                             <template #item.actions="{ item, index }">
                               <div>
                                 <VBtn v-if="item.id" icon size="x-small" color="primary" variant="text"
-                                  @click="descargarArchivo(item.file, item.name)">
+                                  @click="descargarArchivo(storageBack(item.file), item.name)">
                                   <VIcon size="22" icon="tabler-eye" />
                                   <VTooltip location="top" transition="scale-transition" activator="parent"
                                     text="Visualizar">
