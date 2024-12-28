@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { VSkeletonLoader } from "vuetify/lib/labs/components.mjs";
-import ModalQuestion from "@/components/ModalQuestion.vue";
 import ModalAttachmentForm from "@/components/Attachment/ModalAttachmentForm.vue";
+import ModalQuestion from "@/components/ModalQuestion.vue";
 
 const { toast } = useToast();
 const { model, id } = defineProps({
@@ -108,7 +107,7 @@ onMounted(() => {
                     <VCol cols="12" md="6">
                       <h4>
                         <a href="#" @click="viewFile(file.pathname)">
-                        <!-- <a href="#" @click="downloadFileV2(file.pathname, file.filename)"> -->
+                          <!-- <a href="#" @click="downloadFileV2(file.pathname, file.filename)"> -->
                           <u>
                             {{ file.filename }}
                           </u>
@@ -141,7 +140,7 @@ onMounted(() => {
     </VCard>
 
 
-    <ModalAttachmentForm ref="refModalAttachmentForm" @saveData="getFiles"  :model_type="model" :model_id="id"/>
+    <ModalAttachmentForm ref="refModalAttachmentForm" @saveData="getFiles" :model_type="model" :model_id="id" />
     <ModalQuestion ref="refModalQuestion" @success="deleteData" />
 
   </div>
