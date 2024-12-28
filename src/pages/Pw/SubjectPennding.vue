@@ -92,7 +92,8 @@ if (data.value.code == 200) {
                                           <v-list-item-content>
                                             <v-list-item-title class="text-body-1">{{ file.name }}</v-list-item-title>
                                             <v-list-item-subtitle>
-                                              <a :href="file.path" target="_blank" class="text-primary">Ver Archivo</a>
+                                              <a :href="storageBack(file.path)" target="_blank" class="text-primary">Ver
+                                                Archivo</a>
                                             </v-list-item-subtitle>
                                           </v-list-item-content>
                                         </v-list-item>
