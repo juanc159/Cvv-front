@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 
+import { __debounce } from '../Helper/util';
 import { stickyNoteStore } from "../Store/StickyNoteStore";
 import { yDocStore } from '../Store/yDocStore';
 import { IStickyNote } from "./StickyNoteTypes";
@@ -19,23 +20,30 @@ export function useDragStickyNote() {
   const stickyNoteHasEventSet = new Set<string>();
 
 
+  const _modifyStickyNote = __debounce((fn: (...args: any[]) => void) => {
+    fn()
+  }, 1000);
+
   function changeStickyNoteBodyContent(id: string) {
     const stickyNoteContent = document.querySelector('.sticky-note-' + id) as HTMLElement;
 
     const index = stickyNote.value.findIndex((obj) => obj.id === id);
     stickyNoteContent.addEventListener("keydown", (e: any) => {
 
+      _modifyStickyNote(_changeStickyNoteBodyContent)
+      function _changeStickyNoteBodyContent() {
+        yDocStore.doc.transact(() => {
+          const trackStickyNote = yArrayStickyNote.value.get(index);
 
-      yDocStore.doc.transact(() => {
-        const trackStickyNote = yArrayStickyNote.value.get(index);
+          if (trackStickyNote) {
+            trackStickyNote.body = stickyNoteContent.textContent
+          }
 
-        if (trackStickyNote) {
-          trackStickyNote.body = stickyNoteContent.textContent
-        }
+          yArrayStickyNote.value.delete(index);
+          yArrayStickyNote.value.insert(index, [trackStickyNote]);
+        })
+      }
 
-        yArrayStickyNote.value.delete(index);
-        yArrayStickyNote.value.insert(index, [trackStickyNote]);
-      })
     })
 
   }

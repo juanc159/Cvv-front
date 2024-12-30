@@ -2,6 +2,12 @@
 import { useDragMiniTextEditor } from '@/components/Miro/Actions/MiniTextEditor';
 import { useDragStickyNote } from '@/components/Miro/Actions/StickyNote';
 import { initYjs } from '@/components/Miro/yjs/yjs';
+import { useShareUserCursor } from './Actions/userCursor';
+import { yDocStore } from './Store/yDocStore';
+
+
+const { trackMousePosition } = useShareUserCursor()
+
 const {
   dragStickyNote,
   createStickyNote,
@@ -15,11 +21,9 @@ const {
 const {
   dragMiniTextEditor,
   createMiniTextEditor,
-  miniTextEditor,
   deleteMiniTextEditor,
-  yArrayMiniTextEditor,
   miniTextEditorHasEventSet,
-  changeMiniTextEditorBodyContent,
+  changeMiniTextEditorBodyContent
 } = useDragMiniTextEditor()
 
 
@@ -31,7 +35,7 @@ const changeStickyNoteColor = (stickyNoteId: string, color: string) => {
 }
 
 const changeMiniTextEditorColor = (miniTextEditorId: string, color: string) => {
-  const singleMiniTextEditor = miniTextEditor.value.find((miniTextEditor) => miniTextEditor.id === miniTextEditorId)
+  const singleMiniTextEditor = yDocStore.miniTextEditor.find((miniTextEditor) => miniTextEditor.id === miniTextEditorId)
   if (singleMiniTextEditor) {
     singleMiniTextEditor.color = color
   }
@@ -45,16 +49,16 @@ onMounted(() => {
     dragStickyNote,
     stickyNote
   }, {
-    yArrayMiniTextEditor,
+    // yArrayMiniTextEditor,
     miniTextEditorHasEventSet,
     changeMiniTextEditorBodyContent,
     dragMiniTextEditor,
-    miniTextEditor
+    // miniTextEditor
   })
 })
 </script>
 <template>
-  <div>
+  <div @mousemove="trackMousePosition" class="miro">
     <VContainer fluid class="d-flex gap-2">
 
       <div>
@@ -69,16 +73,13 @@ onMounted(() => {
         <VRow>
           <VCol cols="12">
             <StickyNote @deleteStickyNote="deleteStickyNote" :sticky-notes="stickyNote" />
-            <MiniTextEditor @deleteMiniTextEditor="deleteMiniTextEditor" :miniTextEditors="miniTextEditor" />
+
+            <MiniTextEditor @deleteMiniTextEditor="deleteMiniTextEditor" :miniTextEditors="yDocStore.miniTextEditor" />
+
+            <UserCursor :mousePosition="yDocStore.mousePosition" />
           </VCol>
         </VRow>
-
-
       </div>
-
-
-
-
 
     </VContainer>
 

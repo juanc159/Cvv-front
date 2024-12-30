@@ -1,8 +1,7 @@
 
-import { IndexeddbPersistence } from 'y-indexeddb';
+// import { IndexeddbPersistence } from 'y-indexeddb';
 import { WebsocketProvider } from 'y-websocket';
 import * as Y from 'yjs';
-import { IMiniTextEditor } from '../Actions/MiniTextEditorTypes';
 import { IStickyNote } from '../Actions/StickyNoteTypes';
 import { yDocStore } from '../Store/yDocStore';
 
@@ -16,11 +15,11 @@ export interface IStickyNoteParams {
 }
 
 export interface IMiniTextEditorParams {
-  yArrayMiniTextEditor: Ref<Y.Array<IMiniTextEditor>>,
+  // yArrayMiniTextEditor: Ref<Y.Array<IMiniTextEditor>>,
   miniTextEditorHasEventSet: Set<string>,
   changeMiniTextEditorBodyContent: (...args: any[]) => void,
   dragMiniTextEditor: (...args: any[]) => void,
-  miniTextEditor: Ref<IMiniTextEditor[]>,
+  // miniTextEditor: Ref<IMiniTextEditor[]>,
 }
 
 export function initYjs(
@@ -28,16 +27,19 @@ export function initYjs(
   miniTextEditorParam: IMiniTextEditorParams,
 ) {
 
+  new WebsocketProvider('ws://localhost:1234', 'sticky-noted', yDocStore.doc)
+  console.log("aaaaaaaaaaaaaaaaaaaaaa");
+
   initYjsTypesForStickyNote(stickyNoteParam);
   initYjsTypesForMiniTextEditor(miniTextEditorParam);
+  initYjsTypesForCursor()
 
   // this allows you to instantly get the (cached) documents data
-  const indexeddbProvider = new IndexeddbPersistence('sticky-note', yDocStore.doc)
-  indexeddbProvider.whenSynced.then(() => {
-    console.log('loaded data from indexed db')
-  })
+  // const indexeddbProvider = new IndexeddbPersistence('sticky-note', yDocStore.doc)
+  // indexeddbProvider.whenSynced.then(() => {
+  //   console.log('loaded data from indexed db')
+  // })
 
-  new WebsocketProvider('ws://localhost:1234', 'sticky-note', yDocStore.doc)
 
 }
 
@@ -45,19 +47,19 @@ export function initYjs(
 function initYjsTypesForMiniTextEditor(miniTextEditorParam: IMiniTextEditorParams) {
 
   const {
-    yArrayMiniTextEditor,
+    // yArrayMiniTextEditor,
     miniTextEditorHasEventSet,
     changeMiniTextEditorBodyContent,
     dragMiniTextEditor,
-    miniTextEditor
+    // miniTextEditor
   } = miniTextEditorParam;
 
-  yArrayMiniTextEditor.value = yDocStore.doc.getArray('y-array-mini-text-editor')
+  yDocStore.yArrayMiniTextEditor = yDocStore.doc.getArray('y-array-mini-text-editor')
 
-  yArrayMiniTextEditor.value.observe((event: any) => {
-    miniTextEditor.value = yArrayMiniTextEditor.value.toArray();
+  yDocStore.yArrayMiniTextEditor.observe((event: any) => {
+    yDocStore.miniTextEditor = yDocStore.yArrayMiniTextEditor.toArray();
 
-    for (const item of miniTextEditor.value) {
+    for (const item of yDocStore.miniTextEditor) {
 
       if (miniTextEditorHasEventSet.has(item.id) === false) {
         miniTextEditorHasEventSet.add(item.id);
@@ -104,5 +106,14 @@ function initYjsTypesForStickyNote(stickyNoteParam: IStickyNoteParams) {
         }, 2000);
       }
     }
+  })
+}
+
+function initYjsTypesForCursor() {
+  yDocStore.yCursor = yDocStore.doc.getMap('y-cursor')
+
+  yDocStore.yCursor.observe((event: any) => {
+    yDocStore.mousePosition.x = yDocStore.yCursor.get('x') as number;
+    yDocStore.mousePosition.y = yDocStore.yCursor.get('y') as number;
   })
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { IMiniTextEditor } from '../Actions/MiniTextEditorTypes';
+import { yDocStore } from '../Store/yDocStore';
 
 
 
@@ -9,14 +10,31 @@ defineProps<{
 
 const emit = defineEmits<{ (e: 'deleteMiniTextEditor', miniTextEditor: IMiniTextEditor): void }>()
 
+
+const updateBodyMiniTextEditor = (event: any, id: any) => {
+
+  const index = yDocStore.miniTextEditor.findIndex((obj) => obj.id === id);
+
+  const newContent = yDocStore.miniTextEditor[index].body = event;
+
+  yDocStore.doc.transact(async () => {
+    const trackMiniTextEditor = yDocStore.yArrayMiniTextEditor.get(index);
+
+    if (trackMiniTextEditor) {
+      trackMiniTextEditor.body = newContent;
+    }
+
+    yDocStore.yArrayMiniTextEditor.delete(index);
+    yDocStore.yArrayMiniTextEditor.insert(index, [trackMiniTextEditor]);
+  })
+}
 </script>
 
 <template>
-  <VCard :class="'text-editor-' + miniTextEditor.id" v-for="miniTextEditor in miniTextEditors" :key="miniTextEditor.id"
-    :style="{
+  <VCard min-width="200" min-height="300" :class="'text-editor-' + miniTextEditor.id"
+    v-for="miniTextEditor in miniTextEditors" :key="miniTextEditor.id" :style="{
       left: miniTextEditor.dragPosition.x + 'px',
       top: miniTextEditor.dragPosition.y + 'px',
-      width: miniTextEditor.resizePosition.x + 'px',
       height: miniTextEditor.resizePosition.y + 'px',
     }">
     <VCardTitle class="d-flex justify-space-between">
@@ -30,6 +48,7 @@ const emit = defineEmits<{ (e: 'deleteMiniTextEditor', miniTextEditor: IMiniText
     </VCardTitle>
     <VCardText class="d-flex p-0">
       <TiptapEditor placeholder="Content here ..." v-model="miniTextEditor.body"
+        @update:model-value="updateBodyMiniTextEditor($event, miniTextEditor.id)"
         :class="'border rounded basic-editor text-editor-body-' + miniTextEditor.id"></TiptapEditor>
     </VCardText>
     <VCardActions class="d-flex justify-end align-end" style="position: absolute; bottom: 0; right: 0;">
