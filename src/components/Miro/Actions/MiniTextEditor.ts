@@ -1,6 +1,6 @@
-import { __debounce } from "../Helper/util";
+import { __debounce, runFuncSequentially } from "../Helper/util";
 import { miniTextEditorStore } from "../Store/MiniTextEditorStore";
-import { yDocStore } from "../Store/yDocStore";
+import { ICursor, yDocStore } from "../Store/yDocStore";
 import { IMiniTextEditor } from "./MiniTextEditorTypes";
 
 
@@ -61,7 +61,35 @@ export function useDragMiniTextEditor() {
 
   const _modifyMiniTextEditor = __debounce((fn: (...args: any[]) => void) => {
     fn()
-  }, 1000);
+  }, 2000);
+
+  function getCursorPosition(editor: HTMLElement, cursor: HTMLElement): ICursor {
+    const selection = window.getSelection();
+
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0) as Range;
+      const cloneRange = range.cloneRange();
+      cloneRange.selectNodeContents(editor);
+      cloneRange.setEnd(range.endContainer, range.endOffset);
+      const cursorPosition = cloneRange.toString().length;
+
+
+
+      const rect = range.getBoundingClientRect();
+      const editorRect = editor.getBoundingClientRect();
+
+      const x = `${rect.left - editorRect.left}px`;
+      const y = `${rect.bottom - editorRect.top + window.scrollY + 20}px`;
+
+
+      return {
+        cursorPosition,
+        x,
+        y
+      };
+    }
+  }
+
 
   function changeMiniTextEditorBodyContent(id: string) {
     const miniTextEditorContent = document.querySelector('.text-editor-body-' + id) as HTMLElement;
@@ -70,9 +98,24 @@ export function useDragMiniTextEditor() {
 
     const htmlMiniTextEditor = yDocStore.yArrayMiniTextEditor.get(index);
 
-    miniTextEditorContent.addEventListener("keydown", (e: any) => {
+    miniTextEditorContent.addEventListener("keydown", _changeMiniTextEditorContentEvent)
+    miniTextEditorContent.addEventListener("mouseup", _changeMiniTextEditorContentEvent)
 
-      _modifyMiniTextEditor(_changeMiniTextEditorBodyContent)
+
+    function _changeMiniTextEditorContentEvent() {
+
+      const blinkingCursor = document.querySelector('.blinking-cursor-' + id) as HTMLElement;
+      blinkingCursor.style.display = 'block';
+
+      const { cursorPosition, x, y } = getCursorPosition(miniTextEditorContent, blinkingCursor);
+      yDocStore.cursor.cursorPosition = cursorPosition;
+      yDocStore.cursor.x = x;
+      yDocStore.cursor.y = y;
+      yDocStore.yCursor.set("x", x);
+      yDocStore.yCursor.set("y", y);
+
+      // _modifyMiniTextEditor(_changeMiniTextEditorBodyContent)
+
       function _changeMiniTextEditorBodyContent() {
         yDocStore.doc.transact(() => {
           const trackMiniTextEditor = yDocStore.yArrayMiniTextEditor.get(index);
@@ -86,8 +129,42 @@ export function useDragMiniTextEditor() {
         })
       }
 
+      const func1 = () => {
+        return new Promise((resolve, reject) => {
+          yDocStore.cursor.cursorPosition = cursorPosition; //update cursor position
+          _changeMiniTextEditorBodyContent();
+          resolve(null);
+        })
+      }
 
-    })
+      const func2 = () => {
+        return new Promise((resolve, reject) => {
+          console.log("func2");
+          moveCursorToPosition(miniTextEditorContent, yDocStore.cursor.cursorPosition);
+
+          resolve(null);
+        })
+      }
+
+      function runner() {
+        runFuncSequentially([func1, func2]).then(() => {
+          console.log("done");
+
+        });
+      }
+      _modifyMiniTextEditor(runner);
+
+    }
+
+
+
+
+
+
+
+
+
+
   }
 
   function changeMiniTextEditorXYPosition(id: string) {
@@ -212,6 +289,55 @@ export function useDragMiniTextEditor() {
       }
     })
   }
+
+
+  function moveCursorToPosition(editor: HTMLElement, position: number) {
+    const selection = window.getSelection() as Selection;
+    const range = document.createRange();
+
+    let cursorPos = 0;
+    let node: Node | null = null;
+
+    for (let i = 0; i < editor.childNodes.length; i++) {
+      node = editor.childNodes[i];
+      const nodeLength = (node.textContent as string).length || 0;
+
+      if (cursorPos + nodeLength >= position) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          range.setStart(node, position - cursorPos);
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          setCursorInsideElement(node, position - cursorPos, range);
+        }
+        break;
+      } else {
+        cursorPos += nodeLength;
+      }
+    }
+
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    editor.focus();
+  }
+
+  function setCursorInsideElement(element: any, position: number, range: any) {
+    for (let i = 0; i < element.childNodes.length; i++) {
+      let child = element.childNodes[i];
+      let length = (child.textContent as string).length || 0;
+      if (position <= length) {
+        if (child.nodeType === Node.TEXT_NODE) {
+          range.setStart(child, position);
+        } else {
+          setCursorInsideElement(child, position, range);
+        }
+        break;
+      } else {
+        position -= length;
+      }
+
+    }
+  }
+
 
   return {
     dragMiniTextEditor,

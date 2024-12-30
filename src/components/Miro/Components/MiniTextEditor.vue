@@ -46,10 +46,17 @@ const updateBodyMiniTextEditor = (event: any, id: any) => {
         <VIcon icon="tabler-arrows-move" size="15"></VIcon>
       </VBtn>
     </VCardTitle>
+
+    <BlinkingCursor :miniTextEditorId="miniTextEditor.id" :x="yDocStore.cursor.x" :y="yDocStore.cursor.y" />
+
     <VCardText class="d-flex p-0">
+
+
       <TiptapEditor placeholder="Content here ..." v-model="miniTextEditor.body"
         @update:model-value="updateBodyMiniTextEditor($event, miniTextEditor.id)"
         :class="'border rounded basic-editor text-editor-body-' + miniTextEditor.id"></TiptapEditor>
+
+
     </VCardText>
     <VCardActions class="d-flex justify-end align-end" style="position: absolute; bottom: 0; right: 0;">
       <VBtn color="#000000" :class="'text-editor-resizer-' + miniTextEditor.id" style="cursor: nw-resize;" icon

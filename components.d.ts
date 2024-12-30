@@ -28,6 +28,9 @@ declare module 'vue' {
     AppTextarea: typeof import('./src/@core/components/app-form-elements/AppTextarea.vue')['default']
     AppTextField: typeof import('./src/@core/components/app-form-elements/AppTextField.vue')['default']
     Attachments: typeof import('./src/components/Attachment/Attachments.vue')['default']
+    Blink: typeof import('./src/components/Miro/Components/Blink.vue')['default']
+    Blinking: typeof import('./src/components/Miro/Components/Blinking.vue')['default']
+    BlinkingCursor: typeof import('./src/components/Miro/Components/BlinkingCursor.vue')['default']
     BtnBack: typeof import('./src/components/BtnBack.vue')['default']
     BuyNow: typeof import('./src/@core/components/BuyNow.vue')['default']
     CardAddEditDialog: typeof import('./src/components/dialogs/CardAddEditDialog.vue')['default']
@@ -92,7 +95,6 @@ declare module 'vue' {
     TwoFactorAuthDialog: typeof import('./src/components/dialogs/TwoFactorAuthDialog.vue')['default']
     UndoRedo: typeof import('./src/components/Miro/Components/UndoRedo.vue')['default']
     UserCursor: typeof import('./src/components/Miro/Components/UserCursor.vue')['default']
-    'UserCursor.vue': typeof import('./src/components/Miro/Components/UserCursor.vue.vue')['default']
     UserInfoEditDialog: typeof import('./src/components/dialogs/UserInfoEditDialog.vue')['default']
     UserUpgradePlanDialog: typeof import('./src/components/dialogs/UserUpgradePlanDialog.vue')['default']
   }

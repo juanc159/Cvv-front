@@ -28,11 +28,11 @@ export function initYjs(
 ) {
 
   new WebsocketProvider('ws://localhost:1234', 'sticky-noted', yDocStore.doc)
-  console.log("aaaaaaaaaaaaaaaaaaaaaa");
 
   initYjsTypesForStickyNote(stickyNoteParam);
   initYjsTypesForMiniTextEditor(miniTextEditorParam);
   initYjsTypesForCursor()
+  initYjsTypesForMouse()
 
   // this allows you to instantly get the (cached) documents data
   // const indexeddbProvider = new IndexeddbPersistence('sticky-note', yDocStore.doc)
@@ -47,11 +47,9 @@ export function initYjs(
 function initYjsTypesForMiniTextEditor(miniTextEditorParam: IMiniTextEditorParams) {
 
   const {
-    // yArrayMiniTextEditor,
     miniTextEditorHasEventSet,
     changeMiniTextEditorBodyContent,
     dragMiniTextEditor,
-    // miniTextEditor
   } = miniTextEditorParam;
 
   yDocStore.yArrayMiniTextEditor = yDocStore.doc.getArray('y-array-mini-text-editor')
@@ -109,11 +107,19 @@ function initYjsTypesForStickyNote(stickyNoteParam: IStickyNoteParams) {
   })
 }
 
+function initYjsTypesForMouse() {
+  yDocStore.yMouse = yDocStore.doc.getMap('y-mouse')
+
+  yDocStore.yMouse.observe((event: any) => {
+    yDocStore.mousePosition.x = yDocStore.yMouse.get('x') as number;
+    yDocStore.mousePosition.y = yDocStore.yMouse.get('y') as number;
+  })
+}
 function initYjsTypesForCursor() {
   yDocStore.yCursor = yDocStore.doc.getMap('y-cursor')
 
   yDocStore.yCursor.observe((event: any) => {
-    yDocStore.mousePosition.x = yDocStore.yCursor.get('x') as number;
-    yDocStore.mousePosition.y = yDocStore.yCursor.get('y') as number;
+    yDocStore.cursor.x = yDocStore.yCursor.get('x') as string;
+    yDocStore.cursor.y = yDocStore.yCursor.get('y') as string;
   })
 }

@@ -2,7 +2,7 @@
 import { useDragMiniTextEditor } from '@/components/Miro/Actions/MiniTextEditor';
 import { useDragStickyNote } from '@/components/Miro/Actions/StickyNote';
 import { initYjs } from '@/components/Miro/yjs/yjs';
-import { useShareUserCursor } from './Actions/userCursor';
+import { useShareUserCursor } from './Actions/useMouse';
 import { yDocStore } from './Store/yDocStore';
 
 
