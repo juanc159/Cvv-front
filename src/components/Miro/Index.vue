@@ -2,9 +2,11 @@
 import { useDragMiniTextEditor } from '@/components/Miro/Actions/MiniTextEditor';
 import { useDragStickyNote } from '@/components/Miro/Actions/StickyNote';
 import { initYjs } from '@/components/Miro/yjs/yjs';
+import { useDrawCanvas } from './Actions/canvas';
 import { useShareUserCursor } from './Actions/useMouse';
 import { yDocStore } from './Store/yDocStore';
 
+const { drawOnCanvas, undo, redo } = useDrawCanvas()
 
 const { trackMousePosition } = useShareUserCursor()
 
@@ -42,6 +44,13 @@ const changeMiniTextEditorColor = (miniTextEditorId: string, color: string) => {
 }
 
 onMounted(() => {
+
+  setTimeout(() => {
+    drawOnCanvas()
+
+  }, 1000);
+
+
   initYjs({
     yArrayStickyNote,
     stickyNoteHasEventSet,
@@ -66,22 +75,26 @@ onMounted(() => {
 
         <ColorPalette @changeStickyNoteColor="changeStickyNoteColor" :sticky-notes="stickyNote" />
 
-        <UndoRedo />
+        <UndoRedo @undo="undo" @redo="redo" />
       </div>
 
       <div>
         <VRow>
           <VCol cols="12">
+            <canvas width="1200" height="800" style="background-color: #f4f4f9; z-index: -1000;">
+
+            </canvas>
             <StickyNote @deleteStickyNote="deleteStickyNote" :sticky-notes="stickyNote" />
 
             <MiniTextEditor @deleteMiniTextEditor="deleteMiniTextEditor" :miniTextEditors="yDocStore.miniTextEditor" />
 
-            <UserCursor :mousePosition="yDocStore.mousePosition" />
+            <!-- <UserCursor :mousePosition="yDocStore.mousePosition" /> -->
           </VCol>
         </VRow>
       </div>
 
     </VContainer>
+    <!-- {{ yDocStore.arrayDrawing }} -->
 
 
   </div>

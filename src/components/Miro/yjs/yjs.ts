@@ -2,9 +2,11 @@
 // import { IndexeddbPersistence } from 'y-indexeddb';
 import { WebsocketProvider } from 'y-websocket';
 import * as Y from 'yjs';
+import { useDrawCanvas } from '../Actions/canvas';
 import { IStickyNote } from '../Actions/StickyNoteTypes';
 import { yDocStore } from '../Store/yDocStore';
 
+const { drawOnCanvas, replayDrawing } = useDrawCanvas()
 
 export interface IStickyNoteParams {
   yArrayStickyNote: Ref<Y.Array<IStickyNote>>,
@@ -29,10 +31,11 @@ export function initYjs(
 
   new WebsocketProvider('ws://localhost:1234', 'sticky-noted', yDocStore.doc)
 
-  initYjsTypesForStickyNote(stickyNoteParam);
-  initYjsTypesForMiniTextEditor(miniTextEditorParam);
-  initYjsTypesForCursor()
-  initYjsTypesForMouse()
+  // initYjsTypesForStickyNote(stickyNoteParam);
+  // initYjsTypesForMiniTextEditor(miniTextEditorParam);
+  // initYjsTypesForCursor()
+  // initYjsTypesForMouse()
+  initYjsTypesDrawing()
 
   // this allows you to instantly get the (cached) documents data
   // const indexeddbProvider = new IndexeddbPersistence('sticky-note', yDocStore.doc)
@@ -115,11 +118,21 @@ function initYjsTypesForMouse() {
     yDocStore.mousePosition.y = yDocStore.yMouse.get('y') as number;
   })
 }
+
 function initYjsTypesForCursor() {
   yDocStore.yCursor = yDocStore.doc.getMap('y-cursor')
 
   yDocStore.yCursor.observe((event: any) => {
     yDocStore.cursor.x = yDocStore.yCursor.get('x') as string;
     yDocStore.cursor.y = yDocStore.yCursor.get('y') as string;
+  })
+}
+
+function initYjsTypesDrawing() {
+  yDocStore.yArrayDrawing = yDocStore.doc.getArray('y-array-drawing')
+
+  yDocStore.yArrayDrawing.observe((event: any) => {
+    yDocStore.arrayDrawing = yDocStore.yArrayDrawing.toArray();
+    replayDrawing()
   })
 }

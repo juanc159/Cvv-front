@@ -8,6 +8,13 @@ export interface ICursor {
   y: string,
 }
 
+export interface IReplayDrawing {
+  x: number,
+  y: number,
+  type: "start" | "drawing",
+  strokeStyle: string,
+}
+
 const useYDocStore = defineStore('useYDocStore', {
   state: () => ({
     doc: new Y.Doc(),
@@ -25,6 +32,10 @@ const useYDocStore = defineStore('useYDocStore', {
       x: "",
       y: "",
     },
+    yArrayDrawing: new Y.Array<Array<IReplayDrawing>>,
+    arrayDrawing: [] as Array<Array<IReplayDrawing>>,
+    redoDrawingArray: [] as Array<Array<IReplayDrawing>>,
+
   }),
 
 });
