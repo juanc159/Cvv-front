@@ -85,7 +85,7 @@ const optionsFilter = ref({
 
 
 //EXCEL
-const loading = reactive({ excel: false })
+const loading = reactive({ excel: false, resetPlanifications: false })
 const downloadConsolidated = async (obj: object) => {
 
   loading.excel = true;
@@ -105,8 +105,24 @@ const openModalQuestionResetPassword = (id: string) => {
   refModalQuestion.value.openModal(id)
 }
 
-const resetPassword = async (id: number) => {
+const resetPassword = async (id: string) => {
   const { data, response } = await useApi("/teacher-resetPassword/" + id).get()
+};
+
+//ModalQuestionResetPlanifications
+const refModalQuestionResetPlanifications = ref()
+const openModalQuestionResetPlanifications = () => {
+  refModalQuestionResetPlanifications.value.componentData.title = "¿Seguro desea reiniciar las planificaciones de todos los profesores?"
+  refModalQuestionResetPlanifications.value.componentData.subTitle = "Se eliminarán todas las planificaciones. Tenga en cuenta que esta acción no se puede deshacer."
+  refModalQuestionResetPlanifications.value.openModal()
+}
+
+const resetPlanifications = async () => {
+  loading.resetPlanifications = true;
+  const { data, response } = await useApi("/teacher-resetPlanifications").delete({
+    company_id: authenticationStore.company.id
+  })
+  loading.resetPlanifications = false;
 };
 
 </script>
@@ -121,6 +137,11 @@ const resetPassword = async (id: number) => {
         </span>
 
         <div class="d-flex justify-end gap-3 flex-wrap ">
+          <VBtn :loading="loading.resetPlanifications" :disabled="loading.resetPlanifications"
+            v-if="hasPermission('teacher.reset_planifications')" color="primary"
+            @click="openModalQuestionResetPlanifications">
+            Reiniciar Planificaciones
+          </VBtn>
           <VBtn color="primary" @click="goView({ action: 'order', id: null })">
             Ordenar Docentes
           </VBtn>
@@ -173,6 +194,7 @@ const resetPassword = async (id: number) => {
     </VCard>
 
     <ModalQuestion ref="refModalQuestion" @success="resetPassword" />
+    <ModalQuestion ref="refModalQuestionResetPlanifications" @success="resetPlanifications" />
 
   </div>
 </template>

@@ -55,7 +55,7 @@ onMounted(async () => {
                 <div v-for="(file, indexF) of item.files" :key="indexF" class="d-flex flex-column">
                   <div class="d-flex align-center py-1">
                     <VIcon icon="tabler-download" color="primary" />
-                    <a href="#" @click="descargarArchivo(file.path, file.name)">{{ file.name }}</a>
+                    <a href="#" @click="descargarArchivo(storageBack(file.path), file.name)">{{ file.name }}</a>
                   </div>
                 </div>
               </div>

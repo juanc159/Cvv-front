@@ -27,9 +27,11 @@ const plannings = ref<IService>({
   image: "",
   html: "",
 })
+const students_pending_subject = ref<string>("")
 const { data, response } = await useApi(`pw-materiaPendiente/${route.params.school_id}`).get();
 if (data.value.code == 200) {
   plannings.value = data.value.plannings;
+  students_pending_subject.value = data.value.students_pending_subject;
 }
 
 
@@ -53,9 +55,8 @@ if (data.value.code == 200) {
         </div>
         <VRow>
           <VCol>
-            <h2 class=" font-weight-bold mb-6">
-              <a target="_blank"
-                href="https://docs.google.com/document/d/1C9zBx7USlfeffeYKWWJ7TVDiEm32EKzo/edit?usp=sharing&ouid=109014023290836934766&rtpof=true&sd=true">
+            <h2 class=" font-weight-bold mb-6" v-if="students_pending_subject">
+              <a target="_blank" :href="students_pending_subject">
                 LISTADO DE ESTUDIANTES CON MATERIA PENDIENTE
               </a>
             </h2>
@@ -92,7 +93,8 @@ if (data.value.code == 200) {
                                           <v-list-item-content>
                                             <v-list-item-title class="text-body-1">{{ file.name }}</v-list-item-title>
                                             <v-list-item-subtitle>
-                                              <a :href="file.path" target="_blank" class="text-primary">Ver Archivo</a>
+                                              <a :href="storageBack(file.path)" target="_blank" class="text-primary">Ver
+                                                Archivo</a>
                                             </v-list-item-subtitle>
                                           </v-list-item-content>
                                         </v-list-item>

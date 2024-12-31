@@ -34,6 +34,7 @@ const form = ref({
   slogan: null as string | null,
   image_principal: null as string | null | File,
   iframeGoogleMap: null as string | null,
+  students_pending_subject: null as string | null,
   arrayDetails: [] as Array<{
     id: string | null,
     type_detail_id: string | null,
@@ -140,6 +141,10 @@ const addDetail = () => {
 const deleteDetail = (index: number) => {
   form.value.arrayDetails.splice(index, 1);
 };
+
+
+
+const students_pending_subject = ref()
 </script>
 
 
@@ -188,10 +193,13 @@ const deleteDetail = (index: number) => {
                   <AppTextField clearable v-model="form.iframeGoogleMap" label="iframeGoogleMap">
                   </AppTextField>
                 </VCol>
+                <VCol cols="12">
+                  <AppTextField v-model="form.students_pending_subject" label="Documento de materia pendiente" clearable
+                    :rules="[urlValidator]" />
+                </VCol>
               </VRow>
             </VCol>
           </VRow>
-
 
         </VForm>
 
@@ -206,6 +214,7 @@ const deleteDetail = (index: number) => {
         </div>
       </VCardTitle>
       <VCardText>
+
         <VRow v-for="(item, index) in form.arrayDetails" :key="index">
           <VCol cols="12" md="2">
             <AppSelect :items="typeDetails" v-model="item.type_detail_id" label="Tipo" :requiredField="true">
