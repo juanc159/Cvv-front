@@ -1,6 +1,6 @@
-import { __debounce, runFuncSequentially } from "../Helper/util";
-import { miniTextEditorStore } from "../Store/MiniTextEditorStore";
-import { ICursor, yDocStore } from "../Store/yDocStore";
+import { __debounce, runFuncSequentially } from "../../Helper/util";
+import { miniTextEditorStore } from "../../Store/MiniTextEditorStore";
+import { ICursor, yDocStore } from "../../Store/yDocStore";
 import { IMiniTextEditor } from "./MiniTextEditorTypes";
 
 
@@ -139,7 +139,6 @@ export function useDragMiniTextEditor() {
 
       const func2 = () => {
         return new Promise((resolve, reject) => {
-          console.log("func2");
           moveCursorToPosition(miniTextEditorContent, yDocStore.cursor.cursorPosition);
 
           resolve(null);
@@ -148,8 +147,6 @@ export function useDragMiniTextEditor() {
 
       function runner() {
         runFuncSequentially([func1, func2]).then(() => {
-          console.log("done");
-
         });
       }
       _modifyMiniTextEditor(runner);

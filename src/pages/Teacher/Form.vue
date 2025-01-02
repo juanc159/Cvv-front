@@ -106,8 +106,6 @@ const submitForm = async () => {
 
     const url = form.value.id ? `/teacher/update/${form.value.id}` : `/teacher/store`
 
-    console.log("url", url);
-
     loading.form = true;
     const { data, response } = await useApi(url).post(formData);
     loading.form = false;

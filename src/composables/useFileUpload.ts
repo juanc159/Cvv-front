@@ -11,7 +11,6 @@ export function useFileUpload() {
   const loading = ref<boolean>(false);
 
   function handleImageSelected() {
-    console.log("event.target.files[0].name", event.target.files[0]);
 
     //--------------------------------------------------------------------------------------------
     // Validacion tamaño del archivo
@@ -71,7 +70,6 @@ export function useFileUpload() {
 
     loading.value = true
     fileReader.addEventListener("load", () => {
-      console.log("fileReader", fileReader);
 
       imageUrl.value = fileReader.result;
       loading.value = false

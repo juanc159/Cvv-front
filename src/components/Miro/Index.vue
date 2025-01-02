@@ -1,24 +1,42 @@
 <script lang="ts" setup>
-import { useDragMiniTextEditor } from '@/components/Miro/Actions/MiniTextEditor';
-import { useDragStickyNote } from '@/components/Miro/Actions/StickyNote';
+import { useDragMiniTextEditor } from '@/components/Miro/Actions/editor/MiniTextEditor';
+import { useDragStickyNote } from '@/components/Miro/Actions/sticky-note/StickyNote';
 import { initYjs } from '@/components/Miro/yjs/yjs';
-import { useDrawCanvas } from './Actions/canvas';
-import { useShareUserCursor } from './Actions/useMouse';
+import { useCanvas } from './Actions/canvas/canvas';
+import { useShareUserCursor } from './Actions/cursor/useMouse';
+import { useGetProjectBoardData } from './Actions/http/getProjectBoardData';
+import { useSaveData } from './Actions/http/useSaveData';
+import { useDragTextCaption } from './Actions/text-caption/TextCaption';
 import { yDocStore } from './Store/yDocStore';
 
-const { drawOnCanvas, undo, redo } = useDrawCanvas()
+import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
+import { useGetProjectDetail } from './Actions/http/getProjectDetail';
+
+const authenticationStore = useAuthenticationStore();
+
+const props = defineProps<{
+  code: string,
+}>()
+
+const { initCanvas } = useCanvas()
 
 const { trackMousePosition } = useShareUserCursor()
 
 const {
   dragStickyNote,
   createStickyNote,
-  stickyNote,
   deleteStickyNote,
-  yArrayStickyNote,
   stickyNoteHasEventSet,
   changeStickyNoteBodyContent
 } = useDragStickyNote()
+
+const {
+  dragTextCaption,
+  createTextCaption,
+  deleteTextCaption,
+  textCaptionHasEventSet,
+  changeTextCaptionBodyContent
+} = useDragTextCaption()
 
 const {
   dragMiniTextEditor,
@@ -30,7 +48,7 @@ const {
 
 
 const changeStickyNoteColor = (stickyNoteId: string, color: string) => {
-  const singleStickyNote = stickyNote.value.find((stickyNote) => stickyNote.id === stickyNoteId)
+  const singleStickyNote = yDocStore.stickyNote.find((stickyNote) => stickyNote.id === stickyNoteId)
   if (singleStickyNote) {
     singleStickyNote.color = color
   }
@@ -43,48 +61,92 @@ const changeMiniTextEditorColor = (miniTextEditorId: string, color: string) => {
   }
 }
 
-onMounted(() => {
+const {
+  projectData,
+  getProjectDetail,
+  trackJoinAndLeavingUsers,
+  showJoiningUsersModal,
+  hideJoiningUsersModal,
+  showJoinneesModal,
+} = useGetProjectDetail(props.code, authenticationStore.user.id);
 
-  setTimeout(() => {
-    drawOnCanvas()
 
-  }, 1000);
 
+const saveProject = () => {
+  const { saveBoardData } = useSaveData(
+    yDocStore.arrayDrawing,
+    yDocStore.miniTextEditor,
+    yDocStore.stickyNote,
+    yDocStore.textCaption,
+    projectData.value.id
+  )
+
+  saveBoardData()
+}
+
+
+const { getProjectBoardData, loading: loadingData } = useGetProjectBoardData(
+  initCanvas,
+  dragStickyNote,
+  changeStickyNoteBodyContent,
+  dragTextCaption,
+  changeTextCaptionBodyContent,
+  dragMiniTextEditor,
+  changeMiniTextEditorBodyContent
+);
+
+onMounted(async () => {
+
+  await getProjectDetail();
+
+  await getProjectBoardData(projectData.value.id, authenticationStore);
 
   initYjs({
-    yArrayStickyNote,
     stickyNoteHasEventSet,
     changeStickyNoteBodyContent,
     dragStickyNote,
-    stickyNote
   }, {
-    // yArrayMiniTextEditor,
     miniTextEditorHasEventSet,
     changeMiniTextEditorBodyContent,
     dragMiniTextEditor,
-    // miniTextEditor
-  })
-})
+  },
+    {
+      dragTextCaption,
+      textCaptionHasEventSet,
+      changeTextCaptionBodyContent,
+    },
+    projectData.value,
+  )
+}) 
 </script>
 <template>
+  <TopNavBar :project="projectData" :userData="authenticationStore" @showJoiningUsersModal="showJoiningUsersModal" />
+
   <div @mousemove="trackMousePosition" class="miro">
-    <VContainer fluid class="d-flex gap-2">
+
+    <LoadingIndicator :loading="loadingData" />
+    <div class="d-flex" v-show="!loadingData">
 
       <div>
-        <AddItem @createStickyNote="createStickyNote" @createMiniTextEditor="createMiniTextEditor" />
+        <AddItem @saveBoardData="saveProject" @createTextCaption="createTextCaption"
+          @createStickyNote="createStickyNote" @createMiniTextEditor="createMiniTextEditor"
+          @initDrawing="async () => (await initCanvas()).drawOnCanvas()" />
 
-        <ColorPalette @changeStickyNoteColor="changeStickyNoteColor" :sticky-notes="stickyNote" />
+        <ColorPalette @changeStickyNoteColor="changeStickyNoteColor" :sticky-notes="yDocStore.stickyNote" />
 
-        <UndoRedo @undo="undo" @redo="redo" />
+        <UndoRedo @reset-canvas="async () => (await initCanvas()).initCanvas()"
+          @redo="async () => (await initCanvas()).redo()" @undo="async () => (await initCanvas()).undo()" />
       </div>
 
       <div>
         <VRow>
           <VCol cols="12">
             <canvas width="1200" height="800" style="background-color: #f4f4f9; z-index: -1000;">
-
             </canvas>
-            <StickyNote @deleteStickyNote="deleteStickyNote" :sticky-notes="stickyNote" />
+
+            <TextCaption @deleteTextCaption="deleteTextCaption" :text-captions="yDocStore.textCaption" />
+
+            <StickyNote @deleteStickyNote="deleteStickyNote" :sticky-notes="yDocStore.stickyNote" />
 
             <MiniTextEditor @deleteMiniTextEditor="deleteMiniTextEditor" :miniTextEditors="yDocStore.miniTextEditor" />
 
@@ -93,9 +155,7 @@ onMounted(() => {
         </VRow>
       </div>
 
-    </VContainer>
-    <!-- {{ yDocStore.arrayDrawing }} -->
-
+    </div>
 
   </div>
 </template>

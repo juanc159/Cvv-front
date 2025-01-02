@@ -1,5 +1,5 @@
 export default interface IAuth {
-  id: number
+  id: null | string
   company_id: number
   company: object
   name: string

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { IStickyNote } from '../Actions/StickyNoteTypes';
+import { IStickyNote } from '../Actions/sticky-note/StickyNoteTypes';
 import { stickyNoteStore } from '../Store/StickyNoteStore';
 
 const props = defineProps<{

@@ -1,7 +1,4 @@
 <script lang="ts" setup>
-
-
-
 const props = defineProps<{
   miniTextEditorId: string;
   x: string;

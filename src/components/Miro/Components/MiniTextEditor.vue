@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { IMiniTextEditor } from '../Actions/MiniTextEditorTypes';
+import { IMiniTextEditor } from '../Actions/editor/MiniTextEditorTypes';
 import { yDocStore } from '../Store/yDocStore';
-
-
 
 defineProps<{
   miniTextEditors: IMiniTextEditor[]

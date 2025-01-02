@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { IStickyNote } from '../Actions/StickyNoteTypes';
+import { IStickyNote } from '../Actions/sticky-note/StickyNoteTypes';
 
 defineProps<{
   stickyNotes: IStickyNote[]
@@ -26,7 +26,7 @@ const emit = defineEmits<{ (e: 'deleteStickyNote', stickyNote: IStickyNote): voi
       </VBtn>
     </VCardTitle>
     <VCardText class="d-flex p-0" style="height: 60%; width: 100%;">
-      <div contenteditable="true" :class="'w-100 h-100 p-2 sticky-note-' + stickyNote.id"
+      <div contenteditable="true" :class="'w-100 h-100 p-2 sticky-note-body-' + stickyNote.id"
         style="box-sizing: border-box;">
         {{ stickyNote.body }}
       </div>

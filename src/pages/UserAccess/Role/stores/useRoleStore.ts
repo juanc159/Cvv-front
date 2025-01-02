@@ -23,7 +23,6 @@ export const useRoleStore = defineStore("useRoleStore", {
     },
 
     selectAllPermissions(cardId: number | string) {
-      console.log("this.arrayFather", this.arrayFather);
 
       const dataIndex = this.arrayFather.findIndex((ele) => ele[this.keyIdComparation] == cardId);
       if (dataIndex !== -1) {
