@@ -195,7 +195,8 @@ const openModalPassword = () => {
                         <template #item.name="{ item, index }">
                           <div class="d-flex align-center py-1">
                             <VIcon icon="tabler-file" color="primary" />
-                            <a href="#" @click="descargarArchivo(item.file, item.name)"> <b>{{ item.name }}</b></a>
+                            <a href="#" @click="descargarArchivo(storageBack(item.file), item.name)"> <b>{{ item.name
+                                }}</b></a>
                           </div>
                         </template>
 
