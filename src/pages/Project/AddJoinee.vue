@@ -1,11 +1,16 @@
 <script lang="ts" setup>
+import { useAddJoinees } from "@/components/Miro/Actions/http/addJoinee";
 import { onMounted } from "vue";
 import { useRoute } from "vue-router";
-import LoadingIndicator from "../../components/base-components/LoadingIndicator.vue";
-import { useAddJoinees } from './actions/addjoinee/http/addJoinee';
 const route = useRoute()
 const { addJoinees, loading } = useAddJoinees(route)
 
+
+definePage({
+  name: "Miro-AddJoinees",
+  meta: {
+  },
+});
 
 onMounted(async () => {
 

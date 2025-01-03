@@ -31,6 +31,7 @@ declare module 'vue-router/auto-routes' {
     'Login': RouteRecordInfo<'Login', '/login', Record<never, never>, Record<never, never>>,
     'Note-Index': RouteRecordInfo<'Note-Index', '/Note/Components/Index', Record<never, never>, Record<never, never>>,
     'Note-Index': RouteRecordInfo<'Note-Index', '/Note/Index', Record<never, never>, Record<never, never>>,
+    'Miro-AddJoinees': RouteRecordInfo<'Miro-AddJoinees', '/Project/AddJoinee', Record<never, never>, Record<never, never>>,
     'project-component-form-modal': RouteRecordInfo<'project-component-form-modal', '/Project/Component/FormModal', Record<never, never>, Record<never, never>>,
     'Project-List': RouteRecordInfo<'Project-List', '/Project/List', Record<never, never>, Record<never, never>>,
     'Miro-Board': RouteRecordInfo<'Miro-Board', 'Miro-Board/:action/:id/:code', Record<never, never>, Record<never, never>>,

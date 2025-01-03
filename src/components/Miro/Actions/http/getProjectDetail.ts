@@ -1,4 +1,6 @@
 import { useToast } from '@/composables/useToast';
+import { yDocStore } from '../../Store/yDocStore';
+import { userResponseType } from '../../types/tokenTypes';
 const { toast } = useToast()
 
 export interface IProjectDetail {
@@ -65,22 +67,22 @@ export function useGetProjectDetail(code: string, user_id: any | undefined) {
   }
 
 
-  // function leavingUsers(joinee: userResponseType) {
-  //   const filteredArray = yDocStore.joinees.filter(
-  //     (user) => user.id !== joinee.id
-  //   );
-  //   yDocStore.joinees = [];
-  //   yDocStore.joinees = [...filteredArray];
-  // }
+  function leavingUsers(joinee: userResponseType) {
+    const filteredArray = yDocStore.joinees.filter(
+      (user) => user.id !== joinee.id
+    );
+    yDocStore.joinees = [];
+    yDocStore.joinees = [...filteredArray];
+  }
 
-  // function joiningUsers(joinee: userResponseType) {
-  //   const filteredArray = yDocStore.joinees.filter(
-  //     (user) => user.id === joinee.id
-  //   );
-  //   if (filteredArray.length === 0) {
-  //     yDocStore.joinees.push(joinee);
-  //   }
-  // }
+  function joiningUsers(joinee: userResponseType) {
+    const filteredArray = yDocStore.joinees.filter(
+      (user) => user.id === joinee.id
+    );
+    if (filteredArray.length === 0) {
+      yDocStore.joinees.push(joinee);
+    }
+  }
 
   function showJoiningUsersModal() {
     showJoinneesModal.value = true;
@@ -92,22 +94,31 @@ export function useGetProjectDetail(code: string, user_id: any | undefined) {
 
 
   function trackJoinAndLeavingUsers() {
-    // window.Echo.join(`project.room.${project_code}`)
-    //   .here((users: userResponseType[]) => {
-    //     yDocStore.joinees = [...users];
+    console.log("project_code", project_code);
 
-    //   })
-    //   .joining((user: userResponseType) => {
-    //     joiningUsers(user);
-    //   })
-    //   .leaving((user: userResponseType) => {
-    //     leavingUsers(user);
-    //   })
-    //   .error((error: any) => {
-    //     console.log(error);
-    //     localStorage.clear();
-    //     window.location.href = "/app/login";
-    //   });
+    window.Echo.join(`project.room`)
+      .here((users: userResponseType[]) => {
+        yDocStore.joinees = [...users];
+        console.log("users here", users);
+
+      })
+      .joining((user: userResponseType) => {
+        joiningUsers(user);
+        console.log("users joining", user);
+
+      })
+      .leaving((user: userResponseType) => {
+        leavingUsers(user);
+        console.log("users joining", user);
+
+      })
+      .error((error: any) => {
+        toast("Something went wrong", "", "danger");
+        // localStorage.clear();
+        console.log(error);
+
+        // window.location.href = "/app/login";
+      });
   }
 
   return {

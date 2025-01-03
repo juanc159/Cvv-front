@@ -97,6 +97,8 @@ const { getProjectBoardData, loading: loadingData } = useGetProjectBoardData(
 
 onMounted(async () => {
 
+  trackJoinAndLeavingUsers()
+
   await getProjectDetail();
 
   await getProjectBoardData(projectData.value.id, authenticationStore);
@@ -117,7 +119,9 @@ onMounted(async () => {
     },
     projectData.value,
   )
-}) 
+})
+
+
 </script>
 <template>
   <TopNavBar :project="projectData" :userData="authenticationStore" @showJoiningUsersModal="showJoiningUsersModal" />

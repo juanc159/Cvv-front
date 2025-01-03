@@ -60,6 +60,12 @@ const openModalForm = (data: { action: string, id: number | null } = { action: "
 
 <template>
   <div>
+    <RouterLink :to="{ name: 'Miro-AddJoinees' }"
+      class="flex border-0 text-medium gap-1 hover:bg-slate-100 px-1 py-1 rounded-md">
+      <VIcon icon="tabler-squares"></VIcon>
+      <span>aaaa</span>
+    </RouterLink>
+
 
     <VCard>
       <VCardTitle class="d-flex justify-space-between">
