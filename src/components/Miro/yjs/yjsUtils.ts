@@ -1,6 +1,6 @@
 import { useCanvas } from "../Actions/canvas/canvas";
 import { yDocStore } from "../Store/yDocStore";
-import { IMiniTextEditorParams, IStickyNoteParams, ITextCaptionParams } from "./yjs";
+import { IDivNewParams, IMiniTextEditorParams, IStickyNoteParams, ITextCaptionParams } from "./yjs";
 
 
 
@@ -22,6 +22,15 @@ export const initStickyNote = (stickyNoteParam: IStickyNoteParams) => {
   return function () {
     return new Promise<any>((resolve, reject) => {
       initYjsTypesForStickyNote(stickyNoteParam);
+      resolve(null)
+
+    })
+  }
+}
+export const initDivNew = (divNewParam: IDivNewParams) => {
+  return function () {
+    return new Promise<any>((resolve, reject) => {
+      initYjsTypesForDivNew(divNewParam);
       resolve(null)
 
     })
@@ -157,6 +166,35 @@ function initYjsTypesForStickyNote(stickyNoteParam: IStickyNoteParams) {
         stickyNoteHasEventSet.add(item.id);
         setTimeout(() => {
           dragStickyNote(item.id);
+
+
+
+        }, 2000);
+      }
+    }
+  });
+}
+function initYjsTypesForDivNew(divNewParam: IDivNewParams) {
+  const {
+
+    divNewHasEventSet,
+    changeDivNewBodyContent,
+    // divNew,
+    dragDivNew,
+  } = divNewParam;
+  yDocStore.yArrayDivNew = yDocStore.doc.getArray("y-array-div-news");
+
+  yDocStore.yArrayDivNew.observe((event: any) => {
+    yDocStore.divNew = yDocStore.yArrayDivNew.toArray();
+
+    for (const item of yDocStore.divNew) {
+
+      setTimeout(() => changeDivNewBodyContent(item.id), 1000)
+
+      if (divNewHasEventSet.has(item.id) === false) {
+        divNewHasEventSet.add(item.id);
+        setTimeout(() => {
+          dragDivNew(item.id);
 
 
 

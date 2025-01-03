@@ -91,6 +91,7 @@ function useDrawOnCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2
   }
 
   function drawOnCanvas() {
+    console.log("drawOnCanvas");
 
     let drawing = false;
     let drawingPath = [] as Array<IReplayDrawing>;
@@ -167,9 +168,7 @@ function useDrawOnCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2
     if (yDocStore.redoDrawingArray.length > 0) {
       const redo = yDocStore.redoDrawingArray.pop();
 
-      if (redo) {
-        yDocStore.yArrayDrawing.insert(0, [redo]);
-      }
+      yDocStore.yArrayDrawing.insert(0, [redo]);
       replayDrawing();
       loadCachedGrid();
     }

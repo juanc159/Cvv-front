@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import * as Y from "yjs";
+import { IDivNew } from "../Actions/div-new/DivNewTypes";
 import { IMiniTextEditor } from "../Actions/editor/MiniTextEditorTypes";
 import { IStickyNote } from "../Actions/sticky-note/StickyNoteTypes";
 import { ITextCaption } from "../Actions/text-caption/TextCaptionTypes";
@@ -48,6 +49,9 @@ const useYDocStore = defineStore("y-doc", {
 
     stickyNote: [] as IStickyNote[],
     yArrayStickyNote: new Y.Array<IStickyNote>(),
+
+    divNew: [] as IDivNew[],
+    yArrayDivNew: new Y.Array<IDivNew>(),
 
     yArrayTextCaption: new Y.Array<ITextCaption>(),
     textCaption: [] as ITextCaption[],

@@ -10,6 +10,7 @@ import { useDragTextCaption } from './Actions/text-caption/TextCaption';
 import { yDocStore } from './Store/yDocStore';
 
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
+import { useDragDivNew } from './Actions/div-new/DivNew';
 import { useGetProjectDetail } from './Actions/http/getProjectDetail';
 
 const authenticationStore = useAuthenticationStore();
@@ -29,6 +30,14 @@ const {
   stickyNoteHasEventSet,
   changeStickyNoteBodyContent
 } = useDragStickyNote()
+
+const {
+  dragDivNew,
+  createDivNew,
+  deleteDivNew,
+  divNewHasEventSet,
+  changeDivNewBodyContent
+} = useDragDivNew()
 
 const {
   dragTextCaption,
@@ -118,48 +127,79 @@ onMounted(async () => {
       changeTextCaptionBodyContent,
     },
     projectData.value,
+    {
+      divNewHasEventSet,
+      changeDivNewBodyContent,
+      dragDivNew,
+    }
   )
 })
 
 
 </script>
 <template>
-  <TopNavBar :project="projectData" :userData="authenticationStore" @showJoiningUsersModal="showJoiningUsersModal" />
+  <div>
 
-  <div @mousemove="trackMousePosition" class="miro">
+    <TopNavBar :project="projectData" :userData="authenticationStore" @showJoiningUsersModal="showJoiningUsersModal" />
 
-    <LoadingIndicator :loading="loadingData" />
-    <div class="d-flex" v-show="!loadingData">
+    <div @mousemove="trackMousePosition" class="miro">
+      <LoadingIndicator :loading="loadingData" />
+      <div class="d-flex " v-show="!loadingData">
 
-      <div>
-        <AddItem @saveBoardData="saveProject" @createTextCaption="createTextCaption"
-          @createStickyNote="createStickyNote" @createMiniTextEditor="createMiniTextEditor"
-          @initDrawing="async () => (await initCanvas()).drawOnCanvas()" />
+        <div>
+          <AddItem @saveBoardData="saveProject" @createTextCaption="createTextCaption"
+            @createStickyNote="createStickyNote" @createDivNew="createDivNew"
+            @createMiniTextEditor="createMiniTextEditor"
+            @initDrawing="async () => (await initCanvas()).drawOnCanvas()" />
 
-        <ColorPalette @changeStickyNoteColor="changeStickyNoteColor" :sticky-notes="yDocStore.stickyNote" />
+          <ColorPalette @changeStickyNoteColor="changeStickyNoteColor" :sticky-notes="yDocStore.stickyNote" />
 
-        <UndoRedo @reset-canvas="async () => (await initCanvas()).initCanvas()"
-          @redo="async () => (await initCanvas()).redo()" @undo="async () => (await initCanvas()).undo()" />
-      </div>
+          <UndoRedo @reset-canvas="async () => (await initCanvas()).initCanvas()"
+            @redo="async () => (await initCanvas()).redo()" @undo="async () => (await initCanvas()).undo()" />
+        </div>
 
-      <div>
-        <VRow>
-          <VCol cols="12">
-            <canvas width="1200" height="800" style="background-color: #f4f4f9; z-index: -1000;">
-            </canvas>
+        <div style="width: 100%; height: 50rem;  ">
+          <!-- Canvas con bordes redondeados -->
+          <canvas class="canvas">
+          </canvas>
+          <TextCaption @deleteTextCaption="deleteTextCaption" :text-captions="yDocStore.textCaption" />
 
-            <TextCaption @deleteTextCaption="deleteTextCaption" :text-captions="yDocStore.textCaption" />
+          <StickyNote @deleteStickyNote="deleteStickyNote" :sticky-notes="yDocStore.stickyNote" />
 
-            <StickyNote @deleteStickyNote="deleteStickyNote" :sticky-notes="yDocStore.stickyNote" />
+          <MiniTextEditor @deleteMiniTextEditor="deleteMiniTextEditor" :miniTextEditors="yDocStore.miniTextEditor" />
 
-            <MiniTextEditor @deleteMiniTextEditor="deleteMiniTextEditor" :miniTextEditors="yDocStore.miniTextEditor" />
+          <!-- <UserCursor :mousePosition="yDocStore.mousePosition" /> -->
 
-            <!-- <UserCursor :mousePosition="yDocStore.mousePosition" /> -->
-          </VCol>
-        </VRow>
+        </div>
+
       </div>
 
     </div>
-
   </div>
+
 </template>
+
+
+
+<style scoped>
+.miro {
+  display: flex;
+  height: 100vh;
+  /* Ocupa toda la altura de la pantalla */
+  padding: 20px;
+  /* Espacio interno alrededor del contenido */
+  margin: 0;
+  /* Asegura que el contenedor no tenga margen adicional, puedes ajustar este valor si es necesario */
+  box-sizing: border-box;
+  /* Asegura que el padding se incluya en el cálculo del tamaño */
+}
+
+.canvas {
+  margin-left: .5rem;
+  background-color: #f4f4f9;
+  z-index: -1000;
+  width: inherit;
+  height: inherit;
+  border-radius: 15px;
+}
+</style>

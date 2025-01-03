@@ -10,36 +10,56 @@ const emit = defineEmits<{ (e: 'deleteTextCaption', textCaption: ITextCaption): 
 
 <template>
 
+  <div class="card rounded " v-for="textCaption in textCaptions" :key="textCaption.id" :style="{
+    backgroundColor: textCaption.color,
+    position: 'absolute',
+    left: textCaption.dragPosition.x + 'px',
+    top: textCaption.dragPosition.y + 'px',
+    width: textCaption.resizePosition.x + 'px',
+    height: textCaption.resizePosition.y + 'px',
+  }" :class="'text-caption-' + textCaption.id">
 
-  <VCard min-width="200" :color="textCaption.color" :class="'text-caption-' + textCaption.id"
-    v-for="textCaption in textCaptions" :key="textCaption.id" :style="{
-      left: textCaption.dragPosition.x + 'px',
-      top: textCaption.dragPosition.y + 'px',
-      width: textCaption.resizePosition.x + 'px',
-      height: textCaption.resizePosition.y + 'px',
-    }" class="border rounded shadow-sm">
-    <VCardTitle class="d-flex justify-space-between align-items-center p-1">
-      <VBtn color="red" icon size="25" variant="outlined" @click="emit('deleteTextCaption', textCaption)" class="p-0">
-        <VIcon icon="tabler-trash" size="15" />
-      </VBtn>
-      <VBtn color="gray" :class="'text-caption-handler-' + textCaption.id" style="cursor: move;" icon size="25"
-        variant="outlined" class="p-0">
-        <VIcon icon="tabler-arrows-move" size="15" />
-      </VBtn>
-    </VCardTitle>
+    <div class="d-flex flex-column h-100"> <!-- Contenedor flex para hacer que el contenido ocupe todo el alto -->
 
-    <VCardText class="d-flex p-0" style="position: relative;">
-      <div contenteditable="true" :class="'w-100  p-2 text-caption-body-' + textCaption.id"
-        style="box-sizing: border-box; border: 1px solid #ddd; background-color: #f9f9f9; font-weight: bold; border-radius: 4px">
+      <!-- Contenedor para los iconos en la parte superior (izquierda y derecha) -->
+      <div class="d-flex justify-space-between pa-1">
+        <!-- Icono en la esquina superior derecha -->
+        <VBtn color="#000000" variant="tonal" :class="'text-caption-handler-' + textCaption.id" style="cursor: move;"
+          icon size="25">
+          <VIcon icon="tabler-arrows-move" size="15"></VIcon>
+        </VBtn>
+
+        <!-- Icono en la esquina superior izquierda -->
+        <VBtn color="#000000" variant="tonal" icon size="25" @click="emit('deleteTextCaption', textCaption)">
+          <VIcon icon="tabler-trash" size="15"></VIcon>
+        </VBtn>
+
+      </div>
+
+      <!-- Card body que ocupa todo el espacio disponible -->
+      <div :class="'contentEditable card-body flex-grow-1 pa-2 text-caption-body-' + textCaption.id"
+        contenteditable="true">
         {{ textCaption.body }}
       </div>
-    </VCardText>
 
-    <VCardActions class="d-flex justify-end align-end" style="position: absolute; bottom: 0; right: 0;">
-      <VBtn color="gray" :class="'text-caption-resizer-' + textCaption.id" style="cursor: nw-resize;" icon size="25"
-        variant="outlined">
-        <VIcon icon="tabler-arrow-down-right" size="15" />
-      </VBtn>
-    </VCardActions>
-  </VCard>
+      <!-- Icono en la esquina inferior derecha (siempre pegado al fondo de la tarjeta) -->
+      <div class="d-flex justify-end pa-1 mt-auto">
+        <VBtn color="#000000" variant="tonal" :class="'text-caption-resizer-' + textCaption.id"
+          style="cursor: nw-resize;" icon size="25">
+          <VIcon icon="tabler-arrow-down-right" size="15"></VIcon>
+        </VBtn>
+      </div>
+
+    </div>
+  </div>
 </template>
+
+<style lang="scss" scoped>
+.contentEditable {
+  color: black;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  font-weight: bold;
+  border-radius: 4px;
+}
+</style>

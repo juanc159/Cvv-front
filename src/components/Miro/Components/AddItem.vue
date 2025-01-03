@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 const emit = defineEmits<{
+  (e: "createDivNew"): void;
   (e: "saveBoardData"): void;
   (e: "createTextCaption"): void;
   (e: "createStickyNote"): void;
@@ -12,7 +13,10 @@ const emit = defineEmits<{
 
 <template>
   <VSheet rounded elevation="10" class="d-flex flex-column justify-center align-center gap-5 my-5" width="50"
-    height="300">
+    height="270">
+    <!-- <VBtn icon size="35" variant="tonal" @click="emit('createDivNew')">
+      <VIcon icon="tabler-plus" class="cursor-pointer" size="20"></VIcon>
+    </VBtn> -->
     <VBtn icon size="35" variant="tonal" @click="emit('saveBoardData')">
       <VIcon icon="tabler-device-floppy" class="cursor-pointer" size="20"></VIcon>
     </VBtn>

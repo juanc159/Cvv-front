@@ -160,6 +160,10 @@ export function useGetProjectBoardData(
         yDocStore.yArrayStickyNote.delete(0, stickyNoteArray.length);
         yDocStore.stickyNote = [];
 
+        const divNewArray = yDocStore.yArrayDivNew.toArray();
+        yDocStore.yArrayDivNew.delete(0, divNewArray.length);
+        yDocStore.divNew = [];
+
         const miniTextEditorArray = yDocStore.yArrayMiniTextEditor.toArray();
         yDocStore.yArrayMiniTextEditor.delete(0, miniTextEditorArray.length);
         yDocStore.miniTextEditor = [];

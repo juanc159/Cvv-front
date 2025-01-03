@@ -19,13 +19,6 @@ const route = useRoute()
 
 <template>
   <div>
-    <VRow>
-      <VCol cols="12" sm="3">
-        <VBtn :to="{ name: 'Project-List' }">Volver</VBtn>
-      </VCol>
-      <VCol cols="12">
-        <Miro :code="route.params.code" />
-      </VCol>
-    </VRow>
+    <Miro :code="route.params.code" />
   </div>
 </template>

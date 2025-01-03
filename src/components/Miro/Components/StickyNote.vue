@@ -9,34 +9,57 @@ const emit = defineEmits<{ (e: 'deleteStickyNote', stickyNote: IStickyNote): voi
 </script>
 
 <template>
-  <VCard min-width="200" min-height="200" :color="stickyNote.color" :class="'sticky-note-' + stickyNote.id"
-    v-for="stickyNote in stickyNotes" :key="stickyNote.id" :style="{
-      left: stickyNote.dragPosition.x + 'px',
-      top: stickyNote.dragPosition.y + 'px',
-      width: stickyNote.resizePosition.x + 'px',
-      height: stickyNote.resizePosition.y + 'px',
-    }">
-    <VCardTitle class="d-flex justify-space-between">
-      <VBtn color="#000000" icon size="25" variant="outlined" @click="emit('deleteStickyNote', stickyNote)">
-        <VIcon icon="tabler-trash" size="15"></VIcon>
-      </VBtn>
-      <VBtn color="#000000" :class="'sticky-note-handler-' + stickyNote.id" style="cursor: move;" icon size="25"
-        variant="outlined">
-        <VIcon icon="tabler-arrows-move" size="15"></VIcon>
-      </VBtn>
-    </VCardTitle>
-    <VCardText class="d-flex p-0" style="height: 60%; width: 100%;">
-      <div contenteditable="true" :class="'w-100 h-100 p-2 sticky-note-body-' + stickyNote.id"
-        style="box-sizing: border-box;">
+
+  <div class="card rounded" v-for="stickyNote in stickyNotes" :key="stickyNote.id" :style="{
+    backgroundColor: stickyNote.color,
+    position: 'absolute',
+    top: stickyNote.dragPosition.y + 'px',
+    left: stickyNote.dragPosition.x + 'px',
+    width: stickyNote.resizePosition.x + 'px',
+    height: stickyNote.resizePosition.y + 'px',
+  }" :class="'  sticky-note-' + stickyNote.id">
+
+    <div class="d-flex flex-column h-100"> <!-- Contenedor flex para hacer que el contenido ocupe todo el alto -->
+
+      <!-- Contenedor para los iconos en la parte superior (izquierda y derecha) -->
+      <div class="d-flex justify-space-between pa-1">
+        <!-- Icono en la esquina superior derecha -->
+        <VBtn color="#000000" variant="tonal" :class="'sticky-note-handler-' + stickyNote.id" style="cursor: move;" icon
+          size="25">
+          <VIcon icon="tabler-arrows-move" size="15"></VIcon>
+        </VBtn>
+
+        <!-- Icono en la esquina superior izquierda -->
+        <VBtn color="#000000" variant="tonal" icon size="25" @click="emit('deleteStickyNote', stickyNote)">
+          <VIcon icon="tabler-trash" size="15"></VIcon>
+        </VBtn>
+
+      </div>
+
+      <!-- Card body que ocupa todo el espacio disponible -->
+      <div :class="'contentEditable card-body flex-grow-1 pa-2 sticky-note-body-' + stickyNote.id"
+        contenteditable="true">
         {{ stickyNote.body }}
       </div>
-    </VCardText>
-    <VCardActions class="d-flex justify-end align-end" style="position: absolute; bottom: 0; right: 0;">
-      <VBtn color="#000000" :class="'sticky-note-resizer-' + stickyNote.id" style="cursor: nw-resize;" icon size="25"
-        variant="outlined">
-        <VIcon icon="tabler-arrow-down-right" size="15"></VIcon>
-      </VBtn>
-    </VCardActions>
-  </VCard>
+
+      <!-- Icono en la esquina inferior derecha (siempre pegado al fondo de la tarjeta) -->
+      <div class="d-flex justify-end pa-1 mt-auto">
+        <VBtn color="#000000" variant="tonal" :class="'sticky-note-resizer-' + stickyNote.id" style="cursor: nw-resize;"
+          icon size="25">
+          <VIcon icon="tabler-arrow-down-right" size="15"></VIcon>
+        </VBtn>
+      </div>
+
+    </div>
+  </div>
 
 </template>
+
+<style lang="scss" scoped>
+.contentEditable {
+  color: black;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+</style>

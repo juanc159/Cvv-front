@@ -96,29 +96,29 @@ export function useGetProjectDetail(code: string, user_id: any | undefined) {
   function trackJoinAndLeavingUsers() {
     console.log("project_code", project_code);
 
-    window.Echo.join(`project.room`)
-      .here((users: userResponseType[]) => {
-        yDocStore.joinees = [...users];
-        console.log("users here", users);
+    // window.Echo.join(`project.room`)
+    //   .here((users: userResponseType[]) => {
+    //     yDocStore.joinees = [...users];
+    //     console.log("users here", users);
 
-      })
-      .joining((user: userResponseType) => {
-        joiningUsers(user);
-        console.log("users joining", user);
+    //   })
+    //   .joining((user: userResponseType) => {
+    //     joiningUsers(user);
+    //     console.log("users joining", user);
 
-      })
-      .leaving((user: userResponseType) => {
-        leavingUsers(user);
-        console.log("users joining", user);
+    //   })
+    //   .leaving((user: userResponseType) => {
+    //     leavingUsers(user);
+    //     console.log("users joining", user);
 
-      })
-      .error((error: any) => {
-        toast("Something went wrong", "", "danger");
-        // localStorage.clear();
-        console.log(error);
+    //   })
+    //   .error((error: any) => {
+    //     toast("Something went wrong", "", "danger");
+    //     // localStorage.clear();
+    //     console.log(error);
 
-        // window.location.href = "/app/login";
-      });
+    //     // window.location.href = "/app/login";
+    //   });
   }
 
   return {

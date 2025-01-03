@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { useToast } from '@/composables/useToast';
 import { IProjectDetail } from '../Actions/http/getProjectDetail';
-import { yDocStore } from '../Store/yDocStore';
 const { toast } = useToast();
 
 const props = defineProps<{
@@ -41,19 +40,20 @@ function copyProjectLink() {
 <template>
   <div class="flex justify-between p-2 mt-1">
     <div class="flex bg-white p-2 px-3 gap-2 py-2 rounded-md shadow-md">
-      <img :src="'/img/logo.png'" width="35" alt="logo" />
-      <span class="text-slate-200">|</span><span class="pt-1"> {{ project?.name }}</span>
+      <!-- <img :src="'/img/logo.png'" width="35" alt="logo" /> -->
+      <!-- <span class="text-slate-200">|</span> -->
+      <span class="pt-1 text-h4"> {{ project?.name }}</span>
 
-      <span class="text-slate-200">|</span>
+      <VDivider class="mx-2" vertical length="20" />
 
       <RouterLink :to="{ name: 'Project-List' }"
         class="flex border-0 text-medium gap-1 hover:bg-slate-100 px-1 py-1 rounded-md">
         <VIcon icon="tabler-squares"></VIcon>
-        <span>Projectos</span>
+        <span>Volver a projectos</span>
       </RouterLink>
     </div>
 
-    <div class="flex gap-2 bg-white p-2 px-2 py-2 rounded-md shadow-md">
+    <!-- <div class="flex gap-2 bg-white p-2 px-2 py-2 rounded-md shadow-md">
       <div class="flex pr-4">
         <VBtn class="w-8 h-8 mx-2 bg-yellow-300 rounded-full" icon>
           {{ convertLetterToUpperCase() }}
@@ -68,6 +68,6 @@ function copyProjectLink() {
         <VIcon icon="tabler-plus"></VIcon>
         <span class="text-sm"> Compartir</span>
       </VBtn>
-    </div>
+    </div> -->
   </div>
 </template>

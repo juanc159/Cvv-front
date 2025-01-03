@@ -71,7 +71,7 @@ export function useDragMiniTextEditor() {
       const cloneRange = range.cloneRange();
       cloneRange.selectNodeContents(editor);
       cloneRange.setEnd(range.endContainer, range.endOffset);
-      const cursorPosition = cloneRange.toString().length;
+      // const cursorPosition = cloneRange.toString().length;
 
 
 
@@ -83,7 +83,7 @@ export function useDragMiniTextEditor() {
 
 
       return {
-        cursorPosition,
+        // cursorPosition,
         x,
         y
       };
@@ -104,15 +104,15 @@ export function useDragMiniTextEditor() {
 
     function _changeMiniTextEditorContentEvent() {
 
-      const blinkingCursor = document.querySelector('.blinking-cursor-' + id) as HTMLElement;
-      blinkingCursor.style.display = 'block';
+      // const blinkingCursor = document.querySelector('.blinking-cursor-' + id) as HTMLElement;
+      // blinkingCursor.style.display = 'block';
 
-      const { cursorPosition, x, y } = getCursorPosition(miniTextEditorContent, blinkingCursor);
-      yDocStore.cursor.cursorPosition = cursorPosition;
-      yDocStore.cursor.x = x;
-      yDocStore.cursor.y = y;
-      yDocStore.yCursor.set("x", x);
-      yDocStore.yCursor.set("y", y);
+      // const { cursorPosition, x, y } = getCursorPosition(miniTextEditorContent, blinkingCursor);
+      // yDocStore.cursor.cursorPosition = cursorPosition;
+      // yDocStore.cursor.x = x;
+      // yDocStore.cursor.y = y;
+      // yDocStore.yCursor.set("x", x);
+      // yDocStore.yCursor.set("y", y);
 
       // _modifyMiniTextEditor(_changeMiniTextEditorBodyContent)
 
@@ -131,7 +131,7 @@ export function useDragMiniTextEditor() {
 
       const func1 = () => {
         return new Promise((resolve, reject) => {
-          yDocStore.cursor.cursorPosition = cursorPosition; //update cursor position
+          // yDocStore.cursor.cursorPosition = cursorPosition; //update cursor position
           _changeMiniTextEditorBodyContent();
           resolve(null);
         })
@@ -139,7 +139,7 @@ export function useDragMiniTextEditor() {
 
       const func2 = () => {
         return new Promise((resolve, reject) => {
-          moveCursorToPosition(miniTextEditorContent, yDocStore.cursor.cursorPosition);
+          // moveCursorToPosition(miniTextEditorContent, yDocStore.cursor.cursorPosition);
 
           resolve(null);
         })

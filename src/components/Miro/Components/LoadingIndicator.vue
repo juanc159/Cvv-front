@@ -7,7 +7,7 @@ const props = defineProps<{
 <template>
   <div>
     <!-- <div class="loading-text">Document syncing...</div> -->
-    <div class="loading-text" v-show="props.loading">Loading document... </div>
+    <div class="loading-text" v-show="props.loading">Cargando documento... </div>
 
     <div id="loadingSpinner" :style="props.loading ? 'display:block' : 'display:none'" class="loading-spinner"></div>
   </div>
@@ -19,6 +19,7 @@ const props = defineProps<{
   top: 46%;
   left: 48%;
   z-index: 1000;
+  color: #3498db;
 
 }
 
