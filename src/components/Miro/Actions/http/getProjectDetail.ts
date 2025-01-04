@@ -1,5 +1,5 @@
 import { useToast } from '@/composables/useToast';
-import { yDocStore } from '../../Store/yDocStore';
+import { router } from '@/plugins/1.router';
 import { userResponseType } from '../../types/tokenTypes';
 const { toast } = useToast()
 
@@ -13,8 +13,10 @@ export interface IProjectDetail {
 export function useGetProjectDetail(code: string, user_id: any | undefined) {
   const project_code = code;
   const loading = ref(false);
-  const showJoinneesModal = ref(false);
   const sendId = user_id
+
+  console.log("sendId", sendId);
+
 
   const projectData = ref<IProjectDetail>({} as IProjectDetail);
 
@@ -27,7 +29,7 @@ export function useGetProjectDetail(code: string, user_id: any | undefined) {
         createUrl(`/miro/details`, {
           query: {
             code: project_code,
-            user_id: sendId,
+            send_id: sendId,
           },
         })
       );
@@ -36,7 +38,7 @@ export function useGetProjectDetail(code: string, user_id: any | undefined) {
         projectData.value = data.value.project;
         knowWhoIsTyping()
       } else {
-        window.location.href = "/app/projects";
+        router.push({ name: "Login" })
       }
 
       loading.value = false;
@@ -50,19 +52,19 @@ export function useGetProjectDetail(code: string, user_id: any | undefined) {
   function knowWhoIsTyping() {
 
 
-    // window.Echo.private(`typing.${sendId}`)
-    //   .listen("UserTypingEvent", (e: any) => {
-    //     console.log("message here :", e);
+    window.Echo.private(`typing.${sendId}`)
+      .listen("UserTypingEvent", (e: any) => {
+        console.log("message here :", e);
 
-    //   })
-    //   .listenForWhisper("typing", (e: any) => {
-    //     yDocStore.cursor.typingUser = e.name
-    //     console.log(e.name, " is typing...");
-    //   }).error((error: any) => {
-    //     console.log(error);
-    //     localStorage.clear();
-    //     window.location.href = "/app/login";
-    //   });
+      })
+      .listenForWhisper("typing", (e: any) => {
+        yDocStore.cursor.typingUser = e.name
+        console.log(e, " is typing...");
+      }).error((error: any) => {
+        console.log(error);
+        localStorage.clear();
+        router.push({ name: "Login" })
+      });
 
   }
 
@@ -84,50 +86,38 @@ export function useGetProjectDetail(code: string, user_id: any | undefined) {
     }
   }
 
-  function showJoiningUsersModal() {
-    showJoinneesModal.value = true;
-  }
-  function hideJoiningUsersModal() {
-    showJoinneesModal.value = false;
-  }
-
 
 
   function trackJoinAndLeavingUsers() {
-    console.log("project_code", project_code);
+    window.Echo.join(`project.room.${project_code}`)
+      .here((users: userResponseType[]) => {
+        yDocStore.joinees = [...users];
+        console.log("users here", users);
 
-    // window.Echo.join(`project.room`)
-    //   .here((users: userResponseType[]) => {
-    //     yDocStore.joinees = [...users];
-    //     console.log("users here", users);
 
-    //   })
-    //   .joining((user: userResponseType) => {
-    //     joiningUsers(user);
-    //     console.log("users joining", user);
+      })
+      .joining((user: userResponseType) => {
+        joiningUsers(user);
+        console.log("user joining", user);
 
-    //   })
-    //   .leaving((user: userResponseType) => {
-    //     leavingUsers(user);
-    //     console.log("users joining", user);
+      })
+      .leaving((user: userResponseType) => {
+        leavingUsers(user);
+        console.log("user leaving", user);
 
-    //   })
-    //   .error((error: any) => {
-    //     toast("Something went wrong", "", "danger");
-    //     // localStorage.clear();
-    //     console.log(error);
-
-    //     // window.location.href = "/app/login";
-    //   });
+      })
+      .error((error: any) => {
+        console.log(error);
+        localStorage.clear();
+        router.push({ name: "Login" })
+      });
   }
+
 
   return {
     getProjectDetail,
     projectData,
-    showJoiningUsersModal,
-    hideJoiningUsersModal,
     loading,
-    showJoinneesModal,
     trackJoinAndLeavingUsers,
 
   };

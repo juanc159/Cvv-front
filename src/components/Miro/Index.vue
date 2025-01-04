@@ -21,7 +21,7 @@ const props = defineProps<{
 
 const { initCanvas } = useCanvas()
 
-const { trackMousePosition } = useShareUserCursor()
+const { trackMousePosition } = useShareUserCursor(authenticationStore)
 
 const {
   dragStickyNote,
@@ -74,9 +74,6 @@ const {
   projectData,
   getProjectDetail,
   trackJoinAndLeavingUsers,
-  showJoiningUsersModal,
-  hideJoiningUsersModal,
-  showJoinneesModal,
 } = useGetProjectDetail(props.code, authenticationStore.user.id);
 
 
@@ -136,15 +133,22 @@ onMounted(async () => {
 })
 
 
+//ModalJoinningUsers
+const refModalJoinningUsers = ref()
+const openModalJoinningUsers = () => {
+  refModalJoinningUsers.value.openDialog()
+}
+
 </script>
 <template>
   <div>
 
-    <TopNavBar :project="projectData" :userData="authenticationStore" @showJoiningUsersModal="showJoiningUsersModal" />
-
+    <TopNavBar :project="projectData" :userData="authenticationStore" @showJoiningUsersModal="openModalJoinningUsers" />
     <div @mousemove="trackMousePosition" class="miro">
-      <LoadingIndicator :loading="loadingData" />
-      <div class="d-flex " v-show="!loadingData">
+
+      <LoadingIndicator :loading="loadingData || yDocStore.loading" />
+
+      <div class="flex" v-show="(loadingData || yDocStore.loading) === true ? false : true">
 
         <div>
           <AddItem @saveBoardData="saveProject" @createTextCaption="createTextCaption"
@@ -168,13 +172,17 @@ onMounted(async () => {
 
           <MiniTextEditor @deleteMiniTextEditor="deleteMiniTextEditor" :miniTextEditors="yDocStore.miniTextEditor" />
 
-          <!-- <UserCursor :mousePosition="yDocStore.mousePosition" /> -->
+          <UserCursor :userData="authenticationStore" :mousePosition="yDocStore.mousePosition" />
 
         </div>
 
       </div>
 
     </div>
+
+    <ModalJoinningUsers ref="refModalJoinningUsers" />
+
+
   </div>
 
 </template>

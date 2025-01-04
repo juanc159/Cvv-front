@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { yDocStore } from '../Store/yDocStore';
+
 const props = defineProps<{
   miniTextEditorId: string;
   x: string;
@@ -11,8 +13,8 @@ const props = defineProps<{
     left: props.x,
     top: props.y,
   }" :class="'blinking-cursor blinking-cursor-' + miniTextEditorId">
-    Estela Guerra
-  </div>
+
+    {{ yDocStore.cursor.typingUser }}</div>
 </template>
 <style scoped>
 .blinking-cursor {

@@ -210,7 +210,7 @@ function initYjsTypesForMouse() {
   yDocStore.yMouse.observe((event: any) => {
     yDocStore.mousePosition.x = yDocStore.yMouse.get("x") as number;
     yDocStore.mousePosition.y = yDocStore.yMouse.get("y") as number;
-    // yDocStore.mousePosition.userName = yDocStore.yMouse.get("userName") as string;
+    yDocStore.mousePosition.userName = yDocStore.yMouse.get("userName") as string;
 
 
 
@@ -223,7 +223,7 @@ function initYjsTypesForCursor() {
   yDocStore.yCursor.observe((event: any) => {
     yDocStore.cursor.x = yDocStore.yCursor.get("x") as string;
     yDocStore.cursor.y = yDocStore.yCursor.get("y") as string;
-    // yDocStore.cursor.typingUser = yDocStore.yCursor.get("typingUser") as string;
+    yDocStore.cursor.typingUser = yDocStore.yCursor.get("typingUser") as string;
 
 
   });
@@ -239,9 +239,3 @@ function initYjsTypesDrawing() {
 
   });
 }
-
-
-// const blinkingCursor = document.querySelector(
-//     ".blinking-cursor-" + id
-// ) as HTMLElement;
-// blinkingCursor.style.display = "block";

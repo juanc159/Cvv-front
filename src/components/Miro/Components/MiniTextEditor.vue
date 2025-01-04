@@ -56,6 +56,8 @@ const updateBodyMiniTextEditor = (event: any, id: any) => {
         </VBtn>
       </div>
 
+      <BlinkingCursor :miniTextEditorId="miniTextEditor.id" :x="yDocStore.cursor.x" :y="yDocStore.cursor.y" />
+
       <!-- Card body que ocupa todo el espacio disponible -->
       <TiptapEditor placeholder="Content here ..." v-model="miniTextEditor.body"
         @update:model-value="updateBodyMiniTextEditor($event, miniTextEditor.id)"

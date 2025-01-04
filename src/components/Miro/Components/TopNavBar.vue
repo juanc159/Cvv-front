@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { useToast } from '@/composables/useToast';
 import { IProjectDetail } from '../Actions/http/getProjectDetail';
+import { yDocStore } from '../Store/yDocStore';
+
 const { toast } = useToast();
 
 const props = defineProps<{
@@ -53,7 +55,7 @@ function copyProjectLink() {
       </RouterLink>
     </div>
 
-    <!-- <div class="flex gap-2 bg-white p-2 px-2 py-2 rounded-md shadow-md">
+    <div class="flex gap-2 bg-white p-2 px-2 py-2 rounded-md shadow-md">
       <div class="flex pr-4">
         <VBtn class="w-8 h-8 mx-2 bg-yellow-300 rounded-full" icon>
           {{ convertLetterToUpperCase() }}
@@ -68,6 +70,8 @@ function copyProjectLink() {
         <VIcon icon="tabler-plus"></VIcon>
         <span class="text-sm"> Compartir</span>
       </VBtn>
-    </div> -->
+    </div>
+
+
   </div>
 </template>

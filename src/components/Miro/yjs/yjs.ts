@@ -1,6 +1,6 @@
 
 // import { IndexeddbPersistence } from 'y-indexeddb';
-// import { WebsocketProvider } from 'y-websocket';
+import { WebsocketProvider } from 'y-websocket';
 import { runFuncSequentially } from '../Helper/util';
 import { yDocStore } from '../Store/yDocStore';
 import { initCursor, initDivNew, initDrawing, initMiniTextEditor, initMouse, initStickyNote, initTextCaption } from './yjsUtils';
@@ -39,6 +39,7 @@ export function initYjs(
 ) {
 
   yDocStore.loading = true;
+  yDocStore.doc.destroy()
 
   runFuncSequentially([
     initCursor,
@@ -53,6 +54,23 @@ export function initYjs(
     yDocStore.loading = false;
 
   }).catch((err) => console.log(err));
+
+
+  const provider = new WebsocketProvider(
+    "ws://localhost:1234",
+    `sv000013-${projectData?.projectCode}`,
+    yDocStore.doc
+  );
+
+  //wait until the document is synchronized
+  provider.on('sync', () => {
+    yDocStore.loading = false;
+    console.log('document is synchronized')
+  })
+
+
+
+
 
   // new WebsocketProvider('ws://localhost:1234', projectData.code, yDocStore.doc)
 
