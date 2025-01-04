@@ -148,7 +148,7 @@ const openModalJoinningUsers = () => {
 
       <LoadingIndicator :loading="loadingData || yDocStore.loading" />
 
-      <div class="flex" v-show="(loadingData || yDocStore.loading) === true ? false : true">
+      <div class="d-flex" v-show="(loadingData || yDocStore.loading) === true ? false : true">
 
         <div>
           <AddItem @saveBoardData="saveProject" @createTextCaption="createTextCaption"

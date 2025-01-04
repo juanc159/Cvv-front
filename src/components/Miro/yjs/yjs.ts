@@ -58,7 +58,7 @@ export function initYjs(
 
   const provider = new WebsocketProvider(
     "ws://localhost:1234",
-    `sv000013-${projectData?.projectCode}`,
+    `sv000013-${projectData?.code}`,
     yDocStore.doc
   );
 
