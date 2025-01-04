@@ -1,5 +1,6 @@
 import { useToast } from '@/composables/useToast';
 import { router } from '@/plugins/1.router';
+import { yDocStore } from '../../Store/yDocStore';
 import { userResponseType } from '../../types/tokenTypes';
 const { toast } = useToast()
 
