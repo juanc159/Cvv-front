@@ -44,13 +44,13 @@ const goView = (id: string) => {
         <div class="d-flex align-center text-h3 mb-1 flex-wrap justify-center">
           <div class="position-relative me-2">
             <h3 class="section-title text-center">
-              Servicios adicionales o complementarios
+              Servicios adicionales y complementos
             </h3>
           </div>
         </div>
         <p class="text-center">
           Además de sus servicios educativos obligatorios, el aprendizaje de danza
-          latinoamericana, música...
+          latinoamericana, música, periodico estudiantil...
         </p>
       </div>
     </div>

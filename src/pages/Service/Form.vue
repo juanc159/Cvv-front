@@ -168,8 +168,8 @@ const validateImagen = computed(() => {
             <VCol cols="12">
               <Editor :api-key="API_KEY_EDITOR" :init="{
                 toolbar_mode: 'sliding',
-                plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount linkchecker',
-                toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
+                plugins: 'code anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount linkchecker',
+                toolbar: 'code undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
               }" initial-value="" v-model="form.html" />
 
               <template v-for="(item, index) in errorsFormHtml" :key="index">
