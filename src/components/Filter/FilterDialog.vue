@@ -251,8 +251,9 @@ const debouncedEmit = debounce((newValue) => {
   });
 }, 300); // Ajusta el tiempo de espera (en milisegundos) según sea necesario
 
+const cambio = ref<boolean>(true)
 watch(generalSearch, (newValue, oldValue) => {
-  if (!optionsFilter.showBtnSearch) {
+  if (!optionsFilter.showBtnSearch && cambio.value) {
     // Llamar a la función debounced en lugar de emitir directamente
     debouncedEmit(newValue);
   }
@@ -268,6 +269,10 @@ const filterAplicated = computed(() => {
 
 defineExpose({
   reloadComponent,
+  generalSearch,
+  optionsFilter,
+  arrayFilter,
+  cambio
 })
 
 const loadFullComponent = computed(() => {
@@ -290,42 +295,44 @@ const loadFullComponent = computed(() => {
     <template v-if="loadFullComponent">
       <div class="d-flex justify-end gap-3 flex-wrap">
         <VRow>
-          <VCol>
+          <VCol cols="12" md="6">
             <AppTextField :label="optionsFilter.inputGeneral.placeholder" clearable v-model="generalSearch"
               :placeholder="optionsFilter.inputGeneral.placeholder" prepend-inner-icon="tabler-search">
             </AppTextField>
           </VCol>
+          <VCol cols="12" md="6" class="mt-4">
+            <div class="d-flex justify-start gap-3 flex-wrap">
+              <VBtn class="mt-2" v-if="arrayFilter.length > 0" :loading="!allTrueSelect" :disabled="!allTrueSelect"
+                color="primary" @click="openModalFilter()">
+                <template #prepend>
+                  <VIcon icon="tabler-filter" start />
+                </template>
+                Filtros
+              </VBtn>
+              <VBtn class="mt-2" v-if="filterAplicated" :loading="!allTrueSelect" :disabled="!allTrueSelect"
+                color="success" @click="clearFilter">
+                <VTooltip activator="parent" location="bottom"> Limpiar </VTooltip>
+                <VIcon icon="tabler-filter-cancel"></VIcon>
+              </VBtn>
+              <VBtn v-if="!optionsFilter.showBtnSearch" class="mt-2" @click="fecthSearch()">
+                <VTooltip activator="parent" location="bottom"> Actualizar </VTooltip>
+                <VIcon icon="tabler-rotate-clockwise" />
+              </VBtn>
+              <VBtn v-if="optionsFilter.showBtnSearch" class="mt-2" @click="fecthSearch()">
+                <template #prepend>
+                  <VIcon icon="tabler-search" />
+                </template>
+                Buscar
+              </VBtn>
+
+              <div class="mt-2">
+                <slot name="newBtns"></slot>
+              </div>
+
+            </div>
+          </VCol>
           <slot name="newFields"></slot>
         </VRow>
-      </div>
-      <div class="d-flex justify-start gap-3 flex-wrap">
-        <VBtn class="mt-2" v-if="arrayFilter.length > 0" :loading="!allTrueSelect" :disabled="!allTrueSelect"
-          color="primary" @click="openModalFilter()">
-          <template #prepend>
-            <VIcon icon="tabler-filter" start />
-          </template>
-          Filtros
-        </VBtn>
-        <VBtn class="mt-2" v-if="filterAplicated" :loading="!allTrueSelect" :disabled="!allTrueSelect" color="primary"
-          @click="clearFilter">
-          <VTooltip activator="parent" location="bottom"> Limpiar </VTooltip>
-          <VIcon icon="tabler-filter-cancel"></VIcon>
-        </VBtn>
-        <VBtn v-if="!optionsFilter.showBtnSearch" class="mt-2" @click="fecthSearch()">
-          <VTooltip activator="parent" location="bottom"> Actualizar </VTooltip>
-          <VIcon icon="tabler-rotate-clockwise" />
-        </VBtn>
-        <VBtn v-if="optionsFilter.showBtnSearch" class="mt-2" @click="fecthSearch()">
-          <template #prepend>
-            <VIcon icon="tabler-search" />
-          </template>
-          Buscar
-        </VBtn>
-
-        <div class="mt-2">
-          <slot name="newBtns"></slot>
-        </div>
-
       </div>
     </template>
 

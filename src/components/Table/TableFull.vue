@@ -194,7 +194,7 @@ const deleteData = async (id: number | string) => {
   loading.value = true;
   const { data, response } = await useApi(`${optionsTable.actions.delete.url}/${id}`).delete();
   loading.value = false;
-  // if (data.value.code === 200) toast("Éxito", data.value.message, "success");
+  //if (data.value.code === 200) toast("Éxito", data.value.message, "success");
   if (response.value?.ok && data.value) await executeFetchTable();
 };
 
@@ -233,8 +233,65 @@ const executeFetchTable = (page: number | null = null) => {
   });
 };
 const changeFilter = (data: object) => {
+  const queryString = createQueryString(data);
+  router.push({ query: Object.fromEntries(new URLSearchParams(queryString)) });
+
+
   optionsTable.searchQuery = data;
   executeFetchTable(1);
+  emit("dataFilter", data);
+};
+
+const route = useRoute()
+const router = useRouter()
+const refFilterDialog = ref()
+
+const changeFilter2 = (data: object) => {
+
+  if (Object.keys(data).length !== 0) {
+    optionsTable.searchQuery = data;
+
+    setTimeout(() => {
+
+      if (data.generalSearch) {
+        refFilterDialog.value.cambio = false
+        refFilterDialog.value.generalSearch = data.generalSearch
+      }
+      refFilterDialog.value.optionsFilter.inputGeneral.relationsGeneral = JSON.parse(data.relationsGeneral)
+
+      const af = JSON.parse(data.arrayFilter)
+      if (af.length > 0) {
+        // Reemplazar completamente el valor de `refFilterDialog.value.arrayFilter`
+        // refFilterDialog.value.arrayFilter = JSON.parse(data.arrayFilter);
+
+        // Asumimos que `data.arrayFilter` es un JSON string y necesitas parsearlo
+        const parsedData = JSON.parse(data.arrayFilter);
+
+        // Recorremos `refFilterDialog.value.arrayFilter`
+        refFilterDialog.value.arrayFilter.forEach((item) => {
+          // Buscamos si el `input` de `item` existe en `parsedData`
+          const matchingItem = parsedData.find((parsedItem) => parsedItem.input === item.input);
+
+          if (matchingItem) {
+            // Si encontramos un item coincidente, actualizamos el valor de `search` en `refFilterDialog.value.arrayFilter`
+            item.search = matchingItem.search;
+          }
+        });
+
+        console.log("Array actualizado:", refFilterDialog.value.arrayFilter);
+
+
+        executeFetchTable(1);
+      }
+    }, 200);
+
+    setTimeout(() => {
+
+      refFilterDialog.value.cambio = true
+    }, 500);
+  } else {
+    executeFetchTable(1);
+  }
   emit("dataFilter", data);
 };
 
@@ -246,7 +303,14 @@ const updateSortBy = (sortBy: any) => {
 
 onMounted(async () => {
   if (optionsTable.url) {
-    await executeFetchTable();
+
+    if (route.query) {
+      const query = route.query ? { ...route.query } : null;
+      await changeFilter2(query)
+    } else {
+      await executeFetchTable(1);
+    }
+
   }
 });
 
@@ -256,6 +320,32 @@ const openModalQuestionDelete = (id: string) => {
   refModalQuestion.value.componentData.title = "¿Está seguro que desea eliminar el registro?"
   refModalQuestion.value.openModal(id)
 }
+
+// Función para crear la cadena de consulta de manera dinámica
+const createQueryString = (filters: any): string => {
+  const params = new URLSearchParams();
+
+  // Iterar sobre las claves del objeto 'filters'
+  Object.keys(filters).forEach(key => {
+    const value = filters[key];
+
+    // Si el valor es un objeto o array, convertirlo en una cadena JSON
+    if (typeof value === 'object') {
+      if (Array.isArray(value)) {
+        // Si es un array, lo convertimos en JSON
+        params.set(key, JSON.stringify(value));
+      } else {
+        // Si es un objeto, lo convertimos en JSON
+        params.set(key, JSON.stringify(value));
+      }
+    } else if (value !== undefined && value !== null) {
+      // Si el valor no es undefined ni null, lo agregamos a los parámetros
+      params.set(key, value.toString());
+    }
+  });
+
+  return params.toString();
+};
 
 defineExpose({
   executeFetchTable,
@@ -271,9 +361,8 @@ defineExpose({
 <template>
   <div>
     <template v-if="isFilterDialog">
-      <FilterDialog :optionsFilter="optionsFilter" @sendFilter="changeFilter" />
+      <FilterDialog ref="refFilterDialog" :optionsFilter="optionsFilter" @sendFilter="changeFilter" />
     </template>
-
     <VDataTable :multi-sort="optionsTable.multiSort" :show-select="optionsTable.showSelect"
       :expand-on-click="optionsTable.expandOnClick" v-model="optionsTable.selected" class="mt-5"
       :headers="optionsTable.headers" :items-per-page="optionsTable.pagination.rowPerPage"
@@ -304,13 +393,7 @@ defineExpose({
             </td>
             <td v-else>
               <div :class="`d-flex justify-${column.align}`">
-
-                <span v-if="column.sortable === false" class="mr-2">{{ column.title }}</span>
-
-                <span v-if="column.sortable !== false" class="mr-2 cursor-pointer" @click="() => toggleSort(column)">
-                  {{ column.title }}
-                </span>
-
+                <span class="mr-2 cursor-pointer" @click="() => toggleSort(column)">{{ column.title }}</span>
                 <template v-if="isSorted(column)">
                   <v-icon :icon="getSortIcon(column)"></v-icon>
                 </template>
@@ -429,6 +512,9 @@ defineExpose({
 
       <template #loading>
         <VSkeletonLoader type="table-row@10, divider" loading></VSkeletonLoader>
+      </template>
+      <template #no-data>
+        <span>No se encontraron resultados</span>
       </template>
     </VDataTable>
 
