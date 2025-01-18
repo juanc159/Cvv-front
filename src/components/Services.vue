@@ -15,13 +15,14 @@ interface IServices {
   html: string,
 }
 
-
 const services = ref<IServices[]>([])
-const { data, response } = await useApi("pw-services/" + props.school_id).get();
-if (data.value.code == 200) {
-  services.value = data.value.services;
-}
 
+onMounted(async () => {
+  const { data, response } = await useApi("pw-services/" + props.school_id).get();
+  if (data.value.code == 200) {
+    services.value = data.value.services;
+  }
+})
 
 const goView = (id: string) => {
   router.push({
