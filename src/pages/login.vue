@@ -133,6 +133,10 @@ if (isAuthenticated) {
 
                 <div class="d-flex align-center flex-wrap justify-space-between mt-1 mb-4">
                   <VCheckbox v-model="rememberMe" label="Recuérdame" />
+
+                  <RouterLink class="text-primary ms-2 mb-1" :to="{ name: 'ForgotPassword' }">
+                    ¿Ha olvidado su contraseña?
+                  </RouterLink>
                 </div>
 
                 <VBtn class="mt-2" :loading="loading" :disabled="loading" block type="submit" @click="login()">
