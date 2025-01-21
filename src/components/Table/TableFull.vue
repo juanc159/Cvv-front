@@ -281,8 +281,8 @@ const changeFilter2 = (data: object) => {
         console.log("Array actualizado:", refFilterDialog.value.arrayFilter);
 
 
-        executeFetchTable(1);
       }
+      executeFetchTable(1);
     }, 200);
 
     setTimeout(() => {
