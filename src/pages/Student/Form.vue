@@ -25,6 +25,9 @@ const route = useRoute()
 const formValidation = ref<VForm>()
 const loading = reactive({
   form: false,
+  countries: false,
+  states: false,
+  cities: false,
 })
 
 const typeEducations = ref<Array<{
@@ -45,6 +48,9 @@ const form = ref({
   full_name: null as string | null,
   photo: null as string | null | File,
   company_id: null as string | null,
+  country_id: null as string | null,
+  state_id: null as string | null,
+  city_id: null as string | null,
 });
 
 const clearForm = () => {
@@ -64,6 +70,11 @@ const fetchDataForm = async () => {
   loading.form = false
 
   if (response.value?.ok && data.value) {
+
+    //select infinitos
+    select_countries.dataNueva.value = data.value.countries_arrayInfo
+    select_countries.totalLinks.value = data.value.countries_countLinks
+
     typeEducations.value = data.value.typeEducations
     sections.value = data.value.sections
 
@@ -71,6 +82,16 @@ const fetchDataForm = async () => {
     //formulario 
     if (data.value.form) {
       form.value = data.value.form
+      const formClone = JSON.parse(JSON.stringify(data.value.form))
+
+      if (data.value.form.id) {
+        await changeCountry(formClone.country_id)
+        await changeState(formClone.state_id)
+
+        form.value.country_id = formClone.country_id
+        form.value.state_id = formClone.state_id
+        form.value.city_id = formClone.city_id
+      }
     }
   }
 }
@@ -85,10 +106,15 @@ const submitForm = async () => {
 
     const formData = new FormData();
     for (const key in form.value) {
-      if (!["arrayDetails"].includes(key)) {
+      if (!["arrayDetails", "country_id", "state_id", "city_id", "gender", "birthday"].includes(key)) {
         formData.append(key, form.value[key])
       }
     }
+    formData.append("country_id", form.value.country_id.value)
+    formData.append("state_id", form.value.state_id)
+    formData.append("city_id", form.value.city_id)
+    formData.append("gender", form.value.gender)
+    formData.append("birthday", form.value.birthday)
 
     loading.form = true;
     const { data, response } = await useApi(url).post(formData);
@@ -145,6 +171,68 @@ const gradesFilter = computed(() => {
   return []
 })
 
+
+const states = ref<Array<object>>([])
+const cities = ref<Array<object>>([])
+const countries_arrayInfo = ref<Array<{
+  value: string,
+  title: string
+}>>([])
+const countries_countLinks = ref<number>(1)
+
+
+//SELECT INFINITE COUNTRIES
+const selectInfiniteCountries = async (params: object) => {
+  loading.countries = true;
+  const { data, response } = await useApi("/selectInfiniteCountries").post(params)
+  loading.countries = false;
+  if (response.value?.ok && data.value) {
+    countries_arrayInfo.value = data.value.countries_arrayInfo
+    countries_countLinks.value = data.value.countries_countLinks
+  }
+}
+
+const select_countries = useSelect(
+  selectInfiniteCountries,
+  countries_arrayInfo,
+  countries_countLinks,
+  {}
+);
+
+
+//SELECT DEPARTAMENTOS
+const changeCountry = async (event: any) => {
+  form.value.state_id = null;
+  form.value.city_id = null;
+
+  loading.states = true;
+  const { data, response } = await useApi(
+    `/selectStates/${event.value}`
+  ).get();
+  loading.states = false;
+
+  if (response.value?.ok && data.value) {
+    states.value = data.value.states;
+  }
+}
+
+//SELECT CIUDADES
+const changeState = async (event: Event) => {
+  form.value.city_id = null;
+
+  loading.cities = true;
+  const { data, response } = await useApi(`/selectCities/${event}`).get();
+  loading.cities = false;
+
+  if (response.value?.ok && data.value) {
+    cities.value = data.value.cities;
+  }
+}
+
+const genders = [
+  { value: 'M', title: 'Masculino' },
+  { value: 'F', title: 'Femenino' },
+]
 </script>
 
 
@@ -160,19 +248,40 @@ const gradesFilter = computed(() => {
 
         <VForm ref="formValidation" @submit.prevent="() => { }" :disabled="disabledFiledsView">
           <VRow>
-            <VCol cols="12" sm="3">
+            <VCol cols="12" sm="4">
               <AppSelect :items="typeEducations" clearable :rules="[requiredValidator]" v-model="form.type_education_id"
                 label="Tipo de educación"></AppSelect>
             </VCol>
 
-            <VCol cols="12" sm="3">
+            <VCol cols="12" sm="4">
               <AppSelect clearable :items="gradesFilter" :rules="[requiredValidator]" v-model="form.grade_id"
                 label="Grados y niveles">
               </AppSelect>
             </VCol>
-            <VCol cols="12" sm="3">
+            <VCol cols="12" sm="4">
               <AppSelect clearable :items="sections" :rules="[requiredValidator]" v-model="form.section_id"
                 label="Secciones"></AppSelect>
+            </VCol>
+
+            <VCol cols="12" md="4">
+              <SelectInfinite :requiredField="true" label="País" returnObject v-model="form.country_id"
+                :select="select_countries" @update:model-value="changeCountry($event)"
+                :error-messages="errorsBack.country_id" @input="errorsBack.country_id = ''" clearable
+                :loading="loading.countries" :rules="[requiredValidator]">
+              </SelectInfinite>
+            </VCol>
+
+            <VCol cols="12" md="4">
+              <AppAutocomplete :loading="loading.states" :requiredField="true" clearable :items="states"
+                v-model="form.state_id" label="Región" @update:model-value="changeState($event)"
+                :error-messages="errorsBack.state_id" @input="errorsBack.state_id = ''" :rules="[requiredValidator]">
+              </AppAutocomplete>
+            </VCol>
+            <VCol cols="12" md="4">
+              <AppAutocomplete :loading="loading.cities" :requiredField="true" clearable :items="cities"
+                v-model="form.city_id" label="Ciudad" :error-messages="errorsBack.city_id"
+                @input="errorsBack.city_id = ''" :rules="[requiredValidator]">
+              </AppAutocomplete>
             </VCol>
 
 
@@ -183,14 +292,26 @@ const gradesFilter = computed(() => {
               </AppTextField>
             </VCol>
 
-            <VCol cols="12" sm="6">
+            <VCol cols="12" sm="9">
               <AppTextField clearable v-model="form.full_name" :rules="[requiredValidator]"
                 :error-messages="errorsBack.full_name" label="Nombre completo" @input="errorsBack.full_name = ''"
                 :requiredField="true">
               </AppTextField>
             </VCol>
+            <VCol cols="12" sm="4">
+              <AppSelect clearable v-model="form.gender" :items="genders" :rules="[requiredValidator]"
+                :error-messages="errorsBack.gender" label="Sexo" @input="errorsBack.gender = ''" :requiredField="true">
+              </AppSelect>
+            </VCol>
+            <VCol cols="12" sm="4">
+              <AppDateTimePicker clearable v-model="form.birthday" label="Fecha de nacimiento"
+                :rules="[requiredValidator]" :requiredField="true" :error-messages="errorsBack.gender"
+                @input="errorsBack.gender = ''" />
+            </VCol>
 
-            <VCol cols="12" sm="3">
+
+
+            <VCol cols="12" sm="4">
               <VFileInput accept="image/*" :key="archive.key" @change="addPhoto($event)"
                 @click:clear="archive.clearData">
                 <template #label>
@@ -199,6 +320,7 @@ const gradesFilter = computed(() => {
               </VFileInput>
             </VCol>
           </VRow>
+
 
           <VRow>
             <VCol cols="12" class="d-flex justify-center ">
