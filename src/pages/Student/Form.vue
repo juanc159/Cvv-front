@@ -85,12 +85,14 @@ const fetchDataForm = async () => {
       const formClone = JSON.parse(JSON.stringify(data.value.form))
 
       if (data.value.form.id) {
-        await changeCountry(formClone.country_id)
-        await changeState(formClone.state_id)
+        if (formClone.country_id && formClone.state_id) {
+          await changeCountry(formClone.country_id)
+          await changeState(formClone.state_id)
+          form.value.country_id = formClone.country_id
+          form.value.state_id = formClone.state_id
+          form.value.city_id = formClone.city_id
+        }
 
-        form.value.country_id = formClone.country_id
-        form.value.state_id = formClone.state_id
-        form.value.city_id = formClone.city_id
       }
     }
   }
