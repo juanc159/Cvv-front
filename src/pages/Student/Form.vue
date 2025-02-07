@@ -51,6 +51,9 @@ const form = ref({
   country_id: null as string | null,
   state_id: null as string | null,
   city_id: null as string | null,
+  gender: null as string | null,
+  birthday: null as string | null,
+  real_entry_date: null as string | null,
 });
 
 const clearForm = () => {
@@ -266,6 +269,7 @@ const genders = [
             </VCol>
 
             <VCol cols="12" md="4">
+              {{ form.country_id }}
               <SelectInfinite :requiredField="true" label="País" returnObject v-model="form.country_id"
                 :select="select_countries" @update:model-value="changeCountry($event)"
                 :error-messages="errorsBack.country_id" @input="errorsBack.country_id = ''" clearable
@@ -274,12 +278,15 @@ const genders = [
             </VCol>
 
             <VCol cols="12" md="4">
+              {{ form.state_id }}
               <AppAutocomplete :loading="loading.states" :requiredField="true" clearable :items="states"
                 v-model="form.state_id" label="Región" @update:model-value="changeState($event)"
                 :error-messages="errorsBack.state_id" @input="errorsBack.state_id = ''" :rules="[requiredValidator]">
               </AppAutocomplete>
             </VCol>
             <VCol cols="12" md="4">
+              {{ form.city_id }}
+
               <AppAutocomplete :loading="loading.cities" :requiredField="true" clearable :items="cities"
                 v-model="form.city_id" label="Ciudad" :error-messages="errorsBack.city_id"
                 @input="errorsBack.city_id = ''" :rules="[requiredValidator]">
@@ -307,8 +314,14 @@ const genders = [
             </VCol>
             <VCol cols="12" sm="4">
               <AppDateTimePicker clearable v-model="form.birthday" label="Fecha de nacimiento"
-                :rules="[requiredValidator]" :requiredField="true" :error-messages="errorsBack.gender"
-                @input="errorsBack.gender = ''" />
+                :rules="[requiredValidator]" :requiredField="true" :error-messages="errorsBack.birthday"
+                @input="errorsBack.birthday = ''" />
+            </VCol>
+
+            <VCol cols="12" sm="4">
+              <AppDateTimePicker clearable v-model="form.real_entry_date" label="Fecha de ingreso a la institución"
+                :rules="[requiredValidator]" :requiredField="true" :error-messages="errorsBack.real_entry_date"
+                @input="errorsBack.real_entry_date = ''" />
             </VCol>
 
 

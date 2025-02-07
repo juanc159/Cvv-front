@@ -45,6 +45,7 @@ declare module 'vue-router/auto-routes' {
     'Service-List': RouteRecordInfo<'Service-List', '/Service/List', Record<never, never>, Record<never, never>>,
     'Service-Form': RouteRecordInfo<'Service-Form', 'service-form/:action/:id?', Record<never, never>, Record<never, never>>,
     'Student-List': RouteRecordInfo<'Student-List', '/Student/List', Record<never, never>, Record<never, never>>,
+    'student-modal-unsubscribe': RouteRecordInfo<'student-modal-unsubscribe', '/Student/ModalUnsubscribe', Record<never, never>, Record<never, never>>,
     'Student-Form': RouteRecordInfo<'Student-Form', 'student-form/:action/:id?', Record<never, never>, Record<never, never>>,
     'Subject-List': RouteRecordInfo<'Subject-List', '/Subject/List', Record<never, never>, Record<never, never>>,
     'Subject-Form': RouteRecordInfo<'Subject-Form', 'subject-form/:action/:id?', Record<never, never>, Record<never, never>>,

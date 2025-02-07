@@ -6,6 +6,7 @@ interface CountData {
   icon: string;
   color: string;
   title: string;
+  subtitle: string;
   value: string | number;
   isHover: boolean;
 }
@@ -15,6 +16,7 @@ const countData = ref<CountData[]>([
     "icon": 'tabler-user-shield',
     "color": 'success',
     "title": 'Usuarios',
+    "subtitle": '',
     "value": 0,
     "isHover": false
   },
@@ -22,6 +24,7 @@ const countData = ref<CountData[]>([
     "icon": 'tabler-circles',
     "color": 'success',
     "title": 'Roles',
+    "subtitle": '',
     "value": 0,
     "isHover": false
   },
@@ -29,6 +32,7 @@ const countData = ref<CountData[]>([
     "icon": 'tabler-border-inner',
     "color": 'warning',
     "title": 'Banners',
+    "subtitle": '',
     "value": 0,
     "isHover": false
   },
@@ -36,6 +40,7 @@ const countData = ref<CountData[]>([
     "icon": 'tabler-checklist',
     "color": 'error',
     "title": 'Materias',
+    "subtitle": '',
     "value": 0,
     "isHover": false
   },
@@ -43,6 +48,7 @@ const countData = ref<CountData[]>([
     "icon": 'tabler-layers-intersect',
     "color": 'info',
     "title": 'Grados',
+    "subtitle": '',
     "value": 0,
     "isHover": false
   },
@@ -50,6 +56,7 @@ const countData = ref<CountData[]>([
     "icon": 'tabler-device-gamepad-3',
     "color": 'info',
     "title": 'Servicios',
+    "subtitle": '',
     "value": 0,
     "isHover": false
   },
@@ -57,6 +64,7 @@ const countData = ref<CountData[]>([
     "icon": 'tabler-users-group',
     "color": 'info',
     "title": 'Estudiantes',
+    "subtitle": '',
     "value": 0,
     "isHover": false
   },
@@ -64,6 +72,7 @@ const countData = ref<CountData[]>([
     "icon": 'tabler-user-square-rounded',
     "color": 'info',
     "title": 'Docentes',
+    "subtitle": '',
     "value": 0,
     "isHover": false
   },
@@ -90,7 +99,12 @@ onMounted(async () => {
     countData.value[3].value = data.value.subjectCount
     countData.value[4].value = data.value.gradeCount
     countData.value[5].value = data.value.serviceCount
-    countData.value[6].value = data.value.studentCount
+
+    countData.value[6].value = data.value.studentCount.total
+    if (data.value.studentCount.withdrawn > 0) {
+      countData.value[6].subtitle = "Activos: " + data.value.studentCount.active + " | Retirados: " + data.value.studentCount.withdrawn
+    }
+
     countData.value[7].value = data.value.teacherCount
   }
 });
@@ -106,6 +120,9 @@ onMounted(async () => {
           @mouseenter="data.isHover = true" @mouseleave="data.isHover = false">
           <VSkeletonLoader :loading="isLoading" type="avatar,list-item, list-item">
             <VCardText>
+              <div class="text-body-1 mb-1">
+                {{ data.title }}
+              </div>
               <div class="d-flex align-center gap-x-4 mb-1">
                 <VAvatar variant="tonal" :color="data.color" rounded>
                   <VIcon :icon="data.icon" size="28" />
@@ -115,7 +132,7 @@ onMounted(async () => {
                 </h4>
               </div>
               <div class="text-body-1 mb-1">
-                {{ data.title }}
+                {{ data.subtitle }}
               </div>
             </VCardText>
           </VSkeletonLoader>

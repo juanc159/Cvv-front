@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useAuthenticationStore } from '@/stores/useAuthenticationStore';
+
+// Configuración de la página (opcional, si usas vite-plugin-vue-pages)
 definePage({
   path: "/home",
   name: "Home",
@@ -7,11 +10,10 @@ definePage({
     requiresAuth: true,
     requiredPermission: "menu.home",
   },
-})
+});
 
-import { useAuthenticationStore } from '@/stores/useAuthenticationStore';
-
-const { company, user } = storeToRefs(useAuthenticationStore())
+// Obtención de datos del usuario (desde Pinia store)
+const { company } = storeToRefs(useAuthenticationStore());
 
 </script>
 
@@ -32,6 +34,12 @@ const { company, user } = storeToRefs(useAuthenticationStore())
           </VCol>
           <VCol cols="12" md="6">
             <StudentPhoto />
+          </VCol>
+          <VCol cols="12" md="6">
+            <StudentLocation />
+          </VCol>
+          <VCol cols="12">
+            <StudentStatistics />
           </VCol>
         </VRow>
       </VCardText>

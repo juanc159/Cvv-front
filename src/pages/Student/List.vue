@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ModalUnsubscribe from "@/pages/Student/ModalUnsubscribe.vue";
 import { router } from '@/plugins/1.router';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
@@ -121,6 +122,21 @@ const closeModalShowPicture = () => {
   dataStudent.value = null
   isDialogVisibleShowPicture.value = false
 }
+
+
+//ModalUnsubscribe
+const refModalUnsubscribe = ref()
+
+const openModalUnsubscribe = (id: number) => {
+  refModalUnsubscribe.value.openModal(id)
+
+}
+
+const reloadTable = (id: number) => {
+  tableFull.value?.executeFetchTable()
+
+}
+
 </script>
 
 <template>
@@ -162,6 +178,12 @@ const closeModalShowPicture = () => {
               </template>
               <span>Resetear contraseña</span>
             </VListItem>
+            <VListItem @click="openModalUnsubscribe(item.id)">
+              <template #prepend>
+                <VIcon size="22" icon="tabler-user-down" />
+              </template>
+              <span>Dar de baja</span>
+            </VListItem>
 
           </template>
 
@@ -184,6 +206,7 @@ const closeModalShowPicture = () => {
       </VCard>
     </VDialog>
 
+    <ModalUnsubscribe ref="refModalUnsubscribe" @execute="reloadTable" />
 
   </div>
 </template>
