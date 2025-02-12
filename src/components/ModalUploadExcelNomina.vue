@@ -69,7 +69,7 @@ const submitForm = async () => {
     loading.form = false
 
     if (response.value?.ok && data.value) {
-      // handleDialogVisible();
+      handleDialogVisible();
 
     }
 
