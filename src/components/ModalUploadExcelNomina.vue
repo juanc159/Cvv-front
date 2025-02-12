@@ -61,12 +61,15 @@ const submitForm = async () => {
     for (const key in form.value)
       formData.append(key, form.value[key])
 
+
+    formData.append("teacher_id", authenticationStore.user.id)
+
     loading.form = true
     const { data, response } = await useApi('note-store').post(formData)
     loading.form = false
 
     if (response.value?.ok && data.value) {
-      handleDialogVisible();
+      // handleDialogVisible();
 
     }
 

@@ -4,6 +4,7 @@ const { company } = storeToRefs(useAuthenticationStore());
 
 // Variables reactivas
 const statistics = ref([]);
+const withdrawnStudents = ref([]);
 
 const totals = computed(() => {
   const initial = { male: 0, female: 0, total: 0 };
@@ -52,6 +53,7 @@ const getData = async () => {
       throw new Error('Error al obtener datos');
     }
     statistics.value = Object.values(data.value.statistics);
+    withdrawnStudents.value = data.value.withdrawnStudents;
 
   } catch (error) {
     console.error('Error al obtener datos:', error);
@@ -199,16 +201,16 @@ const downloadExcel = async () => {
               <!-- Fila de subtotal por tipo -->
               <tr class="subtotal-row">
                 <td class="subtotal-cell">Subtotal</td>
-                <td v-for="value in group.subtotal.initial" :key="'initial-' + value" class="initial-cell">
+                <td v-for="value in group.subtotal.initial" class="initial-cell">
                   {{ value }}
                 </td>
-                <td v-for="value in group.subtotal.new_entries" :key="'entries-' + value" class="entries-cell">
+                <td v-for="value in group.subtotal.new_entries" class="entries-cell">
                   {{ value }}
                 </td>
-                <td v-for="value in group.subtotal.withdrawals" :key="'withdrawals-' + value" class="withdrawals-cell">
+                <td v-for="value in group.subtotal.withdrawals" class="withdrawals-cell">
                   {{ value }}
                 </td>
-                <td v-for="value in group.subtotal.current" :key="'current-' + value" class="current-cell">
+                <td v-for="value in group.subtotal.current" class="current-cell">
                   {{ value }}
                 </td>
               </tr>
@@ -216,21 +218,56 @@ const downloadExcel = async () => {
             <!-- Total general -->
             <tr class="total-row">
               <td colspan="2" class="total-cell">Total General</td>
-              <td v-for="value in totals.initial" :key="'total-initial-' + value" class="initial-cell">
+              <td v-for="value in totals.initial" class="initial-cell">
                 {{ value }}
               </td>
-              <td v-for="value in totals.new_entries" :key="'total-entries-' + value" class="entries-cell">
+              <td v-for="value in totals.new_entries" class="entries-cell">
                 {{ value }}
               </td>
-              <td v-for="value in totals.withdrawals" :key="'total-withdrawals-' + value" class="withdrawals-cell">
+              <td v-for="value in totals.withdrawals" class="withdrawals-cell">
                 {{ value }}
               </td>
-              <td v-for="value in totals.current" :key="'total-current-' + value" class="current-cell">
+              <td v-for="value in totals.current" class="current-cell">
                 {{ value }}
               </td>
             </tr>
           </tbody>
         </VTable>
+
+        <v-container style="margin-top: 40px;">
+          <h2 class="text-h4 font-weight-bold mb-4">Estudiantes Retirados</h2>
+          <v-table fixed-header>
+            <thead>
+              <tr>
+                <th>Documento</th>
+                <th>Apellidos y Nombres</th>
+                <th>Fecha Nacimiento</th>
+                <th>Grado</th>
+                <th>Sección</th>
+                <th>Sexo</th>
+                <th>Fecha Retiro</th>
+                <th>Motivo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(student, index) in withdrawnStudents" :key="index">
+                <td>{{ student.identity_document }}</td>
+                <td>{{ student.full_name }}</td>
+                <td>
+                  {{ formatDate(student.birthday) }}
+                </td>
+                <td>{{ student.grade_name }}</td>
+                <td>{{ student.section_name }}</td>
+                <td>{{ student.gender === 'M' ? 'Masculino' : 'Femenino' }}</td>
+                <td>{{ formatDate(student.withdrawal_date) }}</td>
+                <td>{{ student.reason }}</td>
+              </tr>
+              <tr v-if="withdrawnStudents.length === 0">
+                <td colspan="8" class="text-center">No hay estudiantes retirados registrados</td>
+              </tr>
+            </tbody>
+          </v-table>
+        </v-container>
       </VCardText>
     </AppCardActions>
   </div>

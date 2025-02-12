@@ -39,7 +39,7 @@ const { company } = storeToRefs(useAuthenticationStore());
             <StudentLocation />
           </VCol>
           <VCol cols="12">
-            <StudentStatistics />
+            <!-- <StudentStatistics /> -->
           </VCol>
         </VRow>
       </VCardText>

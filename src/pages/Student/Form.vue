@@ -280,7 +280,7 @@ const genders = [
             <VCol cols="12" md="4">
               {{ form.state_id }}
               <AppAutocomplete :loading="loading.states" :requiredField="true" clearable :items="states"
-                v-model="form.state_id" label="Región" @update:model-value="changeState($event)"
+                v-model="form.state_id" label="Estado" @update:model-value="changeState($event)"
                 :error-messages="errorsBack.state_id" @input="errorsBack.state_id = ''" :rules="[requiredValidator]">
               </AppAutocomplete>
             </VCol>
@@ -288,7 +288,7 @@ const genders = [
               {{ form.city_id }}
 
               <AppAutocomplete :loading="loading.cities" :requiredField="true" clearable :items="cities"
-                v-model="form.city_id" label="Ciudad" :error-messages="errorsBack.city_id"
+                v-model="form.city_id" label="Municipio" :error-messages="errorsBack.city_id"
                 @input="errorsBack.city_id = ''" :rules="[requiredValidator]">
               </AppAutocomplete>
             </VCol>
