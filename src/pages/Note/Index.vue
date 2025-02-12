@@ -17,16 +17,19 @@ const loading = reactive({
 const form = ref<{
   company_id: null | number
   type_education_id: null | number
+  teacher_id: null | string
   archive: null | File
 }>({
   company_id: null,
   type_education_id: null,
+  teacher_id: null,
   archive: null,
 })
 const errorsBack = ref<IErrorsBack>({});
 const formValidation = ref<VForm>();
 const formValidationDownload = ref<VForm>();
 const typeEducations = ref<Array<object>>([])
+const teachers = ref<Array<object>>([])
 const archive = ref(useFileUpload());
 archive.value.allowedExtensions = ["xls", "xlsx"]
 const selectedSwitch = ref<boolean>(false)
@@ -43,6 +46,7 @@ onMounted(async () => {
     typeEducations.value = data.value.typeEducations
 
     selectedSwitch.value = data.value.blockData
+    teachers.value = data.value.teachers
   }
   loading.form = false
 })
@@ -180,6 +184,11 @@ const openModalQuestion = () => {
               <VLabel>Archivo&nbsp;<b class="text-warning">*</b></VLabel>
               <VFileInput :key="archive.key" @change="archive.handleImageSelected" @click:clear="archive.clearData"
                 :rules="[requiredValidator]" />
+            </VCol>
+            <VCol cols="12" sm="4">
+              <AppAutocomplete clearable v-model="form.teacher_id" :error-messages="errorsBack.teacher_id"
+                label="Docente" @change="errorsBack.teacher_id = ''" :items="teachers">
+              </AppAutocomplete>
             </VCol>
           </VRow>
           <VRow>
