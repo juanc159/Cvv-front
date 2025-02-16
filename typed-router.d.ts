@@ -41,6 +41,8 @@ declare module 'vue-router/auto-routes' {
     'Pw-ServiceData': RouteRecordInfo<'Pw-ServiceData', '/school/:school_id/service/:service_id', Record<never, never>, Record<never, never>>,
     'Pw-SubjectPennding': RouteRecordInfo<'Pw-SubjectPennding', '/school/:school_id/subjectPennding', Record<never, never>, Record<never, never>>,
     'pw-contact-area': RouteRecordInfo<'pw-contact-area', '/Pw/ContactArea', Record<never, never>, Record<never, never>>,
+    'Enrollments&Exits-Index': RouteRecordInfo<'Enrollments&Exits-Index', '/Report/Enrollments&Exits', Record<never, never>, Record<never, never>>,
+    'Report-Index': RouteRecordInfo<'Report-Index', '/Report/Index', Record<never, never>, Record<never, never>>,
     'second-page': RouteRecordInfo<'second-page', '/second-page', Record<never, never>, Record<never, never>>,
     'Service-List': RouteRecordInfo<'Service-List', '/Service/List', Record<never, never>, Record<never, never>>,
     'Service-Form': RouteRecordInfo<'Service-Form', 'service-form/:action/:id?', Record<never, never>, Record<never, never>>,

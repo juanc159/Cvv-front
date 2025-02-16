@@ -5,12 +5,14 @@ const { company } = storeToRefs(useAuthenticationStore());
 // Variables reactivas
 const statistics = ref([]);
 const withdrawnStudents = ref([]);
+const entriesStudents = ref([]);
 
 const totals = computed(() => {
   const initial = { male: 0, female: 0, total: 0 };
   const new_entries = { male: 0, female: 0, total: 0 };
   const withdrawals = { male: 0, female: 0, total: 0 };
   const current = { male: 0, female: 0, total: 0 };
+  const foreign = { male: 0, female: 0, total: 0 };
 
   // ¡Usamos statistics.value directamente!
   statistics.value.forEach((stat) => {
@@ -29,9 +31,13 @@ const totals = computed(() => {
     current.male += Number(stat.current.male);
     current.female += Number(stat.current.female);
     current.total += Number(stat.current.total);
+
+    foreign.male += Number(stat.foreign.male);
+    foreign.female += Number(stat.foreign.female);
+    foreign.total += Number(stat.foreign.total);
   });
 
-  return { initial, new_entries, withdrawals, current };
+  return { initial, new_entries, withdrawals, current, foreign };
 });
 
 
@@ -54,6 +60,7 @@ const getData = async () => {
     }
     statistics.value = Object.values(data.value.statistics);
     withdrawnStudents.value = data.value.withdrawnStudents;
+    entriesStudents.value = data.value.entriesStudents;
 
   } catch (error) {
     console.error('Error al obtener datos:', error);
@@ -81,7 +88,8 @@ const groupedStatistics = computed(() => {
           initial: { male: 0, female: 0, total: 0 },
           new_entries: { male: 0, female: 0, total: 0 },
           withdrawals: { male: 0, female: 0, total: 0 },
-          current: { male: 0, female: 0, total: 0 }
+          current: { male: 0, female: 0, total: 0 },
+          foreign: { male: 0, female: 0, total: 0 }
         }
       };
     }
@@ -89,7 +97,7 @@ const groupedStatistics = computed(() => {
     groups[type].items.push(stat);
 
     // Sumar al subtotal del grupo
-    ['initial', 'new_entries', 'withdrawals', 'current'].forEach(key => {
+    ['initial', 'new_entries', 'withdrawals', 'current', 'foreign'].forEach(key => {
       groups[type].subtotal[key].male += Number(stat[key].male);
       groups[type].subtotal[key].female += Number(stat[key].female);
       groups[type].subtotal[key].total += Number(stat[key].total);
@@ -161,8 +169,12 @@ const downloadExcel = async () => {
               <th class="header-cell entries-header" colspan="3">Ingresos</th>
               <th class="header-cell withdrawals-header" colspan="3">Egresos</th>
               <th class="header-cell current-header" colspan="3">Matrícula Actual</th>
+              <th class="header-cell foreign-header" colspan="3">Extranjeros</th>
             </tr>
             <tr class="header-row">
+              <th class="header-cell">M</th>
+              <th class="header-cell">F</th>
+              <th class="header-cell">T</th>
               <th class="header-cell">M</th>
               <th class="header-cell">F</th>
               <th class="header-cell">T</th>
@@ -197,6 +209,9 @@ const downloadExcel = async () => {
                 <td class="current-cell">{{ stat.current.male }}</td>
                 <td class="current-cell">{{ stat.current.female }}</td>
                 <td class="current-cell">{{ stat.current.total }}</td>
+                <td class="foreign-cell">{{ stat.foreign.male }}</td>
+                <td class="foreign-cell">{{ stat.foreign.female }}</td>
+                <td class="foreign-cell">{{ stat.foreign.total }}</td>
               </tr>
               <!-- Fila de subtotal por tipo -->
               <tr class="subtotal-row">
@@ -211,6 +226,9 @@ const downloadExcel = async () => {
                   {{ value }}
                 </td>
                 <td v-for="value in group.subtotal.current" class="current-cell">
+                  {{ value }}
+                </td>
+                <td v-for="value in group.subtotal.foreign" class="current-cell">
                   {{ value }}
                 </td>
               </tr>
@@ -228,6 +246,9 @@ const downloadExcel = async () => {
                 {{ value }}
               </td>
               <td v-for="value in totals.current" class="current-cell">
+                {{ value }}
+              </td>
+              <td v-for="value in totals.foreign" class="current-cell">
                 {{ value }}
               </td>
             </tr>
@@ -263,6 +284,38 @@ const downloadExcel = async () => {
                 <td>{{ student.reason }}</td>
               </tr>
               <tr v-if="withdrawnStudents.length === 0">
+                <td colspan="8" class="text-center">No hay estudiantes retirados registrados</td>
+              </tr>
+            </tbody>
+          </v-table>
+        </v-container>
+        <v-container style="margin-top: 40px;">
+          <h2 class="text-h4 font-weight-bold mb-4">Estudiantes Ingresados</h2>
+          <v-table fixed-header>
+            <thead>
+              <tr>
+                <th>Documento</th>
+                <th>Apellidos y Nombres</th>
+                <th>Fecha Nacimiento</th>
+                <th>Grado</th>
+                <th>Sección</th>
+                <th>Sexo</th>
+                <th>Fecha Ingreso</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(student, index) in entriesStudents" :key="index">
+                <td>{{ student.identity_document }}</td>
+                <td>{{ student.full_name }}</td>
+                <td>
+                  {{ formatDate(student.birthday) }}
+                </td>
+                <td>{{ student.grade_name }}</td>
+                <td>{{ student.section_name }}</td>
+                <td>{{ student.gender === 'M' ? 'Masculino' : 'Femenino' }}</td>
+                <td>{{ formatDate(student.real_entry_date) }}</td>
+              </tr>
+              <tr v-if="entriesStudents.length === 0">
                 <td colspan="8" class="text-center">No hay estudiantes retirados registrados</td>
               </tr>
             </tbody>
@@ -328,6 +381,11 @@ const downloadExcel = async () => {
   color: white;
 }
 
+.foreign-header {
+  background-color: #FFCC80;
+  color: white;
+}
+
 /* Celdas de datos */
 .data-row td {
   border: 1px solid #ccc;
@@ -360,6 +418,10 @@ const downloadExcel = async () => {
 
 .current-cell {
   background-color: #c8e6c9;
+}
+
+.foreign-cell {
+  background-color: #FFE0B2;
 }
 
 /* Subtotales */
