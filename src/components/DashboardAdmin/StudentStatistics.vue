@@ -328,121 +328,128 @@ const downloadExcel = async () => {
 
 <style lang="scss" scoped>
 /* Estilos generales */
+
 .stats-title {
-  color: #333;
+  color: rgba(var(--v-theme-text-primary), 1);
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 20px;
 }
 
 .stats-table {
-  border: 2px solid #ccc;
-  /* Borde exterior de la tabla */
+  border: 2px solid rgba(var(--v-border-color), var(--v-border-opacity));
   border-collapse: collapse;
-  /* Elimina espacios entre bordes */
   width: 100%;
   font-size: 14px;
   border-radius: 8px;
   overflow: hidden;
+  background: rgba(var(--v-theme-background), 1);
 }
 
 /* Encabezados */
 .header-row {
-  background-color: #f8f9fa;
-  color: #333;
-  font-weight: bold;
+  background-color: rgba(var(--v-theme-background), 0.8);
+  color: rgba(var(--v-theme-text-primary), 0.87);
 }
 
 .header-cell {
-  border: 1px solid #ccc;
-  /* Borde uniforme para encabezados */
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   padding: 12px;
   text-align: center;
-  /* Centra el texto */
+  position: relative;
 }
 
+
+/* Colores temáticos para encabezados */
 .initial-header {
-  background-color: #4199cc;
-  color: white;
+  background-color: rgba(var(--v-theme-primary), 0.8);
+  color: rgba(var(--v-theme-text-inverse), 1);
 }
 
 .entries-header {
-  background-color: #007bff;
-  color: white;
+  background-color: rgba(var(--v-theme-info), 0.8);
+  color: rgba(var(--v-theme-text-inverse), 1);
 }
 
 .withdrawals-header {
-  background-color: #dc3545;
-  color: white;
+  background-color: rgba(var(--v-theme-error), 0.8);
+  color: rgba(var(--v-theme-text-inverse), 1);
 }
 
 .current-header {
-  background-color: #28a745;
-  color: white;
+  background-color: rgba(var(--v-theme-success), 0.8);
+  color: rgba(var(--v-theme-text-inverse), 1);
 }
 
 .foreign-header {
-  background-color: #FFCC80;
-  color: white;
+  background-color: rgba(var(--v-theme-warning), 0.8);
+  color: rgba(var(--v-theme-text-inverse), 1);
 }
 
 /* Celdas de datos */
 .data-row td {
-  border: 1px solid #ccc;
-  /* Borde uniforme para todas las celdas */
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   padding: 12px;
   text-align: center;
-  /* Centra el texto */
+  // color: rgba(var(--v-theme-text-primary), 0.87);
+  // background-color: rgba(var(--v-theme-background), 1);
 }
+
+
+// /* Celdas de datos */
+// .data-row td {
+//   border: 1px solid #ccc;
+//   /* Borde uniforme para todas las celdas */
+//   padding: 12px;
+//   text-align: center;
+//   /* Centra el texto */
+// }
 
 .type-cell {
   font-weight: bold;
-  background-color: #f1f1f1;
+  background-color: rgba(var(--v-theme-background), 0.9);
 }
 
 .grade-cell {
-  background-color: #fff;
+  background-color: rgba(var(--v-theme-background), 1);
+
 }
 
 .initial-cell {
-  background-color: #e0f2f7;
+  background-color: rgba(var(--v-theme-primary), 0.8);
 }
 
 .entries-cell {
-  background-color: #e3f2fd;
+  background-color: rgba(var(--v-theme-info), 0.8);
 }
 
 .withdrawals-cell {
-  background-color: #ffebee;
+  background-color: rgba(var(--v-theme-error), 0.8);
 }
 
 .current-cell {
-  background-color: #c8e6c9;
+  background-color: rgba(var(--v-theme-success), 0.8);
 }
 
 .foreign-cell {
-  background-color: #FFE0B2;
+  background-color: rgba(var(--v-theme-warning), 0.8);
 }
 
 /* Subtotales */
 .subtotal-row td {
-  border: 1px solid #ccc;
-  /* Asegura que las celdas de subtotal tengan bordes */
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   padding: 12px;
   text-align: center;
-  /* Centra el texto */
   font-weight: bold;
-  background-color: #f8f9fa;
+  background-color: rgba(var(--v-theme-background), 0.8);
 }
 
 /* Totales */
 .total-row td {
-  border: 1px solid #ccc;
-  /* Asegura que las celdas de total tengan bordes */
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   padding: 12px;
   text-align: center;
-  /* Centra el texto */
   font-weight: bold;
-  background-color: #e9ecef;
+  background-color: rgba(var(--v-theme-background), 0.9);
 }
 </style>

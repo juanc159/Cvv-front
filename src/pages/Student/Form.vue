@@ -269,7 +269,6 @@ const genders = [
             </VCol>
 
             <VCol cols="12" md="4">
-              {{ form.country_id }}
               <SelectInfinite :requiredField="true" label="País" returnObject v-model="form.country_id"
                 :select="select_countries" @update:model-value="changeCountry($event)"
                 :error-messages="errorsBack.country_id" @input="errorsBack.country_id = ''" clearable
@@ -278,15 +277,12 @@ const genders = [
             </VCol>
 
             <VCol cols="12" md="4">
-              {{ form.state_id }}
               <AppAutocomplete :loading="loading.states" :requiredField="true" clearable :items="states"
                 v-model="form.state_id" label="Estado" @update:model-value="changeState($event)"
                 :error-messages="errorsBack.state_id" @input="errorsBack.state_id = ''" :rules="[requiredValidator]">
               </AppAutocomplete>
             </VCol>
             <VCol cols="12" md="4">
-              {{ form.city_id }}
-
               <AppAutocomplete :loading="loading.cities" :requiredField="true" clearable :items="cities"
                 v-model="form.city_id" label="Municipio" :error-messages="errorsBack.city_id"
                 @input="errorsBack.city_id = ''" :rules="[requiredValidator]">
