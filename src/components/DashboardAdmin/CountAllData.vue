@@ -100,9 +100,9 @@ onMounted(async () => {
     countData.value[4].value = data.value.gradeCount
     countData.value[5].value = data.value.serviceCount
 
-    countData.value[6].value = data.value.studentCount.total
+    countData.value[6].value = data.value.studentCount.active
     if (data.value.studentCount.withdrawn > 0) {
-      countData.value[6].subtitle = "Activos: " + data.value.studentCount.active + " | Retirados: " + data.value.studentCount.withdrawn
+      countData.value[6].subtitle = "Retirados: " + data.value.studentCount.withdrawn
     }
 
     countData.value[7].value = data.value.teacherCount
