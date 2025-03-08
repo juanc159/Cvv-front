@@ -14,10 +14,6 @@ definePage({
 
 const authenticationStore = useAuthenticationStore();
 
-const goView = (data: { action: string, id: number | null } = { action: "create", id: null }) => {
-  router.push({ name: "Student-Form", params: { action: data.action, id: data.id } })
-}
-
 //TABLE
 const tableFull = ref()
 
@@ -29,11 +25,11 @@ const optionsTable = {
   headers: [
     { title: "Acciones", key: "actions", sortable: false },
     { title: "Foto ", key: "photo", sortable: false },
-    { title: "Grado ", key: "grade_name", sortable: false },
-    { title: "Sección ", key: "section_name", sortable: false },
-    { title: "Cédula ", key: "identity_document", sortable: false },
-    { title: "Nombre", key: "full_name", sortable: false },
-    { title: "Tipo de educación", key: "type_education_name", sortable: false },
+    { title: "Grado ", key: "grade_name" },
+    { title: "Sección ", key: "section_name" },
+    { title: "Cédula ", key: "identity_document" },
+    { title: "Nombre", key: "full_name" },
+    { title: "Tipo de educación", key: "type_education_name" },
 
 
   ],
@@ -50,45 +46,40 @@ const optionsTable = {
   }
 }
 
+
 //FILTER
 const optionsFilter = ref({
-  inputGeneral: {
-    relationsGeneral: {
-      all: ["identity_document", "full_name"],
-      typeEducation: ["name"],
-      grade: ["name"],
-      section: ["name"],
-    },
-  },
   dialog: {
     width: 500,
     inputs: [
       {
-        input_type: "select",
-        title: "Foto",
-        search_key: "photoPerzonalized",
-        type: "null",
-        custom_search: true,
-        arrayList: [
+        type: "selectApi",
+        label: "Sección",
+        name: "section_id",
+        url: "selectInfiniteSection",
+        arrayInfo: "section",
+        multiple: true,
+      },
+      {
+        type: "select",
+        name: "photo",
+        label: "Foto",
+        value: null,
+        options: [
           {
-            value: "1",
+            value: 1,
             title: "Con foto"
           },
           {
-            value: "0",
+            value: 0,
             title: "Sin foto"
           }],
       },
-      {
-        input_type: "selectInfinite",
-        title: "Sección",
-        key: "section",
-        api: "selectInfiniteSection",
-        search_key: "section_id",
-      },
     ],
-  }
+  },
+  filterLabels: { inputGeneral: 'Buscar en todo', is_active: 'Estado' }
 })
+
 
 
 const loading = reactive({
@@ -133,10 +124,17 @@ const openModalUnsubscribe = (id: number) => {
 }
 
 const reloadTable = (id: number) => {
-  tableFull.value?.executeFetchTable()
+  tableFull.value?.fetchTableData()
 
 }
 
+const goViewEdit = (data: any) => {
+  router.push({ name: "Student-Form", params: { action: "edit", id: data.id } })
+}
+
+const goViewCreate = () => {
+  router.push({ name: "Student-Form", params: { action: "create" } })
+}
 </script>
 
 <template>
@@ -149,14 +147,20 @@ const reloadTable = (id: number) => {
         </span>
 
         <div class="d-flex justify-end gap-3 flex-wrap ">
-          <VBtn @click="goView()">
+          <VBtn @click="goViewCreate()">
             Agregar estudiante
           </VBtn>
         </div>
       </VCardTitle>
 
+      <VCardText>
+        <FilterDialogNew :options-filter="optionsFilter">
+        </FilterDialogNew>
+      </VCardText>
       <VCardText class=" mt-2">
-        <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
+
+
+        <TableFullNew ref="tableFull" :options="optionsTable" @edit="goViewEdit">
 
           <template #item.photo="{ item }">
             <div class="my-3 ">
@@ -187,7 +191,7 @@ const reloadTable = (id: number) => {
 
           </template>
 
-        </TableFull>
+        </TableFullNew>
       </VCardText>
     </VCard>
 

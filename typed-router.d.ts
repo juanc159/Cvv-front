@@ -55,6 +55,8 @@ declare module 'vue-router/auto-routes' {
     'Teacher-Planning': RouteRecordInfo<'Teacher-Planning', '/teacher-Planning/:id?', Record<never, never>, Record<never, never>>,
     'Teacher-List': RouteRecordInfo<'Teacher-List', '/Teacher/List', Record<never, never>, Record<never, never>>,
     'Teacher-Form': RouteRecordInfo<'Teacher-Form', 'teacher-form/:action/:id?', Record<never, never>, Record<never, never>>,
+    'Term-List': RouteRecordInfo<'Term-List', '/Term/List', Record<never, never>, Record<never, never>>,
+    'Term-Form': RouteRecordInfo<'Term-Form', 'term-form/:action/:id?', Record<never, never>, Record<never, never>>,
     'user-access-role-components-modal-form': RouteRecordInfo<'user-access-role-components-modal-form', '/UserAccess/Role/Components/ModalForm', Record<never, never>, Record<never, never>>,
     'Role-List': RouteRecordInfo<'Role-List', '/UserAccess/Role/List', Record<never, never>, Record<never, never>>,
     'user-access-users-components-modal-form': RouteRecordInfo<'user-access-users-components-modal-form', '/UserAccess/Users/Components/ModalForm', Record<never, never>, Record<never, never>>,

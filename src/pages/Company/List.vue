@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TableFullNew from '@/components/TableNew/TableFullNew.vue';
 import { router } from '@/plugins/1.router';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
@@ -13,19 +14,14 @@ definePage({
 
 const authenticationStore = useAuthenticationStore();
 
-const goView = (data: { action: string, id: number | null } = { action: "create", id: null }) => {
-  router.push({ name: "Company-Form", params: { action: data.action, id: data.id } })
-}
-
 //TABLE
-const tableFull = ref()
-
+const refTableFull = ref()
 const optionsTable = {
   url: "/company/list",
   headers: [
-    { key: 'name', title: 'Nombre compañia', sortable: false },
-    { key: 'slogan', title: 'Eslogan', sortable: false },
-    { key: "is_active", title: 'Estado', sortable: false },
+    { key: 'name', title: 'Nombre compañia' },
+    { key: 'slogan', title: 'Eslogan' },
+    { key: "is_active", title: 'Estado' },
     { key: 'actions', title: 'Acciones', sortable: false },
   ],
   actions: {
@@ -41,25 +37,28 @@ const optionsTable = {
   }
 }
 
-
 //FILTER
 const optionsFilter = ref({
-  inputGeneral: {
-    relationsGeneral: {
-      all: ["name", "nit", "email", "phone"],
-    },
-  },
   dialog: {
-    width: 500,
+    width: 400,
     inputs: [
       {
-        input_type: "booleanActive",
-        title: "Estado",
-        key: "is_active",
+        type: "booleanActive",
+        name: "is_active",
+        label: "Estado",
       },
     ],
-  }
+  },
+  filterLabels: { inputGeneral: 'Buscar en todo', is_active: 'Estado' }
 })
+
+const goViewEdit = (data: any) => {
+  router.push({ name: "Company-Form", params: { action: "edit", id: data.id } })
+}
+
+const goViewCreate = () => {
+  router.push({ name: "Company-Form", params: { action: "create" } })
+}
 
 
 const selectCompany = (company: object) => {
@@ -78,14 +77,19 @@ const selectCompany = (company: object) => {
         </span>
 
         <div class="d-flex justify-end gap-3 flex-wrap ">
-          <VBtn @click="goView()">
+          <VBtn @click="goViewCreate()">
             Agregar compañia
           </VBtn>
         </div>
       </VCardTitle>
 
+      <VCardText>
+        <FilterDialogNew :options-filter="optionsFilter">
+        </FilterDialogNew>
+      </VCardText>
+
       <VCardText class=" mt-2">
-        <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
+        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit">
 
           <template #item.logo="{ item }">
             <div class="my-2">
@@ -105,7 +109,7 @@ const selectCompany = (company: object) => {
 
           </template>
 
-        </TableFull>
+        </TableFullNew>
       </VCardText>
     </VCard>
   </div>

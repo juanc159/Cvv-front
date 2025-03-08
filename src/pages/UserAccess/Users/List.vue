@@ -16,7 +16,7 @@ const { company, user } = storeToRefs(authenticationStore);
 
 
 //TABLE
-const tableFull = ref()
+const refTableFull = ref()
 
 const optionsTable = {
   url: "/user/list",
@@ -24,10 +24,10 @@ const optionsTable = {
     company_id: company.value.id
   },
   headers: [
-    { key: 'full_name', title: 'Nombre Completo', sortable: false },
-    { key: 'email', title: 'Email', sortable: false },
-    { key: 'role_name', title: 'Rol', sortable: false },
-    { key: "is_active", title: 'Estado', sortable: false },
+    { key: 'full_name', title: 'Nombre Completo' },
+    { key: 'email', title: 'Email' },
+    { key: 'role_description', title: 'Rol' },
+    { key: "is_active", title: 'Estado' },
     { key: 'actions', title: 'Acciones', sortable: false },
   ],
   actions: {
@@ -43,25 +43,22 @@ const optionsTable = {
   }
 }
 
+
 //FILTER
 const optionsFilter = ref({
-  inputGeneral: {
-    relationsGeneral: {
-      all: ["name", "surname", "email", "phone"],
-      rol: ["name"],
-    },
-  },
   dialog: {
-    width: 500,
+    width: 400,
     inputs: [
       {
-        input_type: "booleanActive",
+        type: "booleanActive",
+        name: "is_active",
         title: "Estado",
-        key: "is_active",
       },
     ],
-  }
+  },
+  filterLabels: { inputGeneral: 'Buscar en todo', is_active: 'Estado' }
 })
+
 
 
 //ModalForm
@@ -71,14 +68,17 @@ const openModalForm = () => {
   refModalForm.value.openModal()
 }
 
-const goView = async (data: any = { action: 'created', id: null }) => {
+const goViewEdit = (data: any) => {
   refModalForm.value.openModal(data.id)
+
 }
 
 const reloadTable = () => {
-  tableFull.value.executeFetchTable()
+  refTableFull.value.fetchTableData(null, null)
 
 }
+
+
 </script>
 
 <template>
@@ -97,9 +97,15 @@ const reloadTable = () => {
         </div>
       </VCardTitle>
 
+      <VCardText>
+        <FilterDialogNew :options-filter="optionsFilter">
+        </FilterDialogNew>
+      </VCardText>
+
+
       <VCardText class=" mt-2">
-        <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
-        </TableFull>
+        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit">
+        </TableFullNew>
       </VCardText>
     </VCard>
 

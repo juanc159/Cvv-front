@@ -3,11 +3,11 @@ import { router } from '@/plugins/1.router';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
 definePage({
-  name: "Subject-List",
+  name: "PendingSubject-List",
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
-    requiredPermission: "subject.list",
+    requiredPermission: "pendingSubject.list",
   },
 });
 
@@ -17,25 +17,26 @@ const authenticationStore = useAuthenticationStore();
 const refTableFull = ref()
 
 const optionsTable = {
-  url: "/subject/list",
+  url: "/pendingSubject/paginate",
   params: {
     company_id: authenticationStore.company.id,
   },
   headers: [
-    { key: 'type_education_name', title: 'Tipo de educación' },
     { key: 'name', title: 'Nombre' },
-    { key: 'code', title: 'Código' },
-    { key: 'actions', title: 'Acciones', sortable: false },
+    { key: 'start_date', title: 'Fecha inicio' },
+    { key: 'end_date', title: 'Fecha fin' },
+    { key: 'is_active', title: 'Estado' },
+    { key: 'actions', title: 'Acciones', sortable: false, width: 100 },
   ],
   actions: {
     changeStatus: {
-      url: "/subject/changeStatus"
+      url: "/pendingSubject/changeStatus"
     },
     view: {
       show: false,
     },
     delete: {
-      url: "/subject/delete"
+      url: "/pendingSubject/delete"
     },
   }
 }
@@ -46,25 +47,24 @@ const optionsFilter = ref({
     width: 400,
     inputs: [
       {
-        type: "selectApi",
-        label: "Tipo de educación",
-        name: "type_education_id",
-        arrayInfo: "typeEducation",
-        multiple: true,
-        url: "selectInifiniteTypeEducation"
+        type: "booleanActive",
+        name: "is_active",
+        label: "Estado",
       },
     ],
   },
   filterLabels: { inputGeneral: 'Buscar en todo', is_active: 'Estado' }
 })
 
+
 const goViewEdit = (data: any) => {
-  router.push({ name: "Subject-Form", params: { action: "edit", id: data.id } })
+  router.push({ name: "PendingSubject-Form", params: { action: "edit", id: data.id } })
 }
 
 const goViewCreate = () => {
-  router.push({ name: "Subject-Form", params: { action: "create" } })
+  router.push({ name: "PendingSubject-Form", params: { action: "create" } })
 }
+
 
 </script>
 
@@ -74,12 +74,12 @@ const goViewCreate = () => {
     <VCard>
       <VCardTitle class="d-flex justify-space-between">
         <span>
-          Materias
+          Periodos escolares
         </span>
 
         <div class="d-flex justify-end gap-3 flex-wrap ">
           <VBtn @click="goViewCreate()">
-            Agregar materia
+            Agregar periodo escolar
           </VBtn>
         </div>
       </VCardTitle>
@@ -90,9 +90,11 @@ const goViewCreate = () => {
       </VCardText>
 
       <VCardText class=" mt-2">
+
         <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit">
 
         </TableFullNew>
+
       </VCardText>
     </VCard>
   </div>

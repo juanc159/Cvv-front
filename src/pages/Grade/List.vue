@@ -13,12 +13,8 @@ definePage({
 
 const authenticationStore = useAuthenticationStore();
 
-const goView = (data: { action: string, id: number | null } = { action: "create", id: null }) => {
-  router.push({ name: "Grade-Form", params: { action: data.action, id: data.id } })
-}
-
 //TABLE
-const tableFull = ref()
+const refTableFull = ref()
 
 const optionsTable = {
   url: "/grade/list",
@@ -26,8 +22,8 @@ const optionsTable = {
     company_id: authenticationStore.company.id,
   },
   headers: [
-    { key: 'type_education_name', title: 'Tipo de educación', sortable: false },
-    { key: 'name', title: 'Nombre', sortable: false },
+    { key: 'type_education_name', title: 'Tipo de educación' },
+    { key: 'name', title: 'Nombre' },
     { key: 'actions', title: 'Acciones', sortable: false },
   ],
   actions: {
@@ -45,27 +41,30 @@ const optionsTable = {
 
 //FILTER
 const optionsFilter = ref({
-  inputGeneral: {
-    relationsGeneral: {
-      all: ["name"],
-      typeEducation: ["name"],
-    },
-  },
   dialog: {
-    width: 500,
+    width: 400,
     inputs: [
       {
-        input_type: "selectInfinite",
-        title: "Tipo de educación",
-        key: "typeEducation",
-        relation: "typeEducation",
-        relation_key: "type_education_id",
+        type: "selectApi",
+        label: "Tipo de educación",
+        name: "type_education_id",
+        arrayInfo: "typeEducation",
         multiple: true,
-        api: "selectInifiniteTypeEducation"
+        url: "selectInifiniteTypeEducation"
       },
     ],
-  }
+  },
+  filterLabels: { inputGeneral: 'Buscar en todo', is_active: 'Estado' }
 })
+
+
+const goViewEdit = (data: any) => {
+  router.push({ name: "Grade-Form", params: { action: "edit", id: data.id } })
+}
+
+const goViewCreate = () => {
+  router.push({ name: "Grade-Form", params: { action: "create" } })
+}
 
 
 </script>
@@ -80,16 +79,23 @@ const optionsFilter = ref({
         </span>
 
         <div class="d-flex justify-end gap-3 flex-wrap ">
-          <VBtn @click="goView()">
+          <VBtn @click="goViewCreate()">
             Agregar grado
           </VBtn>
         </div>
       </VCardTitle>
 
-      <VCardText class=" mt-2">
-        <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
+      <VCardText>
+        <FilterDialogNew :options-filter="optionsFilter">
+        </FilterDialogNew>
+      </VCardText>
 
-        </TableFull>
+      <VCardText class=" mt-2">
+
+        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit">
+
+        </TableFullNew>
+
       </VCardText>
     </VCard>
   </div>

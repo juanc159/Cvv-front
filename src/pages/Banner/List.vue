@@ -13,12 +13,9 @@ definePage({
 
 const authenticationStore = useAuthenticationStore();
 
-const goView = (data: { action: string, id: number | null } = { action: "create", id: null }) => {
-  router.push({ name: "Banner-Form", params: { action: data.action, id: data.id } })
-}
 
 //TABLE
-const tableFull = ref()
+const refTableFull = ref()
 
 const optionsTable = {
   url: "/banner/list",
@@ -45,22 +42,28 @@ const optionsTable = {
 
 //FILTER
 const optionsFilter = ref({
-  inputGeneral: {
-    relationsGeneral: {
-      all: [],
-    },
-  },
   dialog: {
-    width: 500,
+    width: 400,
     inputs: [
       {
-        input_type: "booleanActive",
+        type: "booleanActive",
+        name: "is_active",
         title: "Estado",
-        key: "is_active",
       },
     ],
-  }
+  },
+  filterLabels: { inputGeneral: 'Buscar en todo', is_active: 'Estado' }
 })
+
+
+
+const goViewEdit = (data: any) => {
+  router.push({ name: "Banner-Form", params: { action: "edit", id: data.id } })
+}
+
+const goViewCreate = () => {
+  router.push({ name: "Banner-Form", params: { action: "create" } })
+}
 
 
 </script>
@@ -75,14 +78,19 @@ const optionsFilter = ref({
         </span>
 
         <div class="d-flex justify-end gap-3 flex-wrap ">
-          <VBtn @click="goView()">
+          <VBtn @click="goViewCreate()">
             Agregar banner
           </VBtn>
         </div>
       </VCardTitle>
 
+      <VCardText>
+        <FilterDialogNew :options-filter="optionsFilter">
+        </FilterDialogNew>
+      </VCardText>
+
       <VCardText class=" mt-2">
-        <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
+        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit">
 
           <template #item.path="{ item }">
             <div class="my-2">
@@ -90,7 +98,7 @@ const optionsFilter = ref({
             </div>
           </template>
 
-        </TableFull>
+        </TableFullNew>
       </VCardText>
     </VCard>
   </div>

@@ -13,21 +13,10 @@ definePage({
 
 const authenticationStore = useAuthenticationStore();
 
-const goView = (data: { action: string, id: number | null } = { action: "create", id: null }) => {
 
-  if (data.action == 'order') {
-    router.push({ name: "Teacher-Order" });
-    return false
-  }
-  if (data.action == 'planning') {
-    router.push({ name: "Teacher-Planning", params: { id: data.id } });
-    return false
-  }
-  router.push({ name: "Teacher-Form", params: { action: data.action, id: data.id } })
-}
 
 //TABLE
-const tableFull = ref()
+const refTableFull = ref()
 
 const optionsTable = {
   url: "/teacher/list",
@@ -36,14 +25,14 @@ const optionsTable = {
   },
   headers: [
     { title: "Acciones", key: "actions", sortable: false, width: 50 },
-    { title: "Estado", key: "is_active", sortable: false },
-    { title: "Foto", key: "photo", sortable: false },
-    { title: "Tipo de educación", key: "type_education_name", sortable: false },
-    { title: "Cargo", key: "job_position_name", sortable: false },
-    { title: "Nombre(s)", key: "name", sortable: false },
-    { title: "Apellido(s)", key: "last_name", sortable: false },
-    { title: "Correo", key: "email", sortable: false },
-    { title: "Telefono", key: "phone", sortable: false },
+    { title: "Foto", key: "photo", sortable: false, },
+    { title: "Estado", key: "is_active" },
+    { title: "Tipo de educación", key: "type_education_name" },
+    { title: "Cargo", key: "job_position_name" },
+    { title: "Nombre(s)", key: "name" },
+    { title: "Apellido(s)", key: "last_name" },
+    { title: "Correo", key: "email" },
+    { title: "Telefono", key: "phone" },
   ],
   actions: {
     changeStatus: {
@@ -58,29 +47,22 @@ const optionsTable = {
   }
 }
 
-//FILTER
+//FILTER 
 const optionsFilter = ref({
-  inputGeneral: {
-    relationsGeneral: {
-      all: ["name", "last_name", "email", "phone"],
-      typeEducation: ["name"],
-      jobPosition: ["name"],
-    },
-  },
   dialog: {
-    width: 500,
+    width: 400,
     inputs: [
       {
-        input_type: "selectInfinite",
-        title: "Tipo de educación",
-        key: "typeEducation",
-        relation: "typeEducation",
-        relation_key: "type_education_id",
+        type: "selectApi",
+        label: "Tipo de educación",
+        name: "type_education_id",
+        arrayInfo: "typeEducation",
         multiple: true,
-        api: "selectInifiniteTypeEducation"
+        url: "selectInifiniteTypeEducation"
       },
     ],
-  }
+  },
+  filterLabels: { inputGeneral: 'Buscar en todo', is_active: 'Estado' }
 })
 
 
@@ -125,6 +107,23 @@ const resetPlanifications = async () => {
   loading.resetPlanifications = false;
 };
 
+
+const goViewEdit = (data: any) => {
+  router.push({ name: "Teacher-Form", params: { action: "edit", id: data.id } })
+}
+
+const goViewCreate = () => {
+  router.push({ name: "Teacher-Form", params: { action: "create" } })
+}
+
+const goViewOrder = () => {
+  router.push({ name: "Teacher-Order" })
+}
+
+const goViewPlanning = () => {
+  router.push({ name: "Teacher-Order" })
+}
+
 </script>
 
 <template>
@@ -142,17 +141,22 @@ const resetPlanifications = async () => {
             @click="openModalQuestionResetPlanifications">
             Reiniciar Planificaciones
           </VBtn>
-          <VBtn color="primary" @click="goView({ action: 'order', id: null })">
+          <VBtn color="primary" @click="goViewOrder()">
             Ordenar Docentes
           </VBtn>
-          <VBtn @click="goView()">
+          <VBtn @click="goViewCreate()">
             Agregar docente
           </VBtn>
         </div>
       </VCardTitle>
 
+      <VCardText>
+        <FilterDialogNew :options-filter="optionsFilter">
+        </FilterDialogNew>
+      </VCardText>
+
       <VCardText class="mt-2">
-        <TableFull ref="tableFull" :optionsTable="optionsTable" :optionsFilter="optionsFilter" @goView="goView">
+        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit">
 
           <template #item.photo="{ item }">
             <VAvatar :color="item.photo ? '' : 'primary'" :class="item.photo ? null : 'v-avatar-light-bg primary--text'"
@@ -177,7 +181,7 @@ const resetPlanifications = async () => {
               <span>Resetear contraseña</span>
             </VListItem>
 
-            <VListItem @click="goView({ action: 'planning', id: item.id })">
+            <VListItem @click="goViewPlanning()">
               <template #prepend>
                 <VIcon icon="tabler-file" />
               </template>
@@ -189,7 +193,7 @@ const resetPlanifications = async () => {
 
 
 
-        </TableFull>
+        </TableFullNew>
       </VCardText>
     </VCard>
 
