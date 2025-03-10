@@ -3,11 +3,11 @@ import { router } from '@/plugins/1.router';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
 definePage({
-  name: "PendingSubject-List",
+  name: "PendingRegistration-List",
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
-    requiredPermission: "pendingSubject.list",
+    requiredPermission: "pendingRegistration.list",
   },
 });
 
@@ -17,52 +17,44 @@ const authenticationStore = useAuthenticationStore();
 const refTableFull = ref()
 
 const optionsTable = {
-  url: "/pendingSubject/paginate",
+  url: "/pendingRegistration/paginate",
   params: {
     company_id: authenticationStore.company.id,
   },
   headers: [
-    { key: 'name', title: 'Nombre' },
-    { key: 'start_date', title: 'Fecha inicio' },
-    { key: 'end_date', title: 'Fecha fin' },
-    { key: 'is_active', title: 'Estado' },
+    { key: 'term_name', title: 'Periodo' },
+    { key: 'section_name', title: 'Grado y sección' },
+    { key: 'students_count', title: 'Cant estudiantes' },
     { key: 'actions', title: 'Acciones', sortable: false, width: 100 },
   ],
   actions: {
     changeStatus: {
-      url: "/pendingSubject/changeStatus"
-    },
-    view: {
-      show: false,
+      url: "/pendingRegistration/changeStatus"
     },
     delete: {
-      url: "/pendingSubject/delete"
+      url: "/pendingRegistration/delete"
     },
   }
 }
 
 //FILTER
 const optionsFilter = ref({
-  dialog: {
-    width: 400,
-    inputs: [
-      {
-        type: "booleanActive",
-        name: "is_active",
-        label: "Estado",
-      },
-    ],
-  },
   filterLabels: { inputGeneral: 'Buscar en todo', is_active: 'Estado' }
 })
 
 
 const goViewEdit = (data: any) => {
-  router.push({ name: "PendingSubject-Form", params: { action: "edit", id: data.id } })
+  router.push({ name: "PendingRegistration-Form", params: { action: "edit", id: data.id } })
+}
+const goViewView = (data: any) => {
+  router.push({ name: "PendingRegistration-Form", params: { action: "view", id: data.id } })
 }
 
 const goViewCreate = () => {
-  router.push({ name: "PendingSubject-Form", params: { action: "create" } })
+  router.push({ name: "PendingRegistration-Form", params: { action: "create" } })
+}
+const goViewNotes = (item: any) => {
+  router.push({ name: "PendingRegistration-Notes", params: { id: item.id } })
 }
 
 
@@ -79,7 +71,7 @@ const goViewCreate = () => {
 
         <div class="d-flex justify-end gap-3 flex-wrap ">
           <VBtn @click="goViewCreate()">
-            Agregar periodo escolar
+            Agregar
           </VBtn>
         </div>
       </VCardTitle>
@@ -91,8 +83,16 @@ const goViewCreate = () => {
 
       <VCardText class=" mt-2">
 
-        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit">
+        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit" @view="goViewView">
 
+          <template #item.actions2="{ item, index }">
+            <VListItem @click="goViewNotes(item)">
+              <template #prepend>
+                <VIcon icon="tabler-plus" />
+              </template>
+              <span>agregar notas</span>
+            </VListItem>
+          </template>
         </TableFullNew>
 
       </VCardText>

@@ -10,6 +10,10 @@ const props = defineProps({
     type: [Array, Object, String, Number],
     default: () => []
   },
+  params: {
+    type: [Object],
+    default: () => { }
+  },
   multiple: {
     type: Boolean,
     default: false
@@ -69,7 +73,8 @@ const loadItems = async (newSearch = false) => {
 
     const { data } = await useApi(props.url).post({
       [props.searchParam]: search.value,
-      page: page.value
+      page: page.value,
+      ...props.params,
     })
 
     const arrayInfo = props.arrayInfo + "_arrayInfo";
