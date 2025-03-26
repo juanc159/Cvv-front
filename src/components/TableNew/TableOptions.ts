@@ -1,7 +1,7 @@
 export interface TableOptions {
   url: string | null;
   headers: { title: string; key: string; sortable?: boolean; width?: string; align?: string; fixed?: boolean }[];
-  params?: Record<string, any>;
+  paramsGlobal?: Record<string, any>;
   showSelect?: boolean;
   multiSort?: boolean;
   sortBy?: any[];

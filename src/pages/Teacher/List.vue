@@ -20,7 +20,7 @@ const refTableFull = ref()
 
 const optionsTable = {
   url: "/teacher/list",
-  params: {
+  paramsGlobal: {
     company_id: authenticationStore.company.id,
   },
   headers: [
@@ -120,10 +120,19 @@ const goViewOrder = () => {
   router.push({ name: "Teacher-Order" })
 }
 
-const goViewPlanning = () => {
-  router.push({ name: "Teacher-Order" })
+const goViewPlanning = (id: string) => {
+  router.push({ name: "Teacher-Planning", params: { id: id } })
 }
 
+
+const tableLoading = ref(false); // Estado de carga de la tabla
+
+// Método para refrescar los datos
+const refreshTable = () => {
+  if (refTableFull.value) {
+    refTableFull.value.fetchTableData(null, false, true); // Forzamos la búsqueda
+  }
+};
 </script>
 
 <template>
@@ -151,12 +160,13 @@ const goViewPlanning = () => {
       </VCardTitle>
 
       <VCardText>
-        <FilterDialogNew :options-filter="optionsFilter">
+        <FilterDialogNew :options-filter="optionsFilter" @force-search="refreshTable" :table-loading="tableLoading">
         </FilterDialogNew>
       </VCardText>
 
       <VCardText class="mt-2">
-        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit">
+        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit"
+          @update:loading="tableLoading = $event">
 
           <template #item.photo="{ item }">
             <VAvatar :color="item.photo ? '' : 'primary'" :class="item.photo ? null : 'v-avatar-light-bg primary--text'"
@@ -181,7 +191,7 @@ const goViewPlanning = () => {
               <span>Resetear contraseña</span>
             </VListItem>
 
-            <VListItem @click="goViewPlanning()">
+            <VListItem @click="goViewPlanning(item.id)">
               <template #prepend>
                 <VIcon icon="tabler-file" />
               </template>

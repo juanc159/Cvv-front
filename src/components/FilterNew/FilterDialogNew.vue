@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { OptionsFilter, Queries } from '@/components/FilterNew/types'; // Ajusta la ruta según tu proyecto
+import { OptionsFilter, Queries } from '@/components/CustomComponents/Filter/types'; // Ajusta la ruta según tu proyecto
 import { computed, defineProps, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -12,6 +12,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 const props = defineProps<{
   optionsFilter: OptionsFilter;
+  tableLoading?: boolean; // Nueva prop para el estado de carga de la tabla
 }>();
 
 // Estado reactivo local para los filtros
@@ -27,6 +28,11 @@ const filters = reactive({
   },
   extraFilters: { ...props.optionsFilter.extraFilters }
 });
+
+// Emits
+const emit = defineEmits<{
+  (e: 'forceSearch'): void;
+}>();
 
 const generalSearch = ref<string>('');
 const queries = ref<Queries>({
@@ -45,7 +51,7 @@ const isButtonSearchMode = ref(false);
 const debounceTimeout = ref<NodeJS.Timeout | null>(null);
 
 // Actualiza los parámetros de la URL con los valores actuales de los filtros
-const updateQueries = () => {
+const updateQueries = async () => {
   queries.value = {
     sort: route.query.sort ? route.query.sort as string : '', // Preservamos el sort existente
     'filter[inputGeneral]': '',
@@ -80,13 +86,24 @@ const updateQueries = () => {
     }
   }
 
-  router.push({ query: { ...queries.value } });
+  await router.push({ query: { ...queries.value } });
+};
+
+// Combinamos isLoading y tableLoading para deshabilitar el botón
+const isButtonDisabled = computed(() => isLoading.value || props.tableLoading);
+
+// Método para forzar la búsqueda
+const forceSearch = async () => {
+  isLoading.value = true; // Indicamos que está cargando
+  await updateQueries(); // Esperamos a que los parámetros se actualicen
+  isLoading.value = false; // Reseteamos el estado de carga
+  emit('forceSearch'); // Emitimos el evento después de actualizar la URL
 };
 
 // Aplica los filtros manualmente al hacer clic en el botón "Buscar"
-const applySearch = () => {
-  updateQueries();
-  isLoading.value = false;
+const applySearch = async () => {
+  await forceSearch(); // Esperamos a que forceSearch termine
+  // closeDialog(); // Cerramos el modal
 };
 
 // Ejecuta updateQueries con un debounce de 500ms
@@ -282,6 +299,11 @@ const booleanActive = [
   { value: 1, title: "Activo" },
   { value: 0, title: "Inactivo" },
 ];
+
+// Exponemos forceSearch
+defineExpose({
+  forceSearch,
+});
 </script>
 
 <template>
@@ -304,16 +326,23 @@ const booleanActive = [
 
       <div class="action-buttons mt-6">
         <VBtn v-if="filters.dialog?.inputs?.length > 0" icon @click="openDialog" color="primary" :loading="isLoading"
-          class="filter-btn">
+          :disabled="isLoading" class="filter-btn">
           <VIcon icon="tabler-filter-cog" />
           <VTooltip location="top" transition="scale-transition" activator="parent" text="Filtros Avanzados" />
         </VBtn>
 
+        <VBtn @click="forceSearch" color="primary" icon :loading="isButtonDisabled" :disabled="isButtonDisabled">
+          <VIcon icon="tabler-refresh" />
+          <VTooltip location="top" transition="scale-transition" activator="parent" text="Refrescar" />
+        </VBtn>
+
         <VBtn v-if="showSearchButton && isButtonSearchMode" icon @click="applySearch" color="primary"
-          :loading="isLoading" class="search-btn">
+          :loading="isButtonDisabled" :disabled="isButtonDisabled" class="search-btn">
           <VIcon icon="tabler-filter-search" />
           <VTooltip location="top" transition="scale-transition" activator="parent" text="Buscar" />
         </VBtn>
+
+
       </div>
     </div>
 
@@ -343,7 +372,7 @@ const booleanActive = [
     </div>
 
     <!-- Diálogo de filtros avanzados -->
-    <VDialog v-model="isDialogOpen" :max-width="filters.dialog?.width">
+    <VDialog v-model="isDialogOpen" :max-width="filters.dialog?.width" persistent>
       <DialogCloseBtn @click="closeDialog" />
       <div>
         <VToolbar color="primary">
@@ -388,6 +417,8 @@ const booleanActive = [
               </AppSelect>
               <AppDateTimePicker v-if="field.type === 'date'" v-model="field.value" :label="field.label"
                 :config="{ dateFormat: 'Y-m-d' }" clearable />
+              <AppDateTimePicker v-if="field.type === 'dateRange'" v-model="field.value" :label="field.label"
+                :config="{ mode: 'range' }" clearable />
             </VCol>
           </VRow>
         </VCardText>
@@ -398,7 +429,7 @@ const booleanActive = [
             </template>
             Cerrar
           </VBtn>
-          <VBtn @click="applySearch" color="primary" :loading="isLoading">
+          <VBtn @click="applySearch" color="primary" :loading="isButtonDisabled" :disabled="isButtonDisabled">
             <template #prepend>
               <VIcon icon="tabler-filter-search" />
             </template>

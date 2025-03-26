@@ -277,10 +277,6 @@ const changeFilter2 = (data: object) => {
             item.search = matchingItem.search;
           }
         });
-
-        console.log("Array actualizado:", refFilterDialog.value.arrayFilter);
-
-
       }
       executeFetchTable(1);
     }, 200);

@@ -13,6 +13,7 @@ const totals = computed(() => {
   const withdrawals = { male: 0, female: 0, total: 0 };
   const current = { male: 0, female: 0, total: 0 };
   const foreign = { male: 0, female: 0, total: 0 };
+  const nationals = { male: 0, female: 0, total: 0 };
 
   // ¡Usamos statistics.value directamente!
   statistics.value.forEach((stat) => {
@@ -35,9 +36,13 @@ const totals = computed(() => {
     foreign.male += Number(stat.foreign.male);
     foreign.female += Number(stat.foreign.female);
     foreign.total += Number(stat.foreign.total);
+
+    nationals.male += Number(stat.nationals.male);
+    nationals.female += Number(stat.nationals.female);
+    nationals.total += Number(stat.nationals.total);
   });
 
-  return { initial, new_entries, withdrawals, current, foreign };
+  return { initial, new_entries, withdrawals, current, foreign, nationals };
 });
 
 
@@ -89,7 +94,8 @@ const groupedStatistics = computed(() => {
           new_entries: { male: 0, female: 0, total: 0 },
           withdrawals: { male: 0, female: 0, total: 0 },
           current: { male: 0, female: 0, total: 0 },
-          foreign: { male: 0, female: 0, total: 0 }
+          foreign: { male: 0, female: 0, total: 0 },
+          nationals: { male: 0, female: 0, total: 0 },
         }
       };
     }
@@ -97,7 +103,7 @@ const groupedStatistics = computed(() => {
     groups[type].items.push(stat);
 
     // Sumar al subtotal del grupo
-    ['initial', 'new_entries', 'withdrawals', 'current', 'foreign'].forEach(key => {
+    ['initial', 'new_entries', 'withdrawals', 'current', 'foreign', 'nationals'].forEach(key => {
       groups[type].subtotal[key].male += Number(stat[key].male);
       groups[type].subtotal[key].female += Number(stat[key].female);
       groups[type].subtotal[key].total += Number(stat[key].total);
@@ -170,8 +176,12 @@ const downloadExcel = async () => {
               <th class="header-cell withdrawals-header" colspan="3">Egresos</th>
               <th class="header-cell current-header" colspan="3">Matrícula Actual</th>
               <th class="header-cell foreign-header" colspan="3">Extranjeros</th>
+              <th class="header-cell nationals-header" colspan="3">Nacionales</th>
             </tr>
             <tr class="header-row">
+              <th class="header-cell">M</th>
+              <th class="header-cell">F</th>
+              <th class="header-cell">T</th>
               <th class="header-cell">M</th>
               <th class="header-cell">F</th>
               <th class="header-cell">T</th>
@@ -212,6 +222,9 @@ const downloadExcel = async () => {
                 <td class="foreign-cell">{{ stat.foreign.male }}</td>
                 <td class="foreign-cell">{{ stat.foreign.female }}</td>
                 <td class="foreign-cell">{{ stat.foreign.total }}</td>
+                <td class="nationals-cell">{{ stat.nationals.male }}</td>
+                <td class="nationals-cell">{{ stat.nationals.female }}</td>
+                <td class="nationals-cell">{{ stat.nationals.total }}</td>
               </tr>
               <!-- Fila de subtotal por tipo -->
               <tr class="subtotal-row">
@@ -229,6 +242,9 @@ const downloadExcel = async () => {
                   {{ value }}
                 </td>
                 <td v-for="value in group.subtotal.foreign" class="current-cell">
+                  {{ value }}
+                </td>
+                <td v-for="value in group.subtotal.nationals" class="current-cell">
                   {{ value }}
                 </td>
               </tr>
@@ -249,6 +265,9 @@ const downloadExcel = async () => {
                 {{ value }}
               </td>
               <td v-for="value in totals.foreign" class="current-cell">
+                {{ value }}
+              </td>
+              <td v-for="value in totals.nationals" class="current-cell">
                 {{ value }}
               </td>
             </tr>
@@ -386,6 +405,11 @@ const downloadExcel = async () => {
   color: rgba(var(--v-theme-text-inverse), 1);
 }
 
+.nationals-header {
+  background-color: rgba(var(--v-theme-success), 0.8);
+  color: rgba(var(--v-theme-text-inverse), 1);
+}
+
 /* Celdas de datos */
 .data-row td {
   border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
@@ -433,6 +457,10 @@ const downloadExcel = async () => {
 
 .foreign-cell {
   background-color: rgba(var(--v-theme-warning), 0.8);
+}
+
+.nationals-cell {
+  background-color: rgba(var(--v-theme-success), 0.8);
 }
 
 /* Subtotales */

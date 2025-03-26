@@ -18,7 +18,7 @@ const refTableFull = ref()
 
 const optionsTable = {
   url: "/grade/list",
-  params: {
+  paramsGlobal: {
     company_id: authenticationStore.company.id,
   },
   headers: [
@@ -67,6 +67,14 @@ const goViewCreate = () => {
 }
 
 
+const tableLoading = ref(false); // Estado de carga de la tabla
+
+// Método para refrescar los datos
+const refreshTable = () => {
+  if (refTableFull.value) {
+    refTableFull.value.fetchTableData(null, false, true); // Forzamos la búsqueda
+  }
+};
 </script>
 
 <template>
@@ -86,13 +94,14 @@ const goViewCreate = () => {
       </VCardTitle>
 
       <VCardText>
-        <FilterDialogNew :options-filter="optionsFilter">
+        <FilterDialogNew :options-filter="optionsFilter" @force-search="refreshTable" :table-loading="tableLoading">
         </FilterDialogNew>
       </VCardText>
 
       <VCardText class=" mt-2">
 
-        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit">
+        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit"
+          @update:loading="tableLoading = $event">
 
         </TableFullNew>
 

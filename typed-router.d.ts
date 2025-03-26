@@ -35,6 +35,7 @@ declare module 'vue-router/auto-routes' {
     'Note-Index': RouteRecordInfo<'Note-Index', '/Note/Components/Index', Record<never, never>, Record<never, never>>,
     'Note-Index': RouteRecordInfo<'Note-Index', '/Note/Index', Record<never, never>, Record<never, never>>,
     'PendingRegistration-List': RouteRecordInfo<'PendingRegistration-List', '/PendingRegistration/List', Record<never, never>, Record<never, never>>,
+    'PendingRegistration-Files': RouteRecordInfo<'PendingRegistration-Files', 'pendingRegistration-Files/:id', Record<never, never>, Record<never, never>>,
     'PendingRegistration-Form': RouteRecordInfo<'PendingRegistration-Form', 'pendingRegistration-form/:action/:id?', Record<never, never>, Record<never, never>>,
     'PendingRegistration-Notes': RouteRecordInfo<'PendingRegistration-Notes', 'pendingRegistration-notes/:id', Record<never, never>, Record<never, never>>,
     'Pw-home': RouteRecordInfo<'Pw-home', '/', Record<never, never>, Record<never, never>>,

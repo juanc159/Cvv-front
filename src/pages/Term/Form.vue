@@ -99,7 +99,10 @@ if (route.params.action == 'view') disabledFiledsView.value = true
 
 onMounted(async () => {
   clearForm()
-  await fetchDataForm()
+
+  if (route.params.id) {
+    await fetchDataForm()
+  }
 })
 
 

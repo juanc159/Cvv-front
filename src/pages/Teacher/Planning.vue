@@ -6,7 +6,8 @@ definePage({
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
-    requiredPermission: "?index",
+    requiredPermission: "teacher.index",
+
   },
 });
 

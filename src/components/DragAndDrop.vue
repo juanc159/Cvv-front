@@ -18,7 +18,6 @@ const { open, onChange } = useFileDialog({})
 
 function onDrop(DroppedFiles: File[] | null) {
   DroppedFiles?.forEach(file => {
-    console.log("file", file);
 
     if (file.type.slice(0, 6) !== 'image/') {
       // eslint-disable-next-line no-alert

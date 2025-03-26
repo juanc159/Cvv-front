@@ -19,11 +19,14 @@ const authenticationStore = useAuthenticationStore();
 const route = useRoute();
 const { toast } = useToast();
 const errorsBack = ref<IErrorsBack>({});
+const isDialogVisible = ref<boolean>(false);
+const titleDialog = ref<string>("");
 const formValidation = ref<VForm>();
 const loading = reactive({
   form: false,
   attempts: false,
   submit: false,
+  momento: false,
 });
 
 const form = ref({
@@ -37,9 +40,12 @@ const form = ref({
   students: [] as any[],
 });
 
-const attempts = ref<any[]>([]); // Almacena los intentos cargados
-const selectedAttempt = ref<any>(null); // Para agregar/editar intento
-const showModal = ref(false); // Controla el modal
+const handleIsDialogVisible = () => {
+  isDialogVisible.value = !isDialogVisible.value;
+};
+
+const attempts = ref<any[]>([]); // Almacena los momentos cargados
+const selectedAttempt = ref<any>(null); // Para agregar/editar momento 
 
 const selectedSubjects = computed(() => {
   const subjectMap = new Map<string, { value: string; title: string }>();
@@ -97,16 +103,11 @@ const fetchAttempts = async () => {
   if (response.value?.ok && data.value) {
 
     // Transformar los datos de la API al formato esperado por el frontend
-    console.log("data.value.data", data.value.data);
     attempts.value = (data.value.data || [])
-    console.log('Intentos transformados:', attempts.value);
-  } else {
-    toast('Error al cargar los intentos', '', 'danger');
-    console.log('Error en fetchAttempts:', response.value, data.value);
   }
 };
 
-// Método para agregar un nuevo intento
+// Método para agregar un nuevo momento
 const addAttempt = async (attemptData: any) => {
   loading.submit = true;
   const { data, response } = await useApi('/pendingRegistration/attempts/store').post(attemptData);
@@ -114,19 +115,15 @@ const addAttempt = async (attemptData: any) => {
 
   if (response.value?.ok && data.value) {
     if (data.value.code === 200) {
-      await fetchAttempts(); // Recarga los intentos
-      showModal.value = false;
-      toast('Intento creado exitosamente', '', 'success');
+      await fetchAttempts(); // Recarga los momentos
+      isDialogVisible.value = false;
     }
   } else if (data.value?.code === 422) {
     errorsBack.value = data.value.errors ?? {};
-    toast('Error al crear el intento', '', 'danger');
-  } else {
-    console.log('Respuesta inesperada al crear intento:', response.value, data.value);
-  }
+  } 
 };
 
-// Método para actualizar un intento
+// Método para actualizar un momento
 const updateAttempt = async (id: string, attemptData: any) => {
   loading.submit = true;
   const { data, response } = await useApi(`/pendingRegistration/attempts/update/${id}`).post(attemptData);
@@ -134,14 +131,12 @@ const updateAttempt = async (id: string, attemptData: any) => {
 
   if (response.value?.ok && data.value) {
     if (data.value.code === 200) {
-      await fetchAttempts(); // Recarga los intentos
-      showModal.value = false;
+      await fetchAttempts(); // Recarga los momentos
+      isDialogVisible.value = false;
     }
   } else if (data.value?.code === 422) {
     errorsBack.value = data.value.errors ?? {};
-  } else {
-    console.log('Respuesta inesperada al actualizar intento:', response.value, data.value);
-  }
+  } 
 };
 
 // Abrir modal para agregar o editar
@@ -158,11 +153,12 @@ const openModal = (student: any, subject: any, attempt: any = null) => {
     note: null,
     attempt_date: null,
   };
-  showModal.value = true;
+
+  handleIsDialogVisible()
 };
 
 // Método para manejar el submit del formulario
-const handleSubmit = async () => {
+const submitForm = async () => {
   const validation = await formValidation.value?.validate();
   if (validation?.valid) {
     const attemptData = {
@@ -185,9 +181,11 @@ const handleSubmit = async () => {
 };
 
 // Computeds para organizar datos
-const getAttemptsByStudentSubject = (studentId: string, subjectId: string) => {
-  return attempts.value.filter(a => a.student_id.value === studentId && a.subject_id.value === subjectId);
-};
+// const getAttemptsByStudentSubject = (studentId: string, subjectId: string) => {
+//   return attempts.value.filter(a => a.student_id.value === studentId && a.subject_id.value === subjectId);
+// };
+
+
 
 const isLoading = computed(() => {
   return Object.values(loading).some(value => value);
@@ -197,13 +195,47 @@ onMounted(async () => {
   await fetchDataForm();
   await fetchAttempts();
 });
+
+
+const refModalQuestion = ref()
+
+const openDeleteModal = (id: string) => {
+  refModalQuestion.value.componentData.title = "¿Está seguro que desea eliminar el momento?";
+  refModalQuestion.value.openModal(id);
+};
+
+const deleteMomento = async (id: string) => {
+  loading.momento = true;
+  const deleteUrl = `/pendingRegistration/attempts/delete/${id}`;
+  const { data, response } = await useApi(deleteUrl).delete();
+  loading.momento = false;
+
+  if (response.value?.ok && data.value) {
+    // Filtramos el array para que no incluya el objeto con ese id
+    attempts.value = attempts.value.filter(item => item.id !== id);
+
+  }
+
+}
+
+const getAttemptsByStudentSubject = (studentId: string, subjectId: string) => {
+  return attempts.value
+    .filter(a => a.student_id.value === studentId && a.subject_id.value === subjectId)
+    .sort((a, b) => b.attempt_number - a.attempt_number); // Ordenar de mayor a menor
+};
+
+const shouldShowAddButton = (studentId: string, subjectId: string) => {
+  const attempts = getAttemptsByStudentSubject(studentId, subjectId);
+  // Si hay menos de 4 intentos Y (no hay intentos o el último no está aprobado), mostrar el botón
+  return attempts.length < 4 && (attempts.length === 0 || !attempts[0].approved);
+};
 </script>
 
 <template>
   <div>
     <VCard :disabled="loading.form" :loading="loading.form">
       <VCardTitle class="d-flex justify-space-between">
-        <span>Gestionar Notas - {{ route.params.id }}</span>
+        <span>Gestionar Notas</span>
       </VCardTitle>
 
       <!-- Nueva sección de previsualización -->
@@ -217,7 +249,7 @@ onMounted(async () => {
               Año Escolar: {{ form.term_name || 'N/A' }} | Fecha: {{ new Date().toLocaleDateString('es-ES') }}
             </p>
             <p class="text-center">
-              Resumen de las Evaluaciones - Def. 1er Lap.
+              Reporte de materia pendiente.
             </p>
           </VCol>
         </VRow>
@@ -247,13 +279,22 @@ onMounted(async () => {
                   }">
                     <div v-if="student.subjects.some((s: { id: string }) => s.id === subject.value)"
                       class="d-flex flex-column justify-center align-center">
-                      <VBtn v-if="getAttemptsByStudentSubject(student.student_id.value, subject.value).length < 4"
-                        icon="tabler-plus" size="small" color="primary" @click="openModal(student, subject)"></VBtn>
 
-                      <VChip v-for="attempt in getAttemptsByStudentSubject(student.student_id.value, subject.value)"
-                        :key="attempt.id" :color="attempt.approved ? 'success' : 'warning'" class="ma-1"
-                        @click="openModal(student, subject, attempt)">
-                        Intento {{ attempt.attempt_number }}: {{ attempt.note }} ({{ attempt.attempt_date }})
+                      <VBtn v-if="shouldShowAddButton(student.student_id.value, subject.value)" icon="tabler-plus"
+                        size="small" color="primary" @click="openModal(student, subject)"></VBtn>
+
+                      <VChip
+                        v-for="(attempt, attIndex) in getAttemptsByStudentSubject(student.student_id.value, subject.value)"
+                        :key="attempt.id" :color="attempt.approved ? 'success' : 'warning'" class="ma-1">
+
+                        <span @click="openModal(student, subject, attempt)" style="cursor: pointer;">
+                          Momento {{ attempt.attempt_number }}: {{ attempt.note }} ({{ attempt.attempt_date }})
+                        </span>
+
+                        <VIcon v-if="attIndex === 0" color="error" class="ml-2" @click="openDeleteModal(attempt.id)"
+                          icon="tabler-trash">
+                        </VIcon>
+
                       </VChip>
                     </div>
                   </td>
@@ -273,42 +314,65 @@ onMounted(async () => {
         <BtnBack :disabled="isLoading" :loading="isLoading" />
       </VCardText>
 
-      <!-- Modal para agregar/editar intento -->
-      <VDialog v-model="showModal" max-width="500px">
+      <!-- Modal para agregar/editar momento -->
+      <VDialog v-model="isDialogVisible" max-width="500px" persistent>
+        <!-- Dialog close btn -->
+        <DialogCloseBtn @click="handleIsDialogVisible()" />
+        <!-- Toolbar -->
+        <div>
+          <VToolbar color="primary">
+            <VToolbarTitle>{{ selectedAttempt?.id ? 'Editar Momento' : 'Agregar Momento' }}</VToolbarTitle>
+          </VToolbar>
+        </div>
+
         <VCard>
-          <VCardTitle>{{ selectedAttempt?.id ? 'Editar Intento' : 'Agregar Intento' }}</VCardTitle>
           <VCardText>
-            <VForm ref="formValidation" @submit.prevent="handleSubmit">
+            <VForm ref="formValidation">
               <VRow>
                 <VCol cols="12">
-                  <VTextField v-model="selectedAttempt.student_id.title" label="Estudiante" disabled></VTextField>
+                  <AppTextField requiredField="true" v-model="selectedAttempt.student_id.title" label="Estudiante"
+                    disabled>
+                  </AppTextField>
                 </VCol>
                 <VCol cols="12">
-                  <VTextField v-model="selectedAttempt.subject_id.title" label="Materia" disabled></VTextField>
+                  <AppTextField requiredField="true" v-model="selectedAttempt.subject_id.title" label="Materia"
+                    disabled>
+                  </AppTextField>
                 </VCol>
                 <VCol cols="12" md="6">
-                  <VTextField v-model="selectedAttempt.attempt_number" label="Número de Intento" type="number"
-                    :disabled="!!selectedAttempt.id"
-                    :rules="[(v) => !!v && v >= 1 && v <= 4 || 'Debe ser entre 1 y 4']"></VTextField>
+                  <AppTextField requiredField="true" v-model="selectedAttempt.attempt_number" disabled
+                    label="Número de Momento" type="number" :disabled="!!selectedAttempt.id"
+                    :rules="[(v) => !!v && v >= 1 && v <= 4 || 'Debe ser entre 1 y 4']">
+                  </AppTextField>
                 </VCol>
                 <VCol cols="12" md="6">
-                  <VTextField v-model="selectedAttempt.note" label="Nota (0-20)" type="number"
-                    :rules="[(v) => !!v && v >= 0 && v <= 20 || 'Debe estar entre 0 y 20']"></VTextField>
+                  <AppTextField requiredField="true" v-model="selectedAttempt.note" label="Nota (0-20)" type="number"
+                    :rules="[(v) => !!v && v >= 0 && v <= 20 || 'Debe estar entre 0 y 20']"></AppTextField>
                 </VCol>
                 <VCol cols="12" md="6">
-                  <VTextField v-model="selectedAttempt.attempt_date" label="Fecha del Intento" type="date"
-                    :rules="[(v) => !!v || 'La fecha es obligatoria']"></VTextField>
+                  <AppTextField requiredField="true" v-model="selectedAttempt.attempt_date" label="Fecha del Momento"
+                    type="date" :rules="[(v) => !!v || 'La fecha es obligatoria']"></AppTextField>
                 </VCol>
               </VRow>
-              <VCardActions>
-                <VBtn color="error" @click="showModal = false">Cancelar</VBtn>
-                <VBtn color="primary" type="submit" :loading="loading.submit">Guardar</VBtn>
-              </VCardActions>
             </VForm>
+          </VCardText>
+
+          <VCardText class="d-flex justify-end gap-3 flex-wrap">
+            <VBtn :loading="isLoading" color="secondary" variant="tonal" @click="handleIsDialogVisible()">
+              <VIcon start icon="tabler-x" />
+              Cancelar
+            </VBtn>
+            <VBtn :disabled="isLoading" :loading="isLoading" @click="submitForm()" color="primary">
+              <VIcon start icon="tabler-device-floppy" />
+              Guardar
+            </VBtn>
           </VCardText>
         </VCard>
       </VDialog>
     </VCard>
+
+    <ModalQuestion ref="refModalQuestion" @success="deleteMomento" />
+
   </div>
 </template>
 

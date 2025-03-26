@@ -34,6 +34,7 @@ const form = ref({
   term_id: null as string | null,
   type_education_id: null as string | null,
   grade_id: null as string | null,
+  code: null as string | null,
   students: [] as { student_id: string | null, subjects: string[] }[],
 });
 
@@ -68,6 +69,7 @@ const fetchDataForm = async () => {
       form.value = {
         id: data.value.form.id || null,
         term_id: data.value.form.term_id || null,
+        code: data.value.form.code || null,
         type_education_id: data.value.form.type_education_id || null,
         grade_id: data.value.form.grade_id || null,
         students: data.value.form.students || [],
@@ -128,6 +130,7 @@ const isLoading = computed(() => {
   return Object.values(loading).some(value => value);
 });
 
+const codeRules = [(v: string) => !!v || 'El código es obligatorio'];
 const termRules = [(v: string) => !!v || 'El periodo es obligatorio'];
 const gradeRules = [(v: string) => !!v || 'El grado es obligatorio'];
 const studentRules = [(v: string) => !!v || 'El estudiante es obligatorio'];
@@ -169,21 +172,26 @@ const selectedSubjects = computed(() => {
       <VCardText>
         <VForm ref="formValidation" @submit.prevent="submitForm" :disabled="disabledFieldsView">
           <VRow>
-            <VCol cols="12" md="4">
-              <AppSelect clearable v-model="form.term_id" :items="terms" label="Periodo" :rules="termRules"
-                :error-messages="errorsBack.term_id" @change="errorsBack.term_id = ''" :readonly="disabledFieldsView">
-              </AppSelect>
-            </VCol>
-            <VCol cols="12" md="4">
-              <AppSelect clearable v-model="form.type_education_id" :items="typeEducations" label="Tipo de educación"
+            <VCol cols="12" md="3">
+              <AppSelect requiredField="true" clearable v-model="form.term_id" :items="terms" label="Periodo"
                 :rules="termRules" :error-messages="errorsBack.term_id" @change="errorsBack.term_id = ''"
                 :readonly="disabledFieldsView">
               </AppSelect>
             </VCol>
-            <VCol cols="12" md="4">
-              <AppSelect clearable v-model="form.grade_id" :items="gradesFilter" label="Grados y niveles"
-                :rules="gradeRules" :error-messages="errorsBack.grade_id" @change="errorsBack.grade_id = ''"
-                :readonly="disabledFieldsView">
+            <VCol cols="12" md="3">
+              <AppTextField requiredField="true" v-model="form.code" :rules="codeRules" label="Código de sección">
+              </AppTextField>
+            </VCol>
+            <VCol cols="12" md="3">
+              <AppSelect requiredField="true" clearable v-model="form.type_education_id" :items="typeEducations"
+                label="Tipo de educación" :rules="termRules" :error-messages="errorsBack.term_id"
+                @change="errorsBack.term_id = ''" :readonly="disabledFieldsView">
+              </AppSelect>
+            </VCol>
+            <VCol cols="12" md="3">
+              <AppSelect requiredField="true" clearable v-model="form.grade_id" :items="gradesFilter"
+                label="Grados y niveles" :rules="gradeRules" :error-messages="errorsBack.grade_id"
+                @change="errorsBack.grade_id = ''" :readonly="disabledFieldsView">
               </AppSelect>
             </VCol>
             <VCol cols="12">
@@ -205,7 +213,6 @@ const selectedSubjects = computed(() => {
                           @input="errorsBack[`students.${index}.student_id`] = ''" :readonly="disabledFieldsView"
                           :params="{
                             type_education_id: form.type_education_id,
-                            grade_id: form.grade_id,
                           }">
                         </AppSelectRemote>
                       </VCol>
@@ -247,7 +254,7 @@ const selectedSubjects = computed(() => {
                 Date().toLocaleDateString('es-ES') }}
             </p>
             <p class="text-center">
-              Resumen de las Evaluaciones - Def. 1er Lap.
+              Reporte de materia pendiente.
             </p>
           </VCol>
         </VRow>
@@ -255,8 +262,11 @@ const selectedSubjects = computed(() => {
         <VRow>
           <VCol cols="12">
             <h3>
-              Sección: {{typeEducations.find(te => te.value === form.type_education_id)?.title || 'N/A'}} - {{
-                gradesFilter.find(grade => grade.value === form.grade_id)?.title || 'N/A'}}
+              Sección:
+              {{terms.find(term => term.value === form.term_id)?.title || 'N/A'}} -
+              {{typeEducations.find(te => te.value === form.type_education_id)?.title || 'N/A'}} -
+              {{gradesFilter.find(grade => grade.value === form.grade_id)?.title || 'N/A'}} -
+              {{ form.code || 'N/A' }}
             </h3>
             <VTable class="bordered-table">
               <thead>

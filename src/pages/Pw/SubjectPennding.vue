@@ -28,9 +28,11 @@ const plannings = ref<IService>({
   html: "",
 })
 const students_pending_subject = ref<string>("")
+const term_name = ref<string>("")
 const { data, response } = await useApi(`pw-materiaPendiente/${route.params.school_id}`).get();
 if (data.value.code == 200) {
-  plannings.value = data.value.plannings;
+  plannings.value = data.value.pendingRegistrations;
+  term_name.value = data.value.term_name;
   students_pending_subject.value = data.value.students_pending_subject;
 }
 
@@ -48,7 +50,7 @@ if (data.value.code == 200) {
             <div class="position-relative me-2 d-flex flex-column justify-center align-center">
               <VImg width="100" :src="ingVirgenCvv" />
               <h3 class="section-title text-center">
-                Materias Pendientes Año Escolar 2024-2025
+                Materias Pendientes {{ term_name }}
               </h3>
             </div>
           </div>
@@ -60,34 +62,70 @@ if (data.value.code == 200) {
                 LISTADO DE ESTUDIANTES CON MATERIA PENDIENTE
               </a>
             </h2>
-
             <v-container>
               <v-row>
-                <v-col v-for="(sections, gradeName) in plannings" :key="gradeName" cols="12" md="6">
+                <v-col v-for="(item, index) in plannings" :key="index" cols="12" md="6">
                   <v-card class="mb-4">
 
                     <!-- Toolbar -->
                     <div>
                       <VToolbar color="primary" class="text-center">
-                        <VToolbarTitle>{{ gradeName }}</VToolbarTitle>
+                        <VToolbarTitle>{{ item.grade_name }}</VToolbarTitle>
                       </VToolbar>
                     </div>
+                    <VCardText>
+                      <VList>
+                        <v-list-item-group>
 
+                          <VListItem v-for="(subject, indexSubject) in item.files_by_subject" :key="indexSubject">
+                            <v-list-item-content>
 
-                    <!-- <v-card-title class="font-weight-bold text-h5">{{ gradeName }}</v-card-title> -->
-                    <v-card-text>
+                              <v-list-item-title class="font-weight-medium text-h6">
+                                ● {{ subject.subject_name }}
+                              </v-list-item-title>
+                              <v-list>
+                                <v-list-item-group>
+
+                                  <VListItem v-for="(file, indexFile) in subject.files" :key="indexFile">
+                                    <v-list-item-content>
+                                      <v-list-item-title class="text-h5">{{ file.name }}</v-list-item-title>
+                                      <v-list-item-subtitle>
+                                        <a :href="storageBack(file.path)" target="_blank"
+                                          class="text-h6 text-primary">Ver
+                                          Archivo</a>
+                                      </v-list-item-subtitle>
+                                    </v-list-item-content>
+                                  </VListItem>
+                                </v-list-item-group>
+
+                              </v-list>
+                              <v-divider></v-divider>
+
+                            </v-list-item-content>
+                          </VListItem>
+                        </v-list-item-group>
+
+                      </VList>
+                    </VCardText>
+
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-container>
+
+            <!-- <v-card-text>
                       <v-list>
                         <v-list-item-group>
                           <v-list-item v-for="(files, sectionName) in sections" :key="sectionName">
                             <v-list-item-content>
                               <v-list-item-title class="font-weight-medium text-h6">Sección {{ sectionName
-                                }}</v-list-item-title>
+                              }}</v-list-item-title>
                               <v-list>
                                 <v-list-item-group>
                                   <v-list-item v-for="(subjectFiles, subjectName) in files" :key="subjectName">
                                     <v-list-item-content>
                                       <v-list-item-title class="text-body-1 font-weight-bold">● {{ subjectName
-                                        }}</v-list-item-title>
+                                      }}</v-list-item-title>
                                       <v-list>
                                         <v-list-item v-for="file in subjectFiles" :key="file.id">
                                           <v-list-item-content>
@@ -108,11 +146,7 @@ if (data.value.code == 200) {
                           </v-list-item>
                         </v-list-item-group>
                       </v-list>
-                    </v-card-text>
-                  </v-card>
-                </v-col>
-              </v-row>
-            </v-container>
+                    </v-card-text> -->
 
 
 
@@ -161,7 +195,7 @@ if (data.value.code == 200) {
 }
 
 .text-body-1 {
-  font-size: 1.125rem;
+  font-size: 3rem;
 
   /* Tamaño de fuente aumentado */
 }
