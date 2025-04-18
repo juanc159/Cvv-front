@@ -15,7 +15,7 @@ definePage({
 const authenticationStore = useAuthenticationStore();
 
 //TABLE
-const tableFull = ref()
+const refTableFull = ref()
 
 const optionsTable = {
   url: "/student/list",
@@ -169,7 +169,7 @@ const refreshTable = () => {
       <VCardText class=" mt-2">
 
 
-        <TableFullNew ref="tableFull" :options="optionsTable" @edit="goViewEdit"
+        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit"
           @update:loading="tableLoading = $event">
 
           <template #item.photo="{ item }">

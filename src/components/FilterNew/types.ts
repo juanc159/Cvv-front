@@ -153,6 +153,14 @@ export interface OptionsFilter {
    * @default false
    */
   showBtnSearch?: boolean;
+  /**
+   * Controla si se plasma en la url el query de busqueda.
+   * - `true`: Agrega el query de busqueda en la url.
+   * - `false`: No agrega el query de busqueda en la url.
+   * @optional
+   * @default true
+   */
+  queryUrl?: boolean;
 
   /**
    * Objeto que define filtros adicionales renderizados a través del slot.

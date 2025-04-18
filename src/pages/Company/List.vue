@@ -74,6 +74,7 @@ const refreshTable = () => {
     refTableFull.value.fetchTableData(null, false, true); // Forzamos la búsqueda
   }
 };
+
 </script>
 
 <template>

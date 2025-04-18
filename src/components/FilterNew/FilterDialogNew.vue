@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { OptionsFilter, Queries } from '@/components/CustomComponents/Filter/types'; // Ajusta la ruta según tu proyecto
+import { OptionsFilter, Queries } from '@/components/CustomComponents/FilterNew/types'; // Ajusta la ruta según tu proyecto
 import { computed, defineProps, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-
 
 /**
  * Componente FilterDialogNew: un sistema de filtros dinámicos para Vue 3 con Composition API.
@@ -12,7 +11,8 @@ import { useRoute, useRouter } from 'vue-router';
 
 const props = defineProps<{
   optionsFilter: OptionsFilter;
-  tableLoading?: boolean; // Nueva prop para el estado de carga de la tabla
+  tableLoading?: boolean; // Estado de carga de la tabla
+  disableUrlUpdate?: boolean; // Nueva prop para deshabilitar la actualización de URL
 }>();
 
 // Estado reactivo local para los filtros
@@ -31,7 +31,7 @@ const filters = reactive({
 
 // Emits
 const emit = defineEmits<{
-  (e: 'forceSearch'): void;
+  (e: 'forceSearch', params?: object): void;
 }>();
 
 const generalSearch = ref<string>('');
@@ -49,6 +49,7 @@ const route = useRoute();
 const showSearchButton = ref(false);
 const isButtonSearchMode = ref(false);
 const debounceTimeout = ref<NodeJS.Timeout | null>(null);
+const currentFilters = ref<object>({});
 
 // Actualiza los parámetros de la URL con los valores actuales de los filtros
 const updateQueries = async () => {
@@ -86,7 +87,13 @@ const updateQueries = async () => {
     }
   }
 
-  await router.push({ query: { ...queries.value } });
+  // Guardamos los filtros actuales para usarlos en la emisión
+  currentFilters.value = { ...queries.value };
+
+  // Solo actualizamos la URL si no está deshabilitado
+  if (!props.disableUrlUpdate) {
+    await router.push({ query: { ...queries.value } });
+  }
 };
 
 // Combinamos isLoading y tableLoading para deshabilitar el botón
@@ -97,7 +104,9 @@ const forceSearch = async () => {
   isLoading.value = true; // Indicamos que está cargando
   await updateQueries(); // Esperamos a que los parámetros se actualicen
   isLoading.value = false; // Reseteamos el estado de carga
-  emit('forceSearch'); // Emitimos el evento después de actualizar la URL
+
+  // Emitimos el evento con los filtros actuales si está deshabilitada la actualización de URL
+  emit('forceSearch', props.disableUrlUpdate ? currentFilters.value : undefined);
 };
 
 // Aplica los filtros manualmente al hacer clic en el botón "Buscar"
@@ -110,7 +119,13 @@ const applySearch = async () => {
 const debounceUpdateQueries = () => {
   if (debounceTimeout.value) clearTimeout(debounceTimeout.value);
   debounceTimeout.value = setTimeout(() => {
-    updateQueries();
+    updateQueries().then(() => {
+      // Si disableUrlUpdate está activo, necesitamos emitir el evento manualmente
+      // ya que no se activará el watcher de la URL
+      if (props.disableUrlUpdate) {
+        emit('forceSearch', currentFilters.value);
+      }
+    });
     debounceTimeout.value = null;
   }, 500);
 };
@@ -151,12 +166,28 @@ const clearFilters = () => {
   for (const key in filters.extraFilters) {
     filters.extraFilters[key].value = ['selectChipCount', 'select', 'selectApi'].includes(filters.extraFilters[key].type) ? [] : '';
   }
+
+  // Limpiamos queries y currentFilters
   queries.value = { sort: '', 'filter[inputGeneral]': '', page: 1, perPage: 15 };
-  router.push({ query: { ...queries.value } });
+  currentFilters.value = { ...queries.value }; // Actualizamos currentFilters también
+
+  // Solo actualizamos la URL si no está deshabilitado
+  if (!props.disableUrlUpdate) {
+    router.push({ query: { ...queries.value } });
+  }
+
+  // Siempre emitimos el evento forceSearch con los filtros limpios
+  // independientemente de isButtonSearchMode o disableUrlUpdate
+  emit('forceSearch', queries.value);
 };
 
 // Inicializa los valores desde los parámetros de la URL
 const initializeFromQuery = () => {
+  // Si disableUrlUpdate está activo, no inicializamos desde la URL en absoluto
+  if (props.disableUrlUpdate) {
+    return;
+  }
+
   const queryParams = route.query;
 
   generalSearch.value = queryParams['filter[inputGeneral]'] ? queryParams['filter[inputGeneral]'] as string : '';
@@ -208,12 +239,16 @@ const clearGeneralSearchInput = () => {
 // Calcula los filtros activos para mostrar como chips
 const activeFilters = computed(() => {
   const filters: Record<string, string> = {};
-  for (const key in route.query) {
+
+  // Si disableUrlUpdate está activo, usamos currentFilters en lugar de route.query
+  const sourceFilters = props.disableUrlUpdate ? currentFilters.value : route.query;
+
+  for (const key in sourceFilters) {
     if (key.startsWith('filter[')) {
       const filterKey = key.replace('filter[', '').replace(']', '');
-      const value = route.query[key]; // No asumimos que es string directamente
-      const stringValue = value !== null && value !== undefined ? String(value) : ''; // Convertimos a string de forma segura
-      if (stringValue.trim() !== '') { // Usamos stringValue para trim
+      const value = sourceFilters[key];
+      const stringValue = value !== null && value !== undefined ? String(value) : '';
+      if (stringValue.trim() !== '') {
         const field = props.optionsFilter.dialog?.inputs?.find(f => f.name === filterKey);
         if (field) {
           if (field.type === 'selectApi') {
@@ -229,7 +264,7 @@ const activeFilters = computed(() => {
             filters[filterKey] = stringValue;
           }
         } else {
-          filters[filterKey] = stringValue; // Fallback para filtros no definidos en dialog.inputs
+          filters[filterKey] = stringValue;
         }
       }
     }
@@ -239,8 +274,16 @@ const activeFilters = computed(() => {
 
 // Elimina un filtro específico
 const removeFilter = (filterKey: string) => {
-  const query = { ...route.query };
-  delete query[`filter[${filterKey}]`];
+  if (!props.disableUrlUpdate) {
+    const query = { ...route.query };
+    delete query[`filter[${filterKey}]`];
+    router.push({ query });
+  } else {
+    // Si está deshabilitado, actualizamos currentFilters
+    const updatedFilters = { ...currentFilters.value };
+    delete updatedFilters[`filter[${filterKey}]`];
+    currentFilters.value = updatedFilters;
+  }
 
   if (filterKey === 'inputGeneral') {
     generalSearch.value = '';
@@ -255,7 +298,10 @@ const removeFilter = (filterKey: string) => {
     props.optionsFilter.extraFilters[filterKey].value = '';
   }
 
-  router.push({ query });
+  // Si está deshabilitado, emitimos el evento con los filtros actualizados
+  if (props.disableUrlUpdate) {
+    emit('forceSearch', currentFilters.value);
+  }
 };
 
 /**
@@ -263,15 +309,6 @@ const removeFilter = (filterKey: string) => {
  * Usa las etiquetas de optionsFilter.filterLabels si existen, o el label de dialog.inputs, o reemplaza '.' por ' - ' como fallback.
  * @param {string} key - Clave del filtro (ej: 'inputGeneral', 'name').
  * @returns {string} Etiqueta formateada para mostrar en el chip.
- * @example
- * ```typescript
- * // Con optionsFilter.filterLabels = { inputGeneral: 'Buscar Todo' }
- * formatFilterKey('inputGeneral'); // 'Buscar Todo'
- * // Con dialog.inputs = [{ name: 'name', label: 'Nombre Completo' }]
- * formatFilterKey('name'); // 'Nombre Completo'
- * // Sin configuración específica
- * formatFilterKey('author.name'); // 'author - name'
- * ```
  */
 const formatFilterKey = (key: string) => {
   // Prioridad 1: Usar filterLabels si existe en optionsFilter
@@ -300,9 +337,10 @@ const booleanActive = [
   { value: 0, title: "Inactivo" },
 ];
 
-// Exponemos forceSearch
+// Exponemos forceSearch y getCurrentFilters
 defineExpose({
   forceSearch,
+  getCurrentFilters: () => currentFilters.value,
 });
 </script>
 
@@ -331,22 +369,20 @@ defineExpose({
           <VTooltip location="top" transition="scale-transition" activator="parent" text="Filtros Avanzados" />
         </VBtn>
 
-        <VBtn @click="forceSearch" color="primary" icon :loading="isButtonDisabled" :disabled="isButtonDisabled">
+        <VBtn v-if="!isButtonSearchMode" @click="forceSearch" color="primary" icon :loading="isButtonDisabled"
+          :disabled="isButtonDisabled">
           <VIcon icon="tabler-refresh" />
           <VTooltip location="top" transition="scale-transition" activator="parent" text="Refrescar" />
         </VBtn>
 
-        <VBtn v-if="showSearchButton && isButtonSearchMode" icon @click="applySearch" color="primary"
-          :loading="isButtonDisabled" :disabled="isButtonDisabled" class="search-btn">
+        <!-- Modificamos esta condición para que el botón aparezca cuando isButtonSearchMode es true -->
+        <VBtn v-if="isButtonSearchMode" icon @click="applySearch" color="primary" :loading="isButtonDisabled"
+          :disabled="isButtonDisabled" class="search-btn">
           <VIcon icon="tabler-filter-search" />
           <VTooltip location="top" transition="scale-transition" activator="parent" text="Buscar" />
         </VBtn>
-
-
       </div>
     </div>
-
-
 
     <!-- Sección de filtros activos (chips) -->
     <div v-if="Object.keys(activeFilters).length > 0" class="active-filters-container">
