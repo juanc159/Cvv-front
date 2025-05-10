@@ -23,7 +23,7 @@ const optionsTable = {
     company_id: authenticationStore.company.id,
   },
   headers: [
-    { key: 'term_name', title: 'Periodo 1' },
+    { key: 'term_name', title: 'Periodo' },
     { key: 'section_name', title: 'Grado y sección' },
     { key: 'students_count', title: 'Cant estudiantes' },
     { key: 'actions', title: 'Acciones', sortable: false, width: 100 },
