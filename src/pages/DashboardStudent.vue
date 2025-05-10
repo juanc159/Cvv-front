@@ -34,7 +34,7 @@ const loading = reactive({
 const openPdfPreview = async (obj: object) => {
 
   loading.btnPdf = true
-  const { data, response } = await useAxios(`pw-pdfNote/${obj.id}`).get();
+  const { data, response } = await useAxios(`/pw-pdfNote/${obj.id}`).get();
   loading.btnPdf = false
 
   if (response.status == 200 && data) {

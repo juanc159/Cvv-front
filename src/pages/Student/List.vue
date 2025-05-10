@@ -84,6 +84,7 @@ const optionsFilter = ref({
 
 const loading = reactive({
   table: false,
+  btnPdf: false,
 })
 
 const resetPassword = async (id: number) => {
@@ -144,6 +145,20 @@ const refreshTable = () => {
     refTableFull.value.fetchTableData(null, false, true); // Forzamos la búsqueda
   }
 };
+
+
+const downloadCertificateStudy = async (id: number) => {
+
+  loading.btnPdf = true
+  const { data, response } = await useAxios(`/pw-study-certificate/${id}`).get();
+  loading.btnPdf = false
+
+  if (response.status == 200 && data) {
+    openPdfBase64(data.pdf)
+  }
+
+}
+
 </script>
 
 <template>
@@ -186,6 +201,12 @@ const refreshTable = () => {
           </template>
 
           <template #item.actions2="{ item }">
+            <VListItem @click="downloadCertificateStudy(item.id)">
+              <template #prepend>
+                <VIcon size="22" icon="tabler-file" />
+              </template>
+              <span>Descargar constancia de estudio</span>
+            </VListItem>
             <VListItem @click="openModalQuestion(item.id)">
               <template #prepend>
                 <VIcon size="22" icon="tabler-lock-open" />
