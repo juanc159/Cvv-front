@@ -34,11 +34,11 @@ const loading = reactive({
 const openPdfPreview = async (obj: object) => {
 
   loading.btnPdf = true
-  const { data, response } = await useApi(`pw-pdfNote/${obj.id}`).get();
+  const { data, response } = await useAxios(`pw-pdfNote/${obj.id}`).get();
   loading.btnPdf = false
 
-  if (response.value?.ok && data.value) {
-    openPdfBase64(data.value.pdf)
+  if (response.status == 200 && data) {
+    openPdfBase64(data.pdf)
   }
 
 }

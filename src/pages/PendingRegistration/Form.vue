@@ -102,16 +102,16 @@ const submitForm = async () => {
 
     const url = form.value.id ? `/pendingRegistration/update/${form.value.id}` : `/pendingRegistration/store`;
     loading.form = true;
-    const { data, response } = await useApi(url).post(payload);
+    const { data, response } = await useAxios(url).post(payload);
     loading.form = false;
 
-    if (response.value?.ok && data.value) {
-      if (data.value.code === 200) {
+    if (response.status == 200 && data) {
+      if (data.code === 200) {
         router.push({ name: 'PendingRegistration-List' });
       }
     }
-    if (data.value.code === 422) {
-      errorsBack.value = data.value.errors ?? {};
+    if (data.code === 422) {
+      errorsBack.value = data.errors ?? {};
     }
   } else {
     toast('Faltan campos por diligenciar', '', 'danger');
