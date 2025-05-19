@@ -27,7 +27,8 @@ const optionsTable = {
     { title: "Foto ", key: "photo", sortable: false },
     { title: "Grado ", key: "grade_name" },
     { title: "Sección ", key: "section_name" },
-    { title: "Cédula ", key: "identity_document" },
+    { title: "Tipo de documento ", key: "type_document_name" },
+    { title: "Documento ", key: "identity_document" },
     { title: "Nombre", key: "full_name" },
     { title: "Tipo de educación", key: "type_education_name" },
 
