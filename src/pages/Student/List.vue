@@ -148,18 +148,6 @@ const refreshTable = () => {
 };
 
 
-const downloadCertificateStudy = async (id: number) => {
-
-  loading.btnPdf = true
-  const { data, response } = await useAxios(`/pw-study-certificate/${id}`).get();
-  loading.btnPdf = false
-
-  if (response.status == 200 && data) {
-    openPdfBase64(data.pdf)
-  }
-
-}
-
 </script>
 
 <template>
@@ -202,12 +190,6 @@ const downloadCertificateStudy = async (id: number) => {
           </template>
 
           <template #item.actions2="{ item }">
-            <VListItem @click="downloadCertificateStudy(item.id)">
-              <template #prepend>
-                <VIcon size="22" icon="tabler-file" />
-              </template>
-              <span>Descargar constancia de estudio</span>
-            </VListItem>
             <VListItem @click="openModalQuestion(item.id)">
               <template #prepend>
                 <VIcon size="22" icon="tabler-lock-open" />
