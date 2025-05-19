@@ -221,7 +221,7 @@ const selectCertificate = (cert: CertificateType) => {
   transporterInfo.value = { name: '', documentType: 'V', documentNumber: '' };
   representativeInfo.value = { name: '', documentType: 'V', documentNumber: '' };
   absenceInfo.value = { startDate: '', endDate: '' };
-  registrationFeeInfo.value = { registrationFee: 68, monthlyFee: 68, educationalCouncilFee: 25, totalAmount: 0 };
+  registrationFeeInfo.value = { registrationFee: 0, monthlyFee: 0, educationalCouncilFee: 0, totalAmount: 0 };
 
   // Show modal if needed
   if (cert.requiresAdditionalInfo) {
