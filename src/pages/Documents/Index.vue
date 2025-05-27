@@ -180,14 +180,14 @@ const certificateTypes: CertificateType[] = [
     requiresAdditionalInfo: true,
     handler: (id, additionalInfo) => downloadCertificate(`/documents/certificate-withdrawal/${id}`, id, additionalInfo)
   },
-  {
-    id: 10,
-    title: 'Permiso de Ausencia Escolar',
-    icon: 'tabler-calendar-off',
-    description: 'Autoriza la ausencia del estudiante por un período específico.',
-    requiresAdditionalInfo: true,
-    handler: (id, additionalInfo) => downloadCertificate(`/documents/absence-permission/${id}`, id, additionalInfo)
-  }
+  // {
+  //   id: 10,
+  //   title: 'Permiso de Ausencia Escolar',
+  //   icon: 'tabler-calendar-off',
+  //   description: 'Autoriza la ausencia del estudiante por un período específico.',
+  //   requiresAdditionalInfo: true,
+  //   handler: (id, additionalInfo) => downloadCertificate(`/documents/absence-permission/${id}`, id, additionalInfo)
+  // }
 ];
 
 const validateForm = async () => {
