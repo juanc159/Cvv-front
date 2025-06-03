@@ -347,7 +347,7 @@ const clearSelection = () => {
             <VRow>
               <VCol cols="12" sm="6">
                 <AppSelect :rules="[requiredValidator]" clearable :requiredField="true"
-                  v-model="prosecutionInfo.grade_id" :items="initialEducationLevels" label="Seleccione el grado"
+                  v-model="prosecutionInfo.grade_id" :items="initialEducationLevels" label="Seleccione el grado "
                   required />
               </VCol>
               <VCol cols="12" sm="6">
