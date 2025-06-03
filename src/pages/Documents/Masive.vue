@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import type { VForm } from 'vuetify/components';
 const authenticationStore = useAuthenticationStore();
+const { toast } = useToast()
 
 definePage({
   name: "Documents-Masive",
@@ -21,35 +23,78 @@ interface CertificateType {
   handler: () => Promise<void>;
 }
 
+interface Student {
+  id: number;
+  full_name: string;
+  identity_document: string;
+  literal?: string;
+}
+
 const searchQuery = ref('');
 const loading = ref(false);
 const selectedCertificate = ref<CertificateType | null>(null);
+const students = ref<Student[]>([]);
 
 // Add form validation ref
 const formValid = ref(true);
-// Import VForm type from Vuetify if available
-import type { VForm } from 'vuetify/components';
-
 const form = ref<VForm | null>(null);
 
 // Additional info refs
 const showAdditionalInfoModal = ref(false);
+const showStudentsModal = ref(false);
+
+// Search query for filtering students
+const studentSearchQuery = ref('');
+
+// Computed property to filter students
+const filteredStudents = computed(() => {
+  if (!studentSearchQuery.value.trim()) return students.value;
+
+  const query = studentSearchQuery.value.trim().toLowerCase();
+  return students.value.filter(student =>
+    student.full_name.toLowerCase().includes(query) ||
+    student.identity_document.toLowerCase().includes(query)
+  );
+});
 
 const handleIsDialogVisible = (isVisible: boolean = false) => {
+  clearForm();
   showAdditionalInfoModal.value = isVisible;
   if (!isVisible) {
-    clearSelection(); // Limpia la selección al cerrar el modal
+    clearSelection();
   }
 };
 
 // Additional info interfaces
 interface ProsecutionInfo {
   grade_id: string | null;
+  section_id: string | null;
+  ordering: string | null;
 }
 
 const prosecutionInfo = ref<ProsecutionInfo>({
   grade_id: null,
+  section_id: null,
+  ordering: null,
 });
+
+const clearForm = () => {
+  prosecutionInfo.value = {
+    grade_id: null,
+    section_id: null,
+    ordering: null,
+  };
+  form.value?.resetValidation();
+};
+
+// Secciones
+const sections = [
+  { value: 1, title: 'A' },
+  { value: 2, title: 'B' },
+  { value: 3, title: 'C' },
+  { value: 4, title: 'D' },
+  { value: 5, title: 'E' }
+];
 
 // Niveles de Educación Inicial
 const initialEducationLevels = [
@@ -67,25 +112,93 @@ const primaryEducationGrades = [
   { value: 9, title: '6to Grado' }
 ];
 
+// Ordenamiento
+const ordering = [
+  { value: "full_name", title: 'Apellidos y nombres' },
+  { value: "identity_document", title: 'Documento' }
+];
+
+// Validation rule for literal (single character)
+const literalValidator = (value: string) => {
+  if (!value) return 'El literal es requerido';
+  if (value.length !== 1) return 'El literal debe ser un solo carácter';
+  return true;
+};
+
 // Generic certificate download function with error handling
 const downloadCertificate = async (route: string): Promise<void> => {
   try {
-    const { data, response } = await useAxios(route).get({
-      params: {
-        additionalInfo: "",
-        grade_id: prosecutionInfo.value.grade_id,
-        company_id: authenticationStore.company.id,
-      }
-    });
+    const params: any = {
+      grade_id: prosecutionInfo.value.grade_id,
+      section_id: prosecutionInfo.value.section_id,
+      ordering: prosecutionInfo.value.ordering,
+      company_id: authenticationStore.company.id,
+    };
 
-    if (response.status === 200 && data?.pdf) {
-      openPdfBase64(data.pdf);
+    if (route === '/documents/searchStudentFor') {
+      const { data, response } = await useAxios(route).get({ params });
+      if (response.status === 200 && data?.students) {
+        students.value = data.students.map((student: Student) => ({
+          ...student,
+          literal: student.literal || '',
+        }));
+        showAdditionalInfoModal.value = false; // Close the additional info modal
+        showStudentsModal.value = true; // Open the students modal
+      } else {
+        throw new Error('Invalid response format');
+      }
     } else {
-      throw new Error('Invalid response format');
+      const { data, response } = await useAxios(route).get({ params });
+      if (response.status === 200 && data?.pdf) {
+        openPdfBase64(data.pdf);
+      } else {
+        throw new Error('Invalid response format');
+      }
     }
   } catch (error) {
     console.error(`Error downloading certificate from ${route}:`, error);
-    // Here you could add user notification of the error
+  }
+};
+
+// Save literals and generate certificate
+const saveLiteralsAndGenerate = async () => {
+  const isValid = await validateForm();
+  if (!isValid) {
+    toast('Faltan Campos Por Diligenciar', '', 'danger')
+    return
+  };
+
+  try {
+    loading.value = true;
+    const { data, response } = await useAxios('/student/saveLiterals').post({
+      students: students.value.map(student => ({
+        id: student.id,
+        literal: student.literal,
+      })),
+      company_id: authenticationStore.company.id,
+    });
+
+    if (response.status === 200) {
+      const { data: pdfData, response: pdfResponse } = await useAxios('/documents/prosecutionPrimaryEducation').get({
+        params: {
+          grade_id: prosecutionInfo.value.grade_id,
+          section_id: prosecutionInfo.value.section_id,
+          ordering: prosecutionInfo.value.ordering,
+          company_id: authenticationStore.company.id,
+        },
+      });
+
+      if (pdfResponse.status === 200 && pdfData?.pdf) {
+        openPdfBase64(pdfData.pdf);
+        showStudentsModal.value = false;
+      } else {
+        throw new Error('Invalid response format');
+      }
+    }
+  } catch (error) {
+    console.error('Error saving literals:', error);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -103,7 +216,7 @@ const certificateTypes: CertificateType[] = [
     title: 'Certificado de Educación Inicial (Tercer Nivel)',
     icon: 'tabler-school',
     description: 'Certificado para estudiantes del Nivel de Educación Inicial que cursan Tercer Nivel.',
-    requiresAdditionalInfo: false,
+    requiresAdditionalInfo: true,
     handler: () => downloadCertificate(`/documents/certificateInitialEducation`)
   },
   {
@@ -112,7 +225,7 @@ const certificateTypes: CertificateType[] = [
     icon: 'tabler-school',
     description: 'Certificado para estudiantes del Nivel de Educación Primaria que cursan desde 1er hasta 6to grado.',
     requiresAdditionalInfo: true,
-    handler: () => downloadCertificate(`/documents/prosecutionPrimaryEducation`)
+    handler: () => downloadCertificate(`/documents/searchStudentFor`)
   },
 ];
 
@@ -135,11 +248,8 @@ const generateCertificate = async (withValidation: boolean = true) => {
   if (!selectedCertificate.value) return;
 
   if (withValidation) {
-    // Validate form before proceeding
     const isValid = await validateForm();
-    if (!isValid) {
-      return;
-    }
+    if (!isValid) return;
   }
 
   loading.value = true;
@@ -152,9 +262,22 @@ const generateCertificate = async (withValidation: boolean = true) => {
   }
 };
 
+// Dedicated function to close students modal
+const closeStudentsModal = () => {
+  showStudentsModal.value = false;
+  students.value = [];
+  studentSearchQuery.value = '';
+  form.value?.resetValidation();
+};
+
 const clearSelection = () => {
   selectedCertificate.value = null;
   searchQuery.value = '';
+  showStudentsModal.value = false;
+  showAdditionalInfoModal.value = false;
+  studentSearchQuery.value = '';
+  students.value = [];
+  clearForm();
 };
 </script>
 
@@ -167,8 +290,6 @@ const clearSelection = () => {
       </VCardTitle>
 
       <VCardText class="pa-6">
-
-
         <!-- Tipos de Constancias -->
         <VSlideYTransition>
           <div class="certificates-section">
@@ -207,8 +328,6 @@ const clearSelection = () => {
       </VCardText>
     </VCard>
 
-
-
     <!-- Modal for Additional Information -->
     <VDialog v-model="showAdditionalInfoModal" width="600" persistent>
       <DialogCloseBtn @click="handleIsDialogVisible()" />
@@ -220,30 +339,55 @@ const clearSelection = () => {
         </VCardTitle>
 
         <VCardText class="pa-6">
-
           <VForm v-if="selectedCertificate?.id === 1" @submit.prevent="generateCertificate" v-model="formValid"
             ref="form">
             <VRow>
-              <VCol>
+              <VCol cols="12" sm="6">
                 <AppSelect :rules="[requiredValidator]" clearable :requiredField="true"
-                  v-model="prosecutionInfo.grade_id" :items="initialEducationLevels"
-                  label="Seleccione el grado que desea generar" required />
+                  v-model="prosecutionInfo.grade_id" :items="initialEducationLevels" label="Seleccione el grado"
+                  required />
+              </VCol>
+              <VCol cols="12" sm="6">
+                <AppSelect :rules="[requiredValidator]" clearable :requiredField="true"
+                  v-model="prosecutionInfo.section_id" :items="sections" label="Seleccione la sección" required />
+              </VCol>
+              <VCol cols="12" sm="6">
+                <AppSelect :rules="[requiredValidator]" clearable :requiredField="true"
+                  v-model="prosecutionInfo.ordering" :items="ordering" label="Seleccione el ordenamiento" required />
               </VCol>
             </VRow>
           </VForm>
-
-
+          <VForm v-if="selectedCertificate?.id === 2" @submit.prevent="generateCertificate" v-model="formValid"
+            ref="form">
+            <VRow>
+              <VCol cols="12" sm="6">
+                <AppSelect :rules="[requiredValidator]" clearable :requiredField="true"
+                  v-model="prosecutionInfo.section_id" :items="sections" label="Seleccione la sección" required />
+              </VCol>
+              <VCol cols="12" sm="6">
+                <AppSelect :rules="[requiredValidator]" clearable :requiredField="true"
+                  v-model="prosecutionInfo.ordering" :items="ordering" label="Seleccione el ordenamiento" required />
+              </VCol>
+            </VRow>
+          </VForm>
           <VForm v-if="selectedCertificate?.id === 3" @submit.prevent="generateCertificate" v-model="formValid"
             ref="form">
             <VRow>
-              <VCol>
+              <VCol cols="12" sm="6">
                 <AppSelect :rules="[requiredValidator]" clearable :requiredField="true"
-                  v-model="prosecutionInfo.grade_id" :items="primaryEducationGrades"
-                  label="Seleccione el grado que desea generar" required />
+                  v-model="prosecutionInfo.grade_id" :items="primaryEducationGrades" label="Seleccione el grado"
+                  required />
+              </VCol>
+              <VCol cols="12" sm="6">
+                <AppSelect :rules="[requiredValidator]" clearable :requiredField="true"
+                  v-model="prosecutionInfo.section_id" :items="sections" label="Seleccione la sección" required />
+              </VCol>
+              <VCol cols="12" sm="6">
+                <AppSelect :rules="[requiredValidator]" clearable :requiredField="true"
+                  v-model="prosecutionInfo.ordering" :items="ordering" label="Seleccione el ordenamiento" required />
               </VCol>
             </VRow>
           </VForm>
-
         </VCardText>
 
         <VDivider></VDivider>
@@ -257,6 +401,64 @@ const clearSelection = () => {
           <VBtn color="primary" @click="generateCertificate" :loading="loading" :disabled="!selectedCertificate">
             <VIcon icon="tabler-printer" class="me-2" />
             Generar Constancia
+          </VBtn>
+        </VCardText>
+      </VCard>
+    </VDialog>
+
+    <!-- Modal for Students List -->
+    <VDialog v-model="showStudentsModal" width="80rem" persistent>
+      <DialogCloseBtn @click="closeStudentsModal()" />
+
+      <VCard>
+        <VCardTitle class="bg-primary text-white pa-4">
+          <VIcon icon="tabler-users" class="me-2" color="white" />
+          Lista de Estudiantes
+        </VCardTitle>
+
+        <VCardText class="pa-6">
+          <!-- Search Input -->
+          <VRow class="mb-4">
+            <VCol cols="12">
+              <VTextField v-model="studentSearchQuery" label="Buscar por nombre o documento"
+                prepend-inner-icon="tabler-search" clearable variant="outlined" />
+            </VCol>
+          </VRow>
+
+          <VForm @submit.prevent="saveLiteralsAndGenerate" v-model="formValid" ref="form">
+            <VTable>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Documento</th>
+                  <th>Literal</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="student in filteredStudents" :key="student.id">
+                  <td>{{ student.full_name }}</td>
+                  <td>{{ student.identity_document }}</td>
+                  <td>
+                    <VTextField v-model="student.literal" :rules="[literalValidator]" maxlength="1" label="Literal"
+                      required style="max-width: 100px;" />
+                  </td>
+                </tr>
+              </tbody>
+            </VTable>
+          </VForm>
+        </VCardText>
+
+        <VDivider></VDivider>
+
+        <VCardText class="d-flex align-center justify-center gap-4">
+          <VSpacer></VSpacer>
+          <VBtn color="error" variant="outlined" @click="closeStudentsModal">
+            <VIcon icon="tabler-x" class="me-2" />
+            Cancelar
+          </VBtn>
+          <VBtn color="primary" @click="saveLiteralsAndGenerate" :loading="loading">
+            <VIcon icon="tabler-printer" class="me-2" />
+            Guardar y Generar
           </VBtn>
         </VCardText>
       </VCard>
