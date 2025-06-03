@@ -38,6 +38,7 @@ const students = ref<Student[]>([]);
 // Add form validation ref
 const formValid = ref(true);
 const form = ref<VForm | null>(null);
+const formValidateStudents = ref<VForm>();
 
 // Additional info refs
 const showAdditionalInfoModal = ref(false);
@@ -162,8 +163,10 @@ const downloadCertificate = async (route: string): Promise<void> => {
 
 // Save literals and generate certificate
 const saveLiteralsAndGenerate = async () => {
-  const isValid = await validateForm();
-  if (!isValid) {
+  const validation = await formValidateStudents.value?.validate()
+  console.log('Validation result:', validation);
+
+  if (!validation?.valid) {
     toast('Faltan Campos Por Diligenciar', '', 'danger')
     return
   };
@@ -425,13 +428,13 @@ const clearSelection = () => {
             </VCol>
           </VRow>
 
-          <VForm @submit.prevent="saveLiteralsAndGenerate" v-model="formValid" ref="form">
+          <VForm ref="formValidateStudents">
             <VTable>
               <thead>
                 <tr>
-                  <th>Nombre</th>
-                  <th>Documento</th>
-                  <th>Literal</th>
+                  <th style="width: 40%">Nombre</th>
+                  <th style="width: 30%">Documento</th>
+                  <th style="width: 30%">Literal</th>
                 </tr>
               </thead>
               <tbody>
@@ -439,8 +442,8 @@ const clearSelection = () => {
                   <td>{{ student.full_name }}</td>
                   <td>{{ student.identity_document }}</td>
                   <td>
-                    <VTextField v-model="student.literal" :rules="[literalValidator]" maxlength="1" label="Literal"
-                      required style="max-width: 100px;" />
+                    <VTextField v-model="student.literal" :rules="[requiredValidator]" maxlength="1" label="Literal"
+                      required />
                   </td>
                 </tr>
               </tbody>
