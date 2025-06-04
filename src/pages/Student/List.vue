@@ -12,6 +12,7 @@ definePage({
   },
 });
 
+const route = useRoute()
 const authenticationStore = useAuthenticationStore();
 
 //TABLE
@@ -51,14 +52,31 @@ const optionsTable = {
 //FILTER
 const optionsFilter = ref({
   dialog: {
-    width: 500,
+    cols: 4,
+    width: 800,
     inputs: [
+      {
+        type: "selectApi",
+        label: "Tipo de educación",
+        name: "type_education_id",
+        url: "selectInifiniteTypeEducation",
+        arrayInfo: "typeEducation",
+        multiple: true,
+      },
       {
         type: "selectApi",
         label: "Sección",
         name: "section_id",
         url: "selectInfiniteSection",
         arrayInfo: "section",
+        multiple: true,
+      },
+      {
+        type: "selectApi",
+        label: "Tipo de documento",
+        name: "type_document_id",
+        url: "selectInfiniteTypedocument",
+        arrayInfo: "typeDocument",
         multiple: true,
       },
       {
@@ -86,6 +104,7 @@ const optionsFilter = ref({
 const loading = reactive({
   table: false,
   btnPdf: false,
+  excel: false,
 })
 
 const resetPassword = async (id: number) => {
@@ -125,10 +144,6 @@ const openModalUnsubscribe = (id: number) => {
 
 }
 
-const reloadTable = (id: number) => {
-  tableFull.value?.fetchTableData()
-
-}
 
 const goViewEdit = (data: any) => {
   router.push({ name: "Student-Form", params: { action: "edit", id: data.id } })
@@ -148,6 +163,22 @@ const refreshTable = () => {
 };
 
 
+const downloadExcel = async () => {
+  loading.excel = true;
+
+  const { data, response } = await useAxios("/students/excelExport").get({
+    params: {
+      ...route.query,
+      company_id: authenticationStore.company.id
+    }
+  })
+
+  loading.excel = false;
+
+  if (response.status == 200 && data) {
+    downloadExcelBase64(data.excel, "Lista de estudiantes")
+  }
+}
 </script>
 
 <template>
@@ -160,6 +191,13 @@ const refreshTable = () => {
         </span>
 
         <div class="d-flex justify-end gap-3 flex-wrap ">
+          <VBtn :loading="loading.excel" :disabled="loading.excel" size="38" color="primary" icon
+            @click="downloadExcel()">
+            <VIcon icon="tabler-file-spreadsheet"></VIcon>
+            <VTooltip location="top" transition="scale-transition" activator="parent" text="Descargar Excel">
+            </VTooltip>
+          </VBtn>
+
           <VBtn @click="goViewCreate()">
             Agregar estudiante
           </VBtn>
@@ -224,7 +262,7 @@ const refreshTable = () => {
       </VCard>
     </VDialog>
 
-    <ModalUnsubscribe ref="refModalUnsubscribe" @execute="reloadTable" />
+    <ModalUnsubscribe ref="refModalUnsubscribe" @execute="refreshTable" />
 
   </div>
 </template>
