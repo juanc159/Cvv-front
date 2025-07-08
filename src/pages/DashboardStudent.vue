@@ -141,13 +141,13 @@ const passwordSaved = () => {
                 </VBtn>
               </p>
 
-              <p class="d-flex align-center mb-6">
+              <!-- <p class="d-flex align-center mb-6">
                 <VBtn :loading="loading.solvencyCertificate" @click="openSolvencyCertificatePreview(user)"
                   :disabled="!user.pdf" variant="outlined">
                   <VIcon icon="tabler-download"></VIcon>
                   <span>Descargar Solvencia Administrativa</span>
                 </VBtn>
-              </p>
+              </p> -->
 
               <p class="d-flex align-center mb-0">
                 <VBtn :loading="loading.boletin" @click="openBoletinPreview(user)" :disabled="!user.pdf"
