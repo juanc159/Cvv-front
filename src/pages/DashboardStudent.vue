@@ -48,6 +48,15 @@ const openBoletinPreview = async (obj: object) => {
   await downloadFileV2(obj.boletin, namePdf)
   loading.boletin = false
 }
+const openSolvencyCertificatePreview = async (obj: object) => {
+  loading.boletin = true
+  // const namePdf = `solvencia_${obj.identity_document}.pdf`
+  const { data, response } = await useAxios(`/pw-pdfSolvencyCertificate/${obj.id}`).get();
+  if (response.status == 200 && data) {
+    openPdfBase64(data.pdf)
+  }
+  loading.boletin = false
+}
 
 
 //ModalContactanosStudent 
@@ -127,6 +136,14 @@ const passwordSaved = () => {
                 <VBtn :loading="loading.btnPdf" @click="openPdfPreview(user)" :disabled="!user.pdf" variant="outlined">
                   <VIcon icon="tabler-download"></VIcon>
                   <span>Descargar Notas</span>
+                </VBtn>
+              </p>
+
+              <p class="d-flex align-center mb-6">
+                <VBtn :loading="loading.boletin" @click="openSolvencyCertificatePreview(user)" :disabled="!user.pdf"
+                  variant="outlined">
+                  <VIcon icon="tabler-download"></VIcon>
+                  <span>Descargar Solvencia Administrativa</span>
                 </VBtn>
               </p>
 
