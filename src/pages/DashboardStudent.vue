@@ -30,6 +30,7 @@ const avatarData = computed(() => {
 const loading = reactive({
   btnPdf: false,
   boletin: false,
+  solvencyCertificate: false,
 })
 const openPdfPreview = async (obj: object) => {
 
@@ -48,14 +49,15 @@ const openBoletinPreview = async (obj: object) => {
   await downloadFileV2(obj.boletin, namePdf)
   loading.boletin = false
 }
+
 const openSolvencyCertificatePreview = async (obj: object) => {
-  loading.boletin = true
+  loading.solvencyCertificate = true
   // const namePdf = `solvencia_${obj.identity_document}.pdf`
   const { data, response } = await useAxios(`/pw-pdfSolvencyCertificate/${obj.id}`).get();
   if (response.status == 200 && data) {
     openPdfBase64(data.pdf)
   }
-  loading.boletin = false
+  loading.solvencyCertificate = false
 }
 
 
@@ -140,8 +142,8 @@ const passwordSaved = () => {
               </p>
 
               <p class="d-flex align-center mb-6">
-                <VBtn :loading="loading.boletin" @click="openSolvencyCertificatePreview(user)" :disabled="!user.pdf"
-                  variant="outlined">
+                <VBtn :loading="loading.solvencyCertificate" @click="openSolvencyCertificatePreview(user)"
+                  :disabled="!user.pdf" variant="outlined">
                   <VIcon icon="tabler-download"></VIcon>
                   <span>Descargar Solvencia Administrativa</span>
                 </VBtn>
