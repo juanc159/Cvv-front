@@ -31,6 +31,7 @@ const loading = reactive({
   btnPdf: false,
   boletin: false,
   solvencyCertificate: false,
+  url_to_download_prosecucion_pdf: false,
 })
 const openPdfPreview = async (obj: object) => {
 
@@ -52,12 +53,19 @@ const openBoletinPreview = async (obj: object) => {
 
 const openSolvencyCertificatePreview = async (obj: object) => {
   loading.solvencyCertificate = true
-  // const namePdf = `solvencia_${obj.identity_document}.pdf`
   const { data, response } = await useAxios(`/pw-pdfSolvencyCertificate/${obj.id}`).get();
   if (response.status == 200 && data) {
     openPdfBase64(data.pdf)
   }
   loading.solvencyCertificate = false
+}
+const openProsecutionPdfPreview = async (obj: object) => {
+  loading.url_to_download_prosecucion_pdf = true
+  const { data, response } = await useAxios(`${obj.url_to_download_prosecucion_pdf}`).get();
+  if (response.status == 200 && data) {
+    openPdfBase64(data.pdf)
+  }
+  loading.url_to_download_prosecucion_pdf = false
 }
 
 
@@ -146,6 +154,13 @@ const passwordSaved = () => {
                   :disabled="!user.solvencyCertificate" variant="outlined">
                   <VIcon icon="tabler-download"></VIcon>
                   <span>Descargar Solvencia Administrativa</span>
+                </VBtn>
+              </p>
+              <p class="d-flex align-center mb-6" v-if="user.url_to_download_prosecucion_pdf">
+                <VBtn :loading="loading.url_to_download_prosecucion_pdf" @click="openProsecutionPdfPreview(user)"
+                  variant="outlined">
+                  <VIcon icon="tabler-download"></VIcon>
+                  <span>Descargar constancia de prosecución</span>
                 </VBtn>
               </p>
 
