@@ -94,6 +94,13 @@ const menu = ref<
     icon: "tabler-books",
   },
   {
+    title: "Inscripción",
+    to: "https://docs.google.com/forms/d/e/1FAIpQLSdcycZnXHLTyudzofgxtlB1LagywZY6wBdh2Z9yJII4ImMFPg/viewform?usp=header",
+    hash: "",
+    isExternal: true, // Marca como externa
+    icon: "tabler-books",
+  },
+  {
     title: "Materia Pendiente",
     to: "Pw-SubjectPennding",
     hash: "",
