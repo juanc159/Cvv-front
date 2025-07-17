@@ -95,7 +95,7 @@ const menu = ref<
   },
 
   {
-    title: "Inscripción",
+    title: "Inscripciones Virtuales",
     to: "https://docs.google.com/forms/d/e/1FAIpQLSdcycZnXHLTyudzofgxtlB1LagywZY6wBdh2Z9yJII4ImMFPg/viewform?usp=header",
     hash: "",
     isExternal: true, // Marca como externa
