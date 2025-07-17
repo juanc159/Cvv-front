@@ -86,14 +86,13 @@ const menu = ref<
     isExternal: true, // Marca como externa
     icon: "",
   },
-  {
-    title: "Biblioteca virtual",
-    to: "https://inforcolegio.blogspot.com/2018/04/clase-25042018.html",
-    hash: "",
-    isExternal: true, // Marca como externa
-    icon: "tabler-books",
-  },
-
+  // {
+  //   title: "Biblioteca virtual",
+  //   to: "https://inforcolegio.blogspot.com/2018/04/clase-25042018.html",
+  //   hash: "",
+  //   isExternal: true, // Marca como externa
+  //   icon: "tabler-books",
+  // },
   {
     title: "Inscripciones Virtuales",
     to: "https://docs.google.com/forms/d/e/1FAIpQLSdcycZnXHLTyudzofgxtlB1LagywZY6wBdh2Z9yJII4ImMFPg/viewform?usp=header",
