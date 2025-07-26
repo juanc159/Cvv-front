@@ -1,96 +1,61 @@
 <script lang="ts" setup type="module">
-definePage({
-  name: "Note-Index",
-});
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import { VForm } from "vuetify/components";
-const authenticationStore = useAuthenticationStore();
 
+definePage({
+  name: "Note-Index",
+});
+
+const authenticationStore = useAuthenticationStore();
 const { toast } = useToast();
+
 const loading = reactive({
   form: false,
   download_notes: false,
   block_uploading_of_grades_to_teachers: false,
   viewing_notes: false,
-})
+});
+
 const form = ref<{
-  company_id: null | number
-  type_education_id: null | number
-  teacher_id: null | string
-  archive: null | File
+  company_id: null | number;
+  type_education_id: null | number;
+  teacher_id: null | string;
+  archive: null | File;
 }>({
   company_id: null,
   type_education_id: null,
   teacher_id: null,
   archive: null,
-})
+});
+
 const errorsBack = ref<IErrorsBack>({});
 const formValidation = ref<VForm>();
 const formValidationDownload = ref<VForm>();
-const typeEducations = ref<Array<object>>([])
-const teachers = ref<Array<object>>([])
+const typeEducations = ref<Array<object>>([]);
+const teachers = ref<Array<object>>([]);
 const archive = ref(useFileUpload());
-archive.value.allowedExtensions = ["xls", "xlsx"]
-const selectedSwitch = ref<boolean>(false)
+archive.value.allowedExtensions = ["xls", "xlsx"];
+
+const selectedSwitch = ref<boolean>(false);
 const selectedNotes = ref({});
 
+// Referencia al componente de loading
+const loadingProgressRef = ref();
 
-onMounted(async () => {
-  await loadDataVisualizeNotes()
+const progressStrategy = ref<'polling' | 'sse'>('sse'); // Default a SSE
 
-  loading.form = true
-  const { data, response } = await useApi('note-dataForm').get()
-
-  if (response.value?.ok && data.value) {
-    typeEducations.value = data.value.typeEducations
-
-    selectedSwitch.value = data.value.blockData
-    teachers.value = data.value.teachers
-  }
-  loading.form = false
-})
-
-const loadDataVisualizeNotes = async () => {
-  const { data, response } = await useApi('/type_educations/visualization/show').get()
-  if (response.value?.ok && data.value) {
-    selectedNotes.value = data.value.selectedNotes
-  }
-
-}
-
-const submitForm = async () => {
-  form.value.archive = archive.value.imageFile;
-  form.value.company_id = authenticationStore.company.id;
-
-  const validation = await formValidation.value?.validate();
-  if (validation?.valid) {
-
-    const formData = new FormData()
-    for (const key in form.value)
-      formData.append(key, form.value[key])
-
-    loading.form = true
-    const { data, response } = await useApi('note-store').post(formData)
-    loading.form = false
-
-  } else {
-    toast("Faltan Campos Por Diligenciar", "", "danger");
-  }
-};
-
+const requiredValidator = (value: any) => !!value || 'Campo requerido';
 
 const formDownload = ref({
-  type_education_id: null as null | string
-})
+  type_education_id: null as null | string,
+});
+
 const dowloadNomina = async () => {
-
   const validation = await formValidationDownload.value?.validate();
-
   if (validation?.valid) {
     loading.download_notes = true;
-
-    const search = typeEducations.value.find(ele => ele.value == formDownload.value.type_education_id)
+    const search = typeEducations.value.find(ele => ele.value == formDownload.value.type_education_id);
     const { data, response } = await useApi<any>(
       createUrl(`/note-downloadAllConsolidated`, {
         query: {
@@ -99,76 +64,186 @@ const dowloadNomina = async () => {
         },
       })
     );
-
     loading.download_notes = false;
-
     if (response.value?.ok && data.value) {
-      downloadExcelBase64(data.value.excel, "Consolidado " + search?.title)
+      downloadExcelBase64(data.value.excel, "Consolidado " + search?.title);
     }
   } else {
     toast("Faltan Campos Por Diligenciar", "", "danger");
   }
-}
+};
 
-
-
-
-const changeStatus = async (
-  value: any
-) => {
-  loading.block_uploading_of_grades_to_teachers = true
+const changeStatus = async (value: any) => {
+  loading.block_uploading_of_grades_to_teachers = true;
   const { data, response } = await useApi(`/note-blockPayrollUpload`).post({
     value: value,
   });
-  // if (data.value.code === 200) toast("Éxito", data.value.message, "success");
   if (response.value?.ok && data.value) {
+    // Handle response if needed
   };
-  loading.block_uploading_of_grades_to_teachers = false
-
+  loading.block_uploading_of_grades_to_teachers = false;
 };
 
-const resetOptionDownloadPdf = async (
-  value: any
-) => {
-  loading.block_uploading_of_grades_to_teachers = true
+const resetOptionDownloadPdf = async () => {
+  loading.block_uploading_of_grades_to_teachers = true;
   const { data, response } = await useApi(`/note-resetOptionDownloadPdf`).post({
     company_id: authenticationStore.company.id,
   });
   if (response.value?.ok && data.value) {
+    // Handle response if needed
   };
-  loading.block_uploading_of_grades_to_teachers = false
-
+  loading.block_uploading_of_grades_to_teachers = false;
 };
 
 const selectValueLabel = computed(() => {
-
   return selectedSwitch.value ? 'Sí' : 'No';
 });
 
-
 const submitFormVisualization = async () => {
-
-  loading.viewing_notes = true
+  loading.viewing_notes = true;
   const { data, response } = await useApi('/type_educations/visualization/store').post({
-    selectedNotes: selectedNotes.value
-  })
-  loading.viewing_notes = false
-
-
+    selectedNotes: selectedNotes.value,
+  });
+  loading.viewing_notes = false;
+  if (response.value?.ok && data.value) {
+    // Handle response if needed
+  }
 };
 
-//ModalQuestion
-const refModalQuestion = ref()
-
+// Modal Question
+const refModalQuestion = ref();
 const openModalQuestion = () => {
-  refModalQuestion.value.openModal()
-  refModalQuestion.value.componentData.title = "Esta seguro que desea activar a todos los estudiantes en un estado insolventes"
-}
+  refModalQuestion.value.openModal();
+  refModalQuestion.value.componentData.title = "Esta seguro que desea activar a todos los estudiantes en un estado insolventes";
+};
 
+const loadDataVisualizeNotes = async () => {
+  const { data, response } = await useApi('/type_educations/visualization/show').get();
+  if (response.value?.ok && data.value) {
+    selectedNotes.value = data.value.selectedNotes;
+  }
+};
+
+const submitForm = async () => {
+  form.value.archive = archive.value.imageFile;
+  form.value.company_id = authenticationStore.company.id;
+
+  const validation = await formValidation.value?.validate();
+  if (validation?.valid) {
+    const formData = new FormData();
+    for (const key in form.value) {
+      if (form.value[key] !== null) {
+        formData.append(key, form.value[key]);
+      }
+    }
+
+    loading.form = true;
+
+    try {
+      console.log('📤 Enviando formulario...');
+      const { data, response } = await useApi('note-store').post(formData);
+
+      console.log('📥 Respuesta del servidor:', data.value);
+
+      if (response.value?.ok && data.value) {
+        if (data.value.status === 'success') {
+          console.log(`🚀 Iniciando loading con ${progressStrategy.value} para batch_id:`, data.value.batch_id);
+
+          // Iniciar el loading con la estrategia seleccionada
+          loadingProgressRef.value?.startLoading(data.value.batch_id);
+
+          toast("Importación iniciada correctamente", "", "success");
+
+          // Resetear el formulario
+          form.value = {
+            company_id: null,
+            type_education_id: null,
+            teacher_id: null,
+            archive: null,
+          };
+          archive.value.clearData();
+
+        } else if (data.value.status === 'error') {
+          toast("Error en la importación", data.value.message, "danger");
+          if (data.value.errors) {
+            errorsBack.value = data.value.errors;
+          }
+        }
+      } else {
+        toast("Error en la respuesta del servidor", "", "danger");
+      }
+    } catch (error) {
+      console.error('❌ Error en submitForm:', error);
+      toast("Error al procesar el archivo", "", "danger");
+    } finally {
+      loading.form = false;
+    }
+  } else {
+    toast("Faltan Campos Por Diligenciar", "", "danger");
+  }
+};
+
+// Manejar cuando se completa la importación
+const onImportCompleted = () => {
+  console.log('✅ Import completed!');
+  toast("¡Importación completada exitosamente!", "", "success");
+};
+
+// Manejar errores en la importación
+const onImportError = (error: any) => {
+  console.error('❌ Error en importación:', error);
+  toast("Error durante la importación", "", "danger");
+};
+
+// Manejar cambio de estrategia
+const onStrategyChanged = (newStrategy: 'polling' | 'sse') => {
+  progressStrategy.value = newStrategy;
+  console.log(`🔄 Strategy changed to: ${newStrategy}`);
+};
+
+// Manejar actualización de progreso
+const onProgressUpdated = (progress: number) => {
+  console.log(`📊 Progress updated to: ${progress}%`);
+};
+
+onMounted(async () => {
+  console.log('🚀 Component mounted, BASE_BACK_API:', BASE_BACK_API);
+  await loadDataVisualizeNotes();
+  loading.form = true;
+  const { data, response } = await useApi('note-dataForm').get();
+  if (response.value?.ok && data.value) {
+    typeEducations.value = data.value.typeEducations;
+    selectedSwitch.value = data.value.blockData;
+    teachers.value = data.value.teachers;
+  }
+  loading.form = false;
+});
 </script>
 
 <template>
   <div>
+    <!-- Componente de Loading Progress con estrategia configurable -->
+    <LoadingProgress ref="loadingProgressRef" :strategy="progressStrategy" :show-debug="true"
+      @completed="onImportCompleted" @error="onImportError" @strategy-changed="onStrategyChanged"
+      @progress-updated="onProgressUpdated" />
+
+    <!-- Selector de estrategia (temporal para testing) -->
+    <VCard class="mb-3" v-if="true">
+      <VCardTitle>🔧 Configuración de Progreso</VCardTitle>
+      <VCardText>
+        <VRadioGroup v-model="progressStrategy" inline>
+          <VRadio label="📡 Server-Sent Events (SSE)" value="sse" />
+          <VRadio label="🔄 Polling" value="polling" />
+        </VRadioGroup>
+        <VAlert type="info" class="mt-2">
+          <strong>SSE:</strong> Más eficiente para archivos grandes, actualizaciones en tiempo real<br>
+          <strong>Polling:</strong> Más compatible, consultas cada 2 segundos<br>
+          <strong>BASE_BACK_API:</strong> {{ BASE_BACK_API }}
+        </VAlert>
+      </VCardText>
+    </VCard>
+
+    <!-- Tu formulario existente -->
     <VCard :disabled="loading.form" :loading="loading.form" v-if="hasPermission('note.upload_notes')">
       <VCardTitle primary-title>Cargar Notas</VCardTitle>
       <VCardText>
@@ -202,6 +277,7 @@ const openModalQuestion = () => {
       </VCardText>
     </VCard>
 
+    <!-- Resto de tu template existente... -->
     <VCard :disabled="loading.download_notes" :loading="loading.download_notes" class="mt-3"
       v-if="hasPermission('note.download_notes')">
       <VCardTitle primary-title>Descargar Notas</VCardTitle>
@@ -227,6 +303,7 @@ const openModalQuestion = () => {
       </VCardText>
     </VCard>
 
+    <!-- Resto de tus cards existentes... -->
     <VRow>
       <VCol cols="4">
         <VCard :disabled="loading.block_uploading_of_grades_to_teachers"
@@ -240,7 +317,6 @@ const openModalQuestion = () => {
                   <VSwitch v-model="selectedSwitch" @update:model-value="changeStatus($event)" :label="selectValueLabel"
                     color="success" />
                 </div>
-
               </VCol>
             </VRow>
           </VCardText>
@@ -257,7 +333,6 @@ const openModalQuestion = () => {
                 <div class="demo-space-x">
                   <VBtn color="primary" @click="openModalQuestion">Reiniciar</VBtn>
                 </div>
-
               </VCol>
             </VRow>
           </VCardText>

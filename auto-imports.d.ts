@@ -7,6 +7,8 @@ export {}
 declare global {
   const $api: typeof import('./src/utils/api')['$api']
   const API_KEY_EDITOR: typeof import('./src/utils/constants')['API_KEY_EDITOR']
+  const BASE_BACK: typeof import('./src/utils/constants')['BASE_BACK']
+  const BASE_BACK_API: typeof import('./src/utils/constants')['BASE_BACK_API']
   const BASE_BACK_STORAGE: typeof import('./src/utils/constants')['BASE_BACK_STORAGE']
   const COOKIE_MAX_AGE_1_YEAR: typeof import('./src/utils/constants')['COOKIE_MAX_AGE_1_YEAR']
   const CreateUrl: typeof import('./src/@core/composable/CreateUrl')['CreateUrl']
@@ -391,6 +393,7 @@ declare module 'vue' {
   interface ComponentCustomProperties {
     readonly $api: UnwrapRef<typeof import('./src/utils/api')['$api']>
     readonly API_KEY_EDITOR: UnwrapRef<typeof import('./src/utils/constants')['API_KEY_EDITOR']>
+    readonly BASE_BACK_API: UnwrapRef<typeof import('./src/utils/constants')['BASE_BACK_API']>
     readonly BASE_BACK_STORAGE: UnwrapRef<typeof import('./src/utils/constants')['BASE_BACK_STORAGE']>
     readonly COOKIE_MAX_AGE_1_YEAR: UnwrapRef<typeof import('./src/utils/constants')['COOKIE_MAX_AGE_1_YEAR']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
