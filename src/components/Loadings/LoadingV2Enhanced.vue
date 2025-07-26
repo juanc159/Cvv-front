@@ -121,10 +121,6 @@
             <v-icon start icon="tabler-window-minimize" />
             Minimizar
           </v-btn>
-          <v-btn v-if="allowCancel" variant="text" color="error" @click="handleCancel">
-            <v-icon start icon="tabler-x" />
-            Cancelar
-          </v-btn>
         </div>
       </v-card-text>
     </v-card>
@@ -202,10 +198,6 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  allowCancel: {
-    type: Boolean,
-    default: true
-  },
   showDebugToggle: {
     type: Boolean,
     default: false
@@ -236,7 +228,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['cancel', 'minimize', 'minimized', 'restored', 'completed'])
+const emit = defineEmits(['minimize', 'minimized', 'restored', 'completed'])
 
 // Estado local
 const currentTipIndex = ref(0)
@@ -259,10 +251,6 @@ const restore = () => {
 
 const toggleDebugInfo = () => {
   showDebugInfo.value = !showDebugInfo.value
-}
-
-const handleCancel = () => {
-  emit('cancel')
 }
 
 const getConnectionColor = (status?: string) => {
@@ -375,9 +363,7 @@ let mounted = false
 
 onMounted(() => {
   mounted = true
-  if (props.isLoading) {
-    startTipRotation()
-  }
+  startTipRotation()
 })
 
 onUnmounted(() => {

@@ -15,6 +15,7 @@ declare global {
   const EffectScope: typeof import('vue')['EffectScope']
   const ROLE_SUPERADMIN_UUID: typeof import('./src/utils/constants')['ROLE_SUPERADMIN_UUID']
   const VITE_API_BASE_BACK: typeof import('./src/utils/constants')['VITE_API_BASE_BACK']
+  const VITE_API_URL: typeof import('./src/utils/constants')['VITE_API_URL']
   const acceptHMRUpdate: typeof import('pinia')['acceptHMRUpdate']
   const alphaDashValidator: typeof import('./src/@core/utils/validators')['alphaDashValidator']
   const alphaValidator: typeof import('./src/@core/utils/validators')['alphaValidator']
@@ -63,6 +64,7 @@ declare global {
   const getActivePinia: typeof import('pinia')['getActivePinia']
   const getCurrentInstance: typeof import('vue')['getCurrentInstance']
   const getCurrentScope: typeof import('vue')['getCurrentScope']
+  const getGlobalLoadingInstance: typeof import('./src/composables/useGlobalLoading')['getGlobalLoadingInstance']
   const h: typeof import('vue')['h']
   const hasPermission: typeof import('./src/@core/utils/helpers')['hasPermission']
   const hexToRgb: typeof import('./src/@core/utils/colorConverter')['hexToRgb']
@@ -251,6 +253,7 @@ declare global {
   const useGamepad: typeof import('@vueuse/core')['useGamepad']
   const useGenerateImageVariant: typeof import('./src/@core/composable/useGenerateImageVariant')['useGenerateImageVariant']
   const useGeolocation: typeof import('@vueuse/core')['useGeolocation']
+  const useGlobalLoading: typeof import('./src/composables/useGlobalLoading')['useGlobalLoading']
   const useI18n: typeof import('vue-i18n')['useI18n']
   const useId: typeof import('vue')['useId']
   const useIdle: typeof import('@vueuse/core')['useIdle']
@@ -398,6 +401,7 @@ declare module 'vue' {
     readonly COOKIE_MAX_AGE_1_YEAR: UnwrapRef<typeof import('./src/utils/constants')['COOKIE_MAX_AGE_1_YEAR']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly ROLE_SUPERADMIN_UUID: UnwrapRef<typeof import('./src/utils/constants')['ROLE_SUPERADMIN_UUID']>
+    readonly VITE_API_URL: UnwrapRef<typeof import('./src/utils/constants')['VITE_API_URL']>
     readonly acceptHMRUpdate: UnwrapRef<typeof import('pinia')['acceptHMRUpdate']>
     readonly alphaDashValidator: UnwrapRef<typeof import('./src/@core/utils/validators')['alphaDashValidator']>
     readonly alphaValidator: UnwrapRef<typeof import('./src/@core/utils/validators')['alphaValidator']>
@@ -445,6 +449,7 @@ declare module 'vue' {
     readonly getActivePinia: UnwrapRef<typeof import('pinia')['getActivePinia']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
+    readonly getGlobalLoadingInstance: UnwrapRef<typeof import('./src/composables/useGlobalLoading')['getGlobalLoadingInstance']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly hasPermission: UnwrapRef<typeof import('./src/@core/utils/helpers')['hasPermission']>
     readonly hexToRgb: UnwrapRef<typeof import('./src/@core/utils/colorConverter')['hexToRgb']>
@@ -629,6 +634,7 @@ declare module 'vue' {
     readonly useGamepad: UnwrapRef<typeof import('@vueuse/core')['useGamepad']>
     readonly useGenerateImageVariant: UnwrapRef<typeof import('./src/@core/composable/useGenerateImageVariant')['useGenerateImageVariant']>
     readonly useGeolocation: UnwrapRef<typeof import('@vueuse/core')['useGeolocation']>
+    readonly useGlobalLoading: UnwrapRef<typeof import('./src/composables/useGlobalLoading')['useGlobalLoading']>
     readonly useI18n: UnwrapRef<typeof import('vue-i18n')['useI18n']>
     readonly useId: UnwrapRef<typeof import('vue')['useId']>
     readonly useIdle: UnwrapRef<typeof import('@vueuse/core')['useIdle']>

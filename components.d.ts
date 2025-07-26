@@ -55,6 +55,7 @@ declare module 'vue' {
     ErrorHeader: typeof import('./src/components/ErrorHeader.vue')['default']
     FilterDialog: typeof import('./src/components/Filter/FilterDialog.vue')['default']
     FilterDialogNew: typeof import('./src/components/FilterNew/FilterDialogNew.vue')['default']
+    GlobalLoadingManager: typeof import('./src/components/Loadings/GlobalLoadingManager.vue')['default']
     HeaderAlertView: typeof import('./src/components/HeaderAlertView.vue')['default']
     I18n: typeof import('./src/@core/components/I18n.vue')['default']
     ListGroup: typeof import('./src/components/Lists/Permissions/ListGroup.vue')['default']

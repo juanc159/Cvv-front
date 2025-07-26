@@ -1,4 +1,5 @@
 <script lang="ts" setup type="module">
+import { getGlobalLoadingInstance } from '@/composables/useGlobalLoading';
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import { VForm } from "vuetify/components";
@@ -9,6 +10,7 @@ definePage({
 
 const authenticationStore = useAuthenticationStore();
 const { toast } = useToast();
+const globalLoading = getGlobalLoadingInstance();
 
 const loading = reactive({
   form: false,
@@ -40,10 +42,7 @@ archive.value.allowedExtensions = ["xls", "xlsx"];
 const selectedSwitch = ref<boolean>(false);
 const selectedNotes = ref({});
 
-// Referencia al componente de loading
-const loadingProgressRef = ref();
-
-const progressStrategy = ref<'polling' | 'sse'>('sse'); // Default a SSE
+const progressStrategy = ref<'polling' | 'sse'>('sse');
 
 const requiredValidator = (value: any) => !!value || 'Campo requerido';
 
@@ -110,7 +109,6 @@ const submitFormVisualization = async () => {
   }
 };
 
-// Modal Question
 const refModalQuestion = ref();
 const openModalQuestion = () => {
   refModalQuestion.value.openModal();
@@ -147,10 +145,25 @@ const submitForm = async () => {
 
       if (response.value?.ok && data.value) {
         if (data.value.status === 'success') {
-          console.log(`🚀 Iniciando loading con ${progressStrategy.value} para batch_id:`, data.value.batch_id);
+          console.log(`🚀 Iniciando loading global con ${progressStrategy.value} para batch_id:`, data.value.batch_id);
 
-          // Iniciar el loading con la estrategia seleccionada
-          loadingProgressRef.value?.startLoading(data.value.batch_id);
+          // Iniciar el loading global
+          globalLoading.startLoading(data.value.batch_id, progressStrategy.value);
+
+          // Configurar callbacks
+          globalLoading.onCompleted(() => {
+            console.log('✅ Import completed!');
+            toast("¡Importación completada exitosamente!", "", "success");
+          });
+
+          globalLoading.onError((error: any) => {
+            console.error('❌ Error en importación:', error);
+            toast("Error durante la importación", "", "danger");
+          });
+
+          globalLoading.onProgressUpdated((progress: number) => {
+            console.log(`📊 Progress updated to: ${progress}%`);
+          });
 
           toast("Importación iniciada correctamente", "", "success");
 
@@ -183,31 +196,8 @@ const submitForm = async () => {
   }
 };
 
-// Manejar cuando se completa la importación
-const onImportCompleted = () => {
-  console.log('✅ Import completed!');
-  toast("¡Importación completada exitosamente!", "", "success");
-};
-
-// Manejar errores en la importación
-const onImportError = (error: any) => {
-  console.error('❌ Error en importación:', error);
-  toast("Error durante la importación", "", "danger");
-};
-
-// Manejar cambio de estrategia
-const onStrategyChanged = (newStrategy: 'polling' | 'sse') => {
-  progressStrategy.value = newStrategy;
-  console.log(`🔄 Strategy changed to: ${newStrategy}`);
-};
-
-// Manejar actualización de progreso
-const onProgressUpdated = (progress: number) => {
-  console.log(`📊 Progress updated to: ${progress}%`);
-};
-
 onMounted(async () => {
-  console.log('🚀 Component mounted, BASE_BACK_API:', BASE_BACK_API);
+  console.log('🚀 Component mounted');
   await loadDataVisualizeNotes();
   loading.form = true;
   const { data, response } = await useApi('note-dataForm').get();
@@ -222,11 +212,6 @@ onMounted(async () => {
 
 <template>
   <div>
-    <!-- Componente de Loading Progress con estrategia configurable -->
-    <LoadingProgress ref="loadingProgressRef" :strategy="progressStrategy" :show-debug="true"
-      @completed="onImportCompleted" @error="onImportError" @strategy-changed="onStrategyChanged"
-      @progress-updated="onProgressUpdated" />
-
     <!-- Selector de estrategia (temporal para testing) -->
     <VCard class="mb-3" v-if="true">
       <VCardTitle>🔧 Configuración de Progreso</VCardTitle>
@@ -238,7 +223,7 @@ onMounted(async () => {
         <VAlert type="info" class="mt-2">
           <strong>SSE:</strong> Más eficiente para archivos grandes, actualizaciones en tiempo real<br>
           <strong>Polling:</strong> Más compatible, consultas cada 2 segundos<br>
-          <strong>BASE_BACK_API:</strong> {{ BASE_BACK_API }}
+          <strong>Estado Global:</strong> El progreso persiste entre páginas
         </VAlert>
       </VCardText>
     </VCard>

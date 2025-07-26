@@ -22,6 +22,8 @@ import { VerticalNavLayout } from '@layouts'
         </IconBtn>
 
         <NavbarThemeSwitcher />
+        <!-- NUEVO: Componente global de loading para importaciones -->
+        <!-- <GlobalLoadingManager /> -->
 
         <VSpacer />
 
