@@ -147,23 +147,47 @@ const submitForm = async () => {
         if (data.value.status === 'success') {
           console.log(`🚀 Iniciando loading global con ${progressStrategy.value} para batch_id:`, data.value.batch_id);
 
-          // Iniciar el loading global
-          globalLoading.startLoading(data.value.batch_id, progressStrategy.value);
+          // Obtener nombre del archivo
+          const fileName = archive.value.imageFile?.name || 'Archivo desconocido';
+          const userId = authenticationStore.user?.id || 'usuario_anonimo';
 
-          // Configurar callbacks
-          globalLoading.onCompleted(() => {
-            console.log('✅ Import completed!');
-            toast("¡Importación completada exitosamente!", "", "success");
-          });
+          // HABILITAR AUTO-LOAD al iniciar un nuevo proceso
+          globalLoading.enableAutoLoad();
 
-          globalLoading.onError((error: any) => {
-            console.error('❌ Error en importación:', error);
-            toast("Error durante la importación", "", "danger");
-          });
+          // Iniciar el loading global con información adicional
+          globalLoading.startLoading(
+            data.value.batch_id,
+            progressStrategy.value,
+            fileName,
+            userId
+          );
 
-          globalLoading.onProgressUpdated((progress: number) => {
-            console.log(`📊 Progress updated to: ${progress}%`);
-          });
+          // Configurar callbacks (solo una vez)
+          if (!globalLoading._callbacksConfigured) {
+            globalLoading.onCompleted((batchId: string) => {
+              console.log(`✅ Import completed for batch: ${batchId}`);
+              toast("¡Importación completada exitosamente!", "", "success");
+            });
+
+            globalLoading.onError((batchId: string, error: any) => {
+              console.error(`❌ Error en importación para batch ${batchId}:`, error);
+              toast("Error durante la importación", "", "danger");
+            });
+
+            globalLoading.onProgressUpdated((batchId: string, progress: number) => {
+              console.log(`📊 Progress updated for ${batchId}: ${progress}%`);
+            });
+
+            globalLoading.onProcessAdded((batchId: string) => {
+              console.log(`➕ New process added: ${batchId}`);
+            });
+
+            globalLoading.onProcessRemoved((batchId: string) => {
+              console.log(`➖ Process removed: ${batchId}`);
+            });
+
+            globalLoading._callbacksConfigured = true;
+          }
 
           toast("Importación iniciada correctamente", "", "success");
 
@@ -196,9 +220,7 @@ const submitForm = async () => {
   }
 };
 
-onMounted(async () => {
-  console.log('🚀 Component mounted');
-  await loadDataVisualizeNotes();
+const loadTypeEducationsAndTeachers = async () => {
   loading.form = true;
   const { data, response } = await useApi('note-dataForm').get();
   if (response.value?.ok && data.value) {
@@ -207,6 +229,12 @@ onMounted(async () => {
     teachers.value = data.value.teachers;
   }
   loading.form = false;
+};
+
+onMounted(async () => {
+  console.log('🚀 Component mounted');
+  await loadDataVisualizeNotes();
+  await loadTypeEducationsAndTeachers();
 });
 </script>
 
@@ -223,8 +251,28 @@ onMounted(async () => {
         <VAlert type="info" class="mt-2">
           <strong>SSE:</strong> Más eficiente para archivos grandes, actualizaciones en tiempo real<br>
           <strong>Polling:</strong> Más compatible, consultas cada 2 segundos<br>
-          <strong>Estado Global:</strong> El progreso persiste entre páginas
+          <strong>Múltiples procesos:</strong> Ahora puedes cargar varios archivos simultáneamente<br>
+          <strong>Auto-load:</strong> {{ globalLoading.isAutoLoadEnabled() ? 'Habilitado' : 'Deshabilitado' }} - Solo se
+          activa al iniciar un proceso
         </VAlert>
+      </VCardText>
+    </VCard>
+
+    <!-- Indicador de procesos activos -->
+    <VCard v-if="globalLoading.hasActiveProcesses.value" class="mb-3" color="info" variant="tonal">
+      <VCardText class="d-flex align-center justify-space-between">
+        <div class="d-flex align-center">
+          <v-icon icon="tabler-loader" class="me-2" />
+          <span class="font-weight-medium">
+            {{ globalLoading.processList.value.length }} proceso{{ globalLoading.processList.value.length !== 1 ? 's' :
+            '' }}
+            {{ globalLoading.processList.value.length === 1 ? 'activo' : 'activos' }}
+          </span>
+        </div>
+        <v-btn v-if="globalLoading.processList.value.length > 1" size="small" variant="outlined"
+          @click="globalLoading.toggleProcessList()">
+          Ver todos
+        </v-btn>
       </VCardText>
     </VCard>
 

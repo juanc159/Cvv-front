@@ -21,77 +21,61 @@ interface ProgressData {
   general_progress: number
 }
 
+interface ImportProcess {
+  batch_id: string
+  progress_data: ProgressData
+  strategy: Strategy
+  status: "active" | "completed" | "error" | "paused"
+  started_at: string
+  completed_at?: string
+  file_name?: string
+  user_id?: string
+  connection_status: string
+  event_source?: EventSource
+  polling_interval?: NodeJS.Timeout
+  reconnect_attempts?: number // NUEVO: Contador de reconexiones
+}
+
 type Strategy = "polling" | "sse"
 
-// Estado global compartido
-const isLoading = ref(false)
-const strategy = ref<Strategy>("sse")
-const connectionStatus = ref("disconnected")
-const lastUpdateTime = ref<string>("")
-const messagesReceived = ref(0)
+// Estado global para múltiples procesos
+const activeProcesses = ref<Map<string, ImportProcess>>(new Map())
+const currentActiveProcess = ref<string | null>(null)
 const isMinimized = ref(false)
+const showProcessList = ref(false)
 
-const progressData = ref<ProgressData>({
-  batch_id: "",
-  progress: 0,
-  current_student: "Iniciando proceso...",
-  current_action: "Preparando importación",
-  metadata: {
-    sheet: 0,
-    chunk: 0,
-    processed_rows: 0,
-    total_rows: 0,
-    total_records: 0,
-    processed_records: 0,
-    general_progress: 0,
-    subjects_processed: 0,
-  },
-  timestamp: "",
-  general_progress: 0,
-})
-
-// Variables para conexiones
-let pollingInterval: NodeJS.Timeout | null = null
-let eventSource: EventSource | null = null
-let reconnectAttempts = 0
-const maxReconnectAttempts = 5
-let reconnectTimeout: NodeJS.Timeout | null = null
+// Variables para reconexión mejoradas
+const maxReconnectAttempts = 3 // REDUCIDO: de 5 a 3
 let saveInterval: NodeJS.Timeout | null = null
+
+// Variables de control de inicialización
+let isInitialized = false
+let autoLoadEnabled = false
 
 // Callbacks para eventos
 const callbacks = {
-  completed: [] as Array<() => void>,
-  error: [] as Array<(error: any) => void>,
-  progressUpdated: [] as Array<(progress: number) => void>,
+  completed: [] as Array<(batchId: string) => void>,
+  error: [] as Array<(batchId: string, error: any) => void>,
+  progressUpdated: [] as Array<(batchId: string, progress: number) => void>,
   strategyChanged: [] as Array<(strategy: Strategy) => void>,
+  processAdded: [] as Array<(batchId: string) => void>,
+  processRemoved: [] as Array<(batchId: string) => void>,
 }
 
-// Función para obtener BASE_BACK_API dinámicamente
+// Función para obtener BASE_BACK_API
 const getBaseApi = () => {
-  // Intentar obtener de diferentes fuentes posibles
-  if (typeof window !== "undefined") {
-    // @ts-ignore - Buscar en window global
-    if (window.BASE_BACK_API) return window.BASE_BACK_API
-
-    // @ts-ignore - Buscar en configuración de Vite
-    if (import.meta.env?.VITE_API_URL) return import.meta.env.VITE_API_URL
-
-    // Fallback: construir desde la URL actual
-    const { protocol, hostname, port } = window.location
-    const portSuffix = port && port !== "80" && port !== "443" ? `:${port}` : ""
-    return `${protocol}//${hostname}${portSuffix}/api`
-  }
-
-  // Fallback para SSR
-  return "/api"
+  return BASE_BACK_API
 }
 
 // ==================== POLLING STRATEGY ====================
 const pollProgress = async (batchId: string) => {
-  try {
-    connectionStatus.value = "connecting"
+  const process = activeProcesses.value.get(batchId)
+  if (!process) return
 
-    const url = `${BASE_BACK_API}/batch-status/${batchId}`
+  try {
+    process.connection_status = "connecting"
+
+    const url = `${getBaseApi()}/batch-status/${batchId}`
     const response = await fetch(url, {
       method: "GET",
       headers: {
@@ -105,18 +89,19 @@ const pollProgress = async (batchId: string) => {
     }
 
     const data = await response.json()
-    connectionStatus.value = "connected"
+    process.connection_status = "connected"
+    process.reconnect_attempts = 0 // Reset contador
 
     if (data.progress_data) {
-      updateProgressData(data.progress_data)
+      updateProgressData(batchId, data.progress_data)
     }
   } catch (error) {
-    console.error("❌ Error polling progress:", error)
-    connectionStatus.value = "error"
+    console.error(`❌ Error polling progress for ${batchId}:`, error)
+    process.connection_status = "error"
 
-    if (isLoading.value) {
+    if (process.status === "active") {
       setTimeout(() => {
-        if (isLoading.value) {
+        if (activeProcesses.value.has(batchId)) {
           pollProgress(batchId)
         }
       }, 5000)
@@ -125,140 +110,186 @@ const pollProgress = async (batchId: string) => {
 }
 
 const startPolling = (batchId: string) => {
+  const process = activeProcesses.value.get(batchId)
+  if (!process) return
+
   console.log(`🔄 [POLLING] Starting for batch: ${batchId}`)
-  connectionStatus.value = "connecting"
+  process.connection_status = "connecting"
+  process.reconnect_attempts = 0
 
   pollProgress(batchId)
-  pollingInterval = setInterval(() => {
-    if (isLoading.value) {
+  process.polling_interval = setInterval(() => {
+    if (activeProcesses.value.has(batchId) && process.status === "active") {
       pollProgress(batchId)
     }
   }, 2000)
 }
 
-const stopPolling = () => {
-  if (pollingInterval) {
-    console.log("🛑 [POLLING] Stopping")
-    clearInterval(pollingInterval)
-    pollingInterval = null
-    connectionStatus.value = "disconnected"
+const stopPolling = (batchId: string) => {
+  const process = activeProcesses.value.get(batchId)
+  if (!process) return
+
+  if (process.polling_interval) {
+    console.log(`🛑 [POLLING] Stopping for ${batchId}`)
+    clearInterval(process.polling_interval)
+    process.polling_interval = undefined
+    process.connection_status = "disconnected"
   }
 }
 
-// ==================== SERVER-SENT EVENTS STRATEGY ====================
+// ==================== SERVER-SENT EVENTS STRATEGY (MEJORADO) ====================
 const startSSE = (batchId: string) => {
-  console.log(`📡 [SSE] Starting for batch: ${batchId}`)
-  connectionStatus.value = "connecting"
-  messagesReceived.value = 0
+  const process = activeProcesses.value.get(batchId)
+  if (!process) return
 
-  const url = `${BASE_BACK_API}/progress/${batchId}`
-  console.log("📡 SSE URL:", url)
+  console.log(`📡 [SSE] Starting for batch: ${batchId}`)
+  process.connection_status = "connecting"
+  process.reconnect_attempts = process.reconnect_attempts || 0
+
+  const url = `${getBaseApi()}/progress/${batchId}`
+  console.log(`📡 SSE URL for ${batchId}:`, url)
 
   try {
-    eventSource = new EventSource(url)
+    const eventSource = new EventSource(url)
+    process.event_source = eventSource
 
     eventSource.addEventListener("message", (event) => {
-      handleSSEMessage(event)
+      handleSSEMessage(batchId, event)
     })
 
     eventSource.addEventListener("progress", (event) => {
-      handleSSEMessage(event)
+      handleSSEMessage(batchId, event)
     })
 
     eventSource.addEventListener("heartbeat", (event) => {
-      console.log("💓 [SSE] Heartbeat event:", event)
-      messagesReceived.value++
-      connectionStatus.value = "connected"
+      console.log(`💓 [SSE] Heartbeat for ${batchId}`)
+      process.connection_status = "connected"
+      process.reconnect_attempts = 0
+    })
+
+    eventSource.addEventListener("timeout", (event) => {
+      console.log(`⏰ [SSE] Timeout event for ${batchId}, switching to polling`)
+      stopSSE(batchId)
+      // Cambiar automáticamente a polling si SSE tiene problemas
+      process.strategy = "polling"
+      startPolling(batchId)
+    })
+
+    eventSource.addEventListener("error", (event) => {
+      console.log(`❌ [SSE] Error event for ${batchId}`)
+      handleSSEError(batchId)
     })
 
     eventSource.onopen = (event) => {
-      console.log("✅ [SSE] Connection opened:", event)
-      connectionStatus.value = "connected"
-      reconnectAttempts = 0
-      messagesReceived.value++
+      console.log(`✅ [SSE] Connection opened for ${batchId}`)
+      process.connection_status = "connected"
+      process.reconnect_attempts = 0
     }
 
     eventSource.onerror = (error) => {
-      console.error("❌ [SSE] Connection error:", error)
-
-      if (eventSource?.readyState === EventSource.CLOSED) {
-        console.log("🔒 [SSE] Connection closed by server")
-        connectionStatus.value = "disconnected"
-        return
-      }
-
-      connectionStatus.value = "error"
-
-      if (isLoading.value && reconnectAttempts < maxReconnectAttempts) {
-        reconnectAttempts++
-        const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000)
-
-        console.log(`🔄 [SSE] Attempting reconnect ${reconnectAttempts}/${maxReconnectAttempts} in ${delay}ms`)
-        connectionStatus.value = "reconnecting"
-
-        reconnectTimeout = setTimeout(() => {
-          if (isLoading.value) {
-            stopSSE()
-            startSSE(batchId)
-          }
-        }, delay)
-      }
+      console.error(`❌ [SSE] Connection error for ${batchId}:`, error)
+      handleSSEError(batchId)
     }
   } catch (error) {
-    console.error("❌ [SSE] Error creating EventSource:", error)
-    connectionStatus.value = "error"
+    console.error(`❌ [SSE] Error creating EventSource for ${batchId}:`, error)
+    process.connection_status = "error"
+    handleSSEError(batchId)
   }
 }
 
-const handleSSEMessage = (event: MessageEvent) => {
+const handleSSEError = (batchId: string) => {
+  const process = activeProcesses.value.get(batchId)
+  if (!process) return
+
+  if (process.event_source?.readyState === EventSource.CLOSED) {
+    console.log(`🔒 [SSE] Connection closed by server for ${batchId}`)
+    process.connection_status = "disconnected"
+    return
+  }
+
+  process.connection_status = "error"
+  process.reconnect_attempts = (process.reconnect_attempts || 0) + 1
+
+  // Solo reconectar si el loading sigue activo y no hemos excedido los intentos
+  if (process.status === "active" && process.reconnect_attempts <= maxReconnectAttempts) {
+    const delay = Math.min(1000 * Math.pow(2, process.reconnect_attempts), 10000) // Max 10 segundos
+
+    console.log(
+      `🔄 [SSE] Attempting reconnect ${process.reconnect_attempts}/${maxReconnectAttempts} for ${batchId} in ${delay}ms`,
+    )
+    process.connection_status = "reconnecting"
+
+    setTimeout(() => {
+      if (activeProcesses.value.has(batchId) && process.status === "active") {
+        stopSSE(batchId)
+        startSSE(batchId)
+      }
+    }, delay)
+  } else {
+    // Si excedemos los intentos, cambiar a polling
+    console.log(`🔄 [SSE] Max reconnect attempts reached for ${batchId}, switching to polling`)
+    stopSSE(batchId)
+    process.strategy = "polling"
+    process.connection_status = "switching"
+    startPolling(batchId)
+  }
+}
+
+const handleSSEMessage = (batchId: string, event: MessageEvent) => {
+  const process = activeProcesses.value.get(batchId)
+  if (!process) return
+
   try {
-    messagesReceived.value++
-    connectionStatus.value = "connected"
-    reconnectAttempts = 0
+    process.connection_status = "connected"
+    process.reconnect_attempts = 0
 
     if (!event.data) return
 
     const data = JSON.parse(event.data)
 
     if (data.type === "heartbeat") {
-      console.log("💓 [SSE] Heartbeat received")
+      console.log(`💓 [SSE] Heartbeat received for ${batchId}`)
       return
     }
 
     if (data.type === "progress" || !data.type) {
-      updateProgressData(data)
+      updateProgressData(batchId, data)
     }
 
     if (data.type === "completed") {
       if (data.final_progress) {
-        updateProgressData(data.final_progress)
+        updateProgressData(batchId, data.final_progress)
       }
     }
+
+    if (data.type === "timeout") {
+      console.log(`⏰ [SSE] Server timeout for ${batchId}, switching to polling`)
+      stopSSE(batchId)
+      process.strategy = "polling"
+      startPolling(batchId)
+    }
   } catch (error) {
-    console.error("❌ [SSE] Error handling message:", error)
+    console.error(`❌ [SSE] Error handling message for ${batchId}:`, error)
   }
 }
 
-const stopSSE = () => {
-  if (eventSource) {
-    console.log("🛑 [SSE] Stopping")
-    eventSource.close()
-    eventSource = null
-  }
+const stopSSE = (batchId: string) => {
+  const process = activeProcesses.value.get(batchId)
+  if (!process || !process.event_source) return
 
-  if (reconnectTimeout) {
-    clearTimeout(reconnectTimeout)
-    reconnectTimeout = null
-  }
-
-  connectionStatus.value = "disconnected"
-  reconnectAttempts = 0
+  console.log(`🛑 [SSE] Stopping for ${batchId}`)
+  process.event_source.close()
+  process.event_source = undefined
+  process.connection_status = "disconnected"
 }
 
 // ==================== SHARED FUNCTIONS ====================
-const updateProgressData = (newData: any) => {
+const updateProgressData = (batchId: string, newData: any) => {
+  const process = activeProcesses.value.get(batchId)
+  if (!process) return
+
   const updatedData = {
-    batch_id: newData.batch_id || progressData.value.batch_id,
+    batch_id: batchId,
     progress: newData.progress || 0,
     current_student: newData.current_student || "Procesando...",
     current_action: newData.current_action || "Importando datos",
@@ -276,20 +307,24 @@ const updateProgressData = (newData: any) => {
     general_progress: newData.metadata?.general_progress || 0,
   }
 
-  progressData.value = updatedData
-  lastUpdateTime.value = new Date().toLocaleTimeString()
+  process.progress_data = updatedData
 
   nextTick(() => {
     const currentProg = updatedData.metadata.general_progress
 
     // Ejecutar callbacks
-    callbacks.progressUpdated.forEach((callback) => callback(currentProg))
+    callbacks.progressUpdated.forEach((callback) => callback(batchId, currentProg))
 
     if (updatedData.metadata.general_progress >= 100) {
-      console.log(`✅ [${strategy.value.toUpperCase()}] Progress completed!`)
+      console.log(`✅ [${process.strategy.toUpperCase()}] Process completed for ${batchId}!`)
+
+      process.status = "completed"
+      process.completed_at = new Date().toISOString()
+
+      stopConnection(batchId)
+
       setTimeout(() => {
-        stopLoading()
-        callbacks.completed.forEach((callback) => callback())
+        callbacks.completed.forEach((callback) => callback(batchId))
       }, 1500)
     }
   })
@@ -297,203 +332,506 @@ const updateProgressData = (newData: any) => {
 
 // Funciones de conexión unificadas
 const startConnection = (batchId: string) => {
-  console.log(`🚀 Starting connection with ${strategy.value} strategy`)
-  if (strategy.value === "polling") {
+  const process = activeProcesses.value.get(batchId)
+  if (!process) return
+
+  console.log(`🚀 Starting connection with ${process.strategy} strategy for ${batchId}`)
+  if (process.strategy === "polling") {
     startPolling(batchId)
   } else {
     startSSE(batchId)
   }
 }
 
-const stopConnection = () => {
-  console.log("🛑 Stopping all connections")
-  stopPolling()
-  stopSSE()
+const stopConnection = (batchId: string) => {
+  console.log(`🛑 Stopping connection for ${batchId}`)
+  stopPolling(batchId)
+  stopSSE(batchId)
+}
+
+// ==================== BATCH STATUS VERIFICATION ====================
+const verifyBatchStatus = async (batchId: string): Promise<boolean> => {
+  try {
+    console.log(`🔍 [VERIFY] Checking batch status for: ${batchId}`)
+
+    const url = `${getBaseApi()}/batch-status/${batchId}`
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    })
+
+    if (!response.ok) {
+      console.log(`❌ [VERIFY] Batch ${batchId} not found or error: ${response.status}`)
+      return false
+    }
+
+    const data = await response.json()
+
+    // Si el batch está completado o no existe, no reconectar
+    if (data.status === "completed" || data.status === "not_found") {
+      console.log(`✅ [VERIFY] Batch ${batchId} is completed or not found, skipping reconnection`)
+      return false
+    }
+
+    // Si el progreso está al 100%, no reconectar
+    if (data.progress_data?.metadata?.general_progress >= 100) {
+      console.log(`✅ [VERIFY] Batch ${batchId} progress is 100%, skipping reconnection`)
+      return false
+    }
+
+    console.log(`🔄 [VERIFY] Batch ${batchId} is still active, can reconnect`)
+    return true
+  } catch (error) {
+    console.error(`❌ [VERIFY] Error verifying batch ${batchId}:`, error)
+    return false
+  }
 }
 
 // ==================== PERSISTENCE ====================
 const saveState = () => {
-  if (isLoading.value && progressData.value.batch_id) {
+  if (!autoLoadEnabled) {
+    console.log(`🚫 [STORAGE] Auto-load disabled, not saving state`)
+    return
+  }
+
+  if (activeProcesses.value.size > 0) {
     const state = {
-      batchId: progressData.value.batch_id,
-      strategy: strategy.value,
+      processes: Array.from(activeProcesses.value.entries()).map(([id, process]) => ({
+        batch_id: id,
+        progress_data: process.progress_data,
+        strategy: process.strategy,
+        status: process.status,
+        started_at: process.started_at,
+        completed_at: process.completed_at,
+        file_name: process.file_name,
+        user_id: process.user_id,
+        connection_status: process.connection_status,
+        reconnect_attempts: process.reconnect_attempts,
+      })),
+      currentActiveProcess: currentActiveProcess.value,
       isMinimized: isMinimized.value,
-      progressData: progressData.value,
+      showProcessList: showProcessList.value,
       timestamp: Date.now(),
     }
-    localStorage.setItem("importProgress", JSON.stringify(state))
+    localStorage.setItem("importProcesses", JSON.stringify(state))
+    console.log(`💾 [STORAGE] Saved state with ${activeProcesses.value.size} processes`)
+  } else {
+    // Si no hay procesos, limpiar el storage
+    localStorage.removeItem("importProcesses")
+    console.log(`🗑️ [STORAGE] No processes, cleared storage`)
   }
 }
 
-const loadState = () => {
-  const saved = localStorage.getItem("importProgress")
-  if (saved) {
-    try {
-      const state = JSON.parse(saved)
-      if (Date.now() - state.timestamp < 3600000) {
-        progressData.value = state.progressData
-        strategy.value = state.strategy
-        isMinimized.value = state.isMinimized
+const loadState = async () => {
+  if (!autoLoadEnabled) {
+    console.log(`🚫 [STORAGE] Auto-load disabled, skipping state load`)
+    return
+  }
 
-        if (state.progressData.metadata.general_progress < 100) {
-          isLoading.value = true
-          startConnection(state.batchId)
-        }
-      } else {
-        localStorage.removeItem("importProgress")
-      }
-    } catch (error) {
-      console.error("Error loading saved state:", error)
-      localStorage.removeItem("importProgress")
+  const saved = localStorage.getItem("importProcesses")
+  if (!saved) {
+    console.log(`📂 [STORAGE] No saved state found`)
+    return
+  }
+
+  try {
+    const state = JSON.parse(saved)
+    const now = Date.now()
+    const maxAge = 1800000 // 30 minutos (reducido de 1 hora)
+
+    // Verificar si el estado no es muy antiguo
+    if (now - state.timestamp > maxAge) {
+      console.log(
+        `⏰ [STORAGE] Saved state is too old (${Math.round((now - state.timestamp) / 60000)} minutes), clearing`,
+      )
+      localStorage.removeItem("importProcesses")
+      return
     }
+
+    console.log(`📂 [STORAGE] Loading saved state with ${state.processes.length} processes`)
+
+    // Verificar cada proceso antes de restaurarlo
+    const validProcesses = []
+
+    for (const processData of state.processes) {
+      // Solo verificar procesos que no estén completados
+      if (processData.status === "completed" || processData.progress_data.metadata.general_progress >= 100) {
+        console.log(`✅ [STORAGE] Process ${processData.batch_id} is completed, adding to list but not reconnecting`)
+        validProcesses.push(processData)
+        continue
+      }
+
+      // Verificar si el batch aún existe y está activo
+      const isActive = await verifyBatchStatus(processData.batch_id)
+
+      if (isActive) {
+        console.log(`🔄 [STORAGE] Process ${processData.batch_id} is still active, will reconnect`)
+        validProcesses.push(processData)
+      } else {
+        console.log(`❌ [STORAGE] Process ${processData.batch_id} is no longer active, skipping`)
+      }
+    }
+
+    // Si no hay procesos válidos, limpiar storage
+    if (validProcesses.length === 0) {
+      console.log(`🗑️ [STORAGE] No valid processes found, clearing storage`)
+      localStorage.removeItem("importProcesses")
+      return
+    }
+
+    // Restaurar solo procesos válidos
+    for (const processData of validProcesses) {
+      const process: ImportProcess = {
+        batch_id: processData.batch_id,
+        progress_data: processData.progress_data,
+        strategy: processData.strategy,
+        status: processData.status,
+        started_at: processData.started_at,
+        completed_at: processData.completed_at,
+        file_name: processData.file_name,
+        user_id: processData.user_id,
+        connection_status: "disconnected",
+        reconnect_attempts: processData.reconnect_attempts,
+      }
+
+      activeProcesses.value.set(processData.batch_id, process)
+
+      // Solo reconectar si el proceso está activo y no completado
+      if (process.status === "active" && process.progress_data.metadata.general_progress < 100) {
+        console.log(`🔌 [STORAGE] Reconnecting to active process: ${processData.batch_id}`)
+        startConnection(processData.batch_id)
+      }
+    }
+
+    // Restaurar estado de UI solo si hay procesos válidos
+    if (validProcesses.length > 0) {
+      currentActiveProcess.value = state.currentActiveProcess
+      isMinimized.value = state.isMinimized
+      showProcessList.value = state.showProcessList
+
+      // Iniciar guardado automático
+      startStateSaving()
+    }
+
+    console.log(`✅ [STORAGE] Successfully loaded ${validProcesses.length} valid processes`)
+  } catch (error) {
+    console.error("❌ [STORAGE] Error loading saved state:", error)
+    localStorage.removeItem("importProcesses")
   }
 }
 
 const clearState = () => {
-  localStorage.removeItem("importProgress")
+  localStorage.removeItem("importProcesses")
+  console.log(`🗑️ [STORAGE] Cleared saved state`)
 }
 
 const startStateSaving = () => {
-  saveInterval = setInterval(saveState, 5000)
+  if (!saveInterval) {
+    saveInterval = setInterval(saveState, 5000)
+    console.log(`⏰ [STORAGE] Started auto-save every 5 seconds`)
+  }
 }
 
 const stopStateSaving = () => {
   if (saveInterval) {
     clearInterval(saveInterval)
     saveInterval = null
+    console.log(`⏹️ [STORAGE] Stopped auto-save`)
   }
 }
 
 // ==================== PUBLIC API ====================
-const startLoading = (batchId: string, selectedStrategy: Strategy = "sse") => {
-  console.log(`🚀 Starting loading with ${selectedStrategy} strategy for batch: ${batchId}`)
-
-  strategy.value = selectedStrategy
-  isLoading.value = true
-  progressData.value.batch_id = batchId
-
-  // Resetear progreso
-  progressData.value.metadata.general_progress = 0
-  progressData.value.metadata.processed_records = 0
-  progressData.value.progress = 0
-  lastUpdateTime.value = ""
-  messagesReceived.value = 0
-  isMinimized.value = false
-
-  startConnection(batchId)
-  startStateSaving()
-}
-
-const stopLoading = () => {
-  console.log("🛑 Stopping loading")
-  isLoading.value = false
-  stopConnection()
-  stopStateSaving()
-  clearState()
-}
-
-const changeStrategy = (newStrategy: Strategy) => {
-  strategy.value = newStrategy
-  callbacks.strategyChanged.forEach((callback) => callback(newStrategy))
-}
-
-// Event listeners
-const onCompleted = (callback: () => void) => {
-  callbacks.completed.push(callback)
-}
-
-const onError = (callback: (error: any) => void) => {
-  callbacks.error.push(callback)
-}
-
-const onProgressUpdated = (callback: (progress: number) => void) => {
-  callbacks.progressUpdated.push(callback)
-}
-
-const onStrategyChanged = (callback: (strategy: Strategy) => void) => {
-  callbacks.strategyChanged.push(callback)
-}
-
-// Cleanup function
-const cleanup = () => {
-  saveState()
-  stopConnection()
-  stopStateSaving()
-}
-
-// Computed para debug info
-const debugInfo = computed(() => ({
-  strategy: strategy.value,
-  connectionStatus: connectionStatus.value,
-  batchId: progressData.value.batch_id,
-  processedRecords: progressData.value.metadata.processed_records,
-  totalRecords: progressData.value.metadata.total_records,
-  currentStudent: progressData.value.current_student,
-  lastUpdate: lastUpdateTime.value,
-  sheet: progressData.value.metadata.sheet,
-  chunk: progressData.value.metadata.chunk,
-}))
-
-// Computed para el progreso actual
-const currentProgress = computed(() => {
-  let progress = progressData.value.metadata?.general_progress || 0
-
-  if (progress === 0) {
-    const { processed_records, total_records } = progressData.value.metadata || {}
-    if (total_records && total_records > 0) {
-      progress = Math.round((processed_records / total_records) * 100)
-    }
-  }
-
-  if (progress === 0) {
-    progress = progressData.value.progress || 0
-  }
-
-  return Math.min(100, Math.max(0, progress))
-})
-
-// Instancia global singleton
-let globalInstance: any = null
-
-// Función principal del composable
-export function useGlobalLoading() {
+const useGlobalLoading = () => {
   return {
     // Estado
-    isLoading: readonly(isLoading),
-    progressData: readonly(progressData),
-    currentProgress,
-    debugInfo,
-    strategy: readonly(strategy),
-    connectionStatus: readonly(connectionStatus),
-    isMinimized: readonly(isMinimized),
+    hasActiveProcesses: computed(() => activeProcesses.value.size > 0),
+    currentProcess: readonly(
+      computed(() => {
+        if (!currentActiveProcess.value) return null
+        return activeProcesses.value.get(currentActiveProcess.value) || null
+      }),
+    ),
+    currentProgress: computed(() => {
+      const process = activeProcesses.value.get(currentActiveProcess.value || "")
+      if (!process) return 0
 
-    // Funciones
-    startLoading,
-    stopLoading,
-    changeStrategy,
-    loadState,
-    cleanup,
+      let progress = process.progress_data.metadata?.general_progress || 0
+
+      if (progress === 0) {
+        const { processed_records, total_records } = process.progress_data.metadata || {}
+        if (total_records && total_records > 0) {
+          progress = Math.round((processed_records / total_records) * 100)
+        }
+      }
+
+      if (progress === 0) {
+        progress = process.progress_data.progress || 0
+      }
+
+      return Math.min(100, Math.max(0, progress))
+    }),
+    debugInfo: computed(() => {
+      const process = activeProcesses.value.get(currentActiveProcess.value || "")
+      if (!process) return {}
+
+      return {
+        strategy: process.strategy,
+        connectionStatus: process.connection_status,
+        batchId: process.batch_id,
+        processedRecords: process.progress_data.metadata.processed_records,
+        totalRecords: process.progress_data.metadata.total_records,
+        currentStudent: process.progress_data.current_student,
+        lastUpdate: process.progress_data.timestamp,
+        sheet: process.progress_data.metadata.sheet,
+        chunk: process.progress_data.metadata.chunk,
+        reconnectAttempts: process.reconnect_attempts || 0,
+      }
+    }),
+    isMinimized: readonly(isMinimized),
+    showProcessList: readonly(showProcessList),
+    processList: computed(() => {
+      return Array.from(activeProcesses.value.values()).map((process) => ({
+        batch_id: process.batch_id,
+        file_name: process.file_name || "Archivo desconocido",
+        progress: process.progress_data.metadata.general_progress,
+        status: process.status,
+        started_at: process.started_at,
+        completed_at: process.completed_at,
+        connection_status: process.connection_status,
+        is_active: currentActiveProcess.value === process.batch_id,
+      }))
+    }),
+    activeProcesses: readonly(activeProcesses),
+    currentActiveProcess: readonly(currentActiveProcess),
+
+    // Funciones principales
+    startLoading: (batchId: string, selectedStrategy: Strategy = "sse", fileName?: string, userId?: string) => {
+      console.log(`🚀 Starting loading with ${selectedStrategy} strategy for batch: ${batchId}`)
+
+      if (!autoLoadEnabled) {
+        autoLoadEnabled = true
+        console.log(`✅ [INIT] Auto-load enabled due to new process`)
+      }
+
+      const newProcess: ImportProcess = {
+        batch_id: batchId,
+        progress_data: {
+          batch_id: batchId,
+          progress: 0,
+          current_student: "Iniciando proceso...",
+          current_action: "Preparando importación",
+          metadata: {
+            sheet: 0,
+            chunk: 0,
+            processed_rows: 0,
+            total_rows: 0,
+            total_records: 0,
+            processed_records: 0,
+            general_progress: 0,
+            subjects_processed: 0,
+          },
+          timestamp: new Date().toISOString(),
+          general_progress: 0,
+        },
+        strategy: selectedStrategy,
+        status: "active",
+        started_at: new Date().toISOString(),
+        file_name: fileName,
+        user_id: userId,
+        connection_status: "disconnected",
+        reconnect_attempts: 0,
+      }
+
+      activeProcesses.value.set(batchId, newProcess)
+      currentActiveProcess.value = batchId
+      isMinimized.value = false
+
+      startConnection(batchId)
+      if (!saveInterval) {
+        saveInterval = setInterval(() => {
+          if (autoLoadEnabled && activeProcesses.value.size > 0) {
+            saveState()
+          }
+        }, 5000)
+      }
+
+      callbacks.processAdded.forEach((callback) => callback(batchId))
+    },
+
+    stopLoading: (batchId: string) => {
+      console.log(`🛑 Stopping loading for ${batchId}`)
+
+      const process = activeProcesses.value.get(batchId)
+      if (process) {
+        process.status = "completed"
+        stopConnection(batchId)
+      }
+
+      if (currentActiveProcess.value === batchId) {
+        const remainingProcesses = Array.from(activeProcesses.value.keys()).filter((id) => id !== batchId)
+        currentActiveProcess.value = remainingProcesses.length > 0 ? remainingProcesses[0] : null
+      }
+
+      if (activeProcesses.value.size === 0) {
+        if (saveInterval) {
+          clearInterval(saveInterval)
+          saveInterval = null
+        }
+        autoLoadEnabled = false
+        console.log(`🚫 [INIT] Auto-load disabled - no active processes`)
+      }
+    },
+
+    // Resto de funciones...
+    removeProcess: (batchId: string) => {
+      console.log(`🗑️ Removing process: ${batchId}`)
+      stopConnection(batchId)
+      activeProcesses.value.delete(batchId)
+
+      if (currentActiveProcess.value === batchId) {
+        const remainingProcesses = Array.from(activeProcesses.value.keys())
+        currentActiveProcess.value = remainingProcesses.length > 0 ? remainingProcesses[0] : null
+      }
+
+      callbacks.processRemoved.forEach((callback) => callback(batchId))
+
+      if (activeProcesses.value.size === 0) {
+        if (saveInterval) {
+          clearInterval(saveInterval)
+          saveInterval = null
+        }
+        autoLoadEnabled = false
+        console.log(`🚫 [INIT] Auto-load disabled - no processes remaining`)
+      }
+    },
+
+    setActiveProcess: (batchId: string) => {
+      if (activeProcesses.value.has(batchId)) {
+        currentActiveProcess.value = batchId
+        isMinimized.value = false
+      }
+    },
+
+    changeStrategy: (newStrategy: Strategy) => {
+      callbacks.strategyChanged.forEach((callback) => callback(newStrategy))
+    },
+
+    cleanup: () => {
+      console.log(`🧹 [CLEANUP] Cleaning up all processes`)
+      activeProcesses.value.forEach((_, batchId) => {
+        stopConnection(batchId)
+      })
+      if (saveInterval) {
+        clearInterval(saveInterval)
+        saveInterval = null
+      }
+    },
 
     // Event listeners
-    onCompleted,
-    onError,
-    onProgressUpdated,
-    onStrategyChanged,
+    onCompleted: (callback: (batchId: string) => void) => {
+      callbacks.completed.push(callback)
+    },
+    onError: (callback: (batchId: string, error: any) => void) => {
+      callbacks.error.push(callback)
+    },
+    onProgressUpdated: (callback: (batchId: string, progress: number) => void) => {
+      callbacks.progressUpdated.push(callback)
+    },
+    onStrategyChanged: (callback: (strategy: Strategy) => void) => {
+      callbacks.strategyChanged.push(callback)
+    },
+    onProcessAdded: (callback: (batchId: string) => void) => {
+      callbacks.processAdded.push(callback)
+    },
+    onProcessRemoved: (callback: (batchId: string) => void) => {
+      callbacks.processRemoved.push(callback)
+    },
 
-    // Control de minimizado
+    // Control de UI
     minimize: () => {
       isMinimized.value = true
     },
     restore: () => {
       isMinimized.value = false
     },
+    toggleProcessList: () => {
+      showProcessList.value = !showProcessList.value
+    },
+
+    // Control de auto-load
+    enableAutoLoad: () => {
+      autoLoadEnabled = true
+      console.log(`✅ [INIT] Auto-load enabled manually`)
+    },
+    disableAutoLoad: () => {
+      autoLoadEnabled = false
+      console.log(`🚫 [INIT] Auto-load disabled manually`)
+    },
+    isAutoLoadEnabled: () => autoLoadEnabled,
+
+    // Funciones adicionales
+    cleanupCompletedProcesses: () => {
+      const completedProcesses = Array.from(activeProcesses.value.entries())
+        .filter(
+          ([_, process]) => process.status === "completed" && process.progress_data.metadata.general_progress >= 100,
+        )
+        .map(([batchId, _]) => batchId)
+
+      if (completedProcesses.length > 0) {
+        console.log(`🧹 [CLEANUP] Removing ${completedProcesses.length} completed processes`)
+        completedProcesses.forEach((batchId) => {
+          stopConnection(batchId)
+          activeProcesses.value.delete(batchId)
+          callbacks.processRemoved.forEach((callback) => callback(batchId))
+        })
+      }
+    },
+
+    forceCleanup: () => {
+      console.log(`🧹 [FORCE-CLEANUP] Forcing complete cleanup`)
+      activeProcesses.value.forEach((_, batchId) => {
+        stopConnection(batchId)
+      })
+      activeProcesses.value.clear()
+      currentActiveProcess.value = null
+      isMinimized.value = false
+      showProcessList.value = false
+      if (saveInterval) {
+        clearInterval(saveInterval)
+        saveInterval = null
+      }
+      autoLoadEnabled = false
+      isInitialized = false
+      console.log(`✅ [FORCE-CLEANUP] Complete cleanup finished`)
+    },
+
+    loadState: async () => {
+      await loadState()
+    },
   }
 }
 
-// Función para obtener la instancia global (CORREGIDA)
+// Instancia global singleton
+let globalInstance: any = null
+
 export function getGlobalLoadingInstance() {
   if (!globalInstance) {
     globalInstance = useGlobalLoading()
   }
   return globalInstance
+}
+
+export function initializeGlobalLoading() {
+  if (!isInitialized) {
+    isInitialized = true
+    console.log(`🚀 [INIT] Global loading system initialized (auto-load: ${autoLoadEnabled})`)
+    if (autoLoadEnabled) {
+      setTimeout(() => {
+        getGlobalLoadingInstance().loadState()
+      }, 1000)
+    }
+  }
 }
