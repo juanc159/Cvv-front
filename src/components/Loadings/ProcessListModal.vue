@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="isOpen" max-width="900" persistent>
+  <v-dialog v-model="isOpen" max-width="60rem" persistent>
     <v-card class="process-list-card">
       <v-card-title class="d-flex align-center justify-space-between pa-6 pb-4">
         <div class="d-flex align-center">
@@ -33,8 +33,9 @@
         </v-card>
       </v-card-text>
 
-      <v-card-text class="pa-0">
+      <v-card-text class="pa-4">
         <v-list class="process-list">
+
           <v-list-item v-for="process in allProcesses" :key="process.batch_id" class="process-item pa-4 ma-2 rounded-lg"
             :class="{ 'active-process': process.status === 'active', 'queued-process': process.status === 'queued' }">
 
@@ -150,7 +151,7 @@
                       <v-icon icon="tabler-user" color="primary" class="me-2" />
                       <div>
                         <div class="text-caption text-medium-emphasis">Procesando</div>
-                        <div class="text-caption text-medium-emphasis">{{ process }}</div>
+
                         <div class="text-body-1 font-weight-medium">{{ process.current_student }}</div>
                       </div>
                     </div>

@@ -13,11 +13,10 @@
             </v-avatar>
             <div v-if="showMultipleButton" class="ml-4">
               <v-chip color="warning" variant="elevated" size="small" prepend-icon="tabler-stack-2">
-                {{ debugData.totalRecords || 2 }} procesos
+                {{ debugData.totalProcesses || 2 }} procesos
               </v-chip>
             </div>
           </div>
-
           <!-- Title and Subtitle -->
           <h2 class="text-h5 font-weight-bold text-white mb-2">
             {{ currentTitle }}
@@ -42,6 +41,63 @@
           </div>
           <v-progress-linear :model-value="progress" height="6" rounded color="primary" bg-color="grey-800"
             class="loading-progress" />
+        </div>
+
+        <!-- ✅ METADATA CARDS SECTION -->
+        <div v-if="debugData.total_records > 0" class="metadata-section mb-6">
+          <v-row class="metadata-grid">
+            <!-- Registros -->
+            <v-col cols="6" sm="3">
+              <v-card class="metadata-mini-card pa-2" variant="tonal" color="info">
+                <div class="text-center">
+                  <v-icon icon="tabler-database" color="info" size="16" class="mb-1" />
+                  <div class="text-caption text-medium-emphasis">Registros</div>
+                  <div class="text-body-2 font-weight-bold">
+                    {{ debugData.processed_records || 0 }} / {{ debugData.total_records || 0 }}
+                  </div>
+                </div>
+              </v-card>
+            </v-col>
+
+            <!-- Hojas -->
+            <v-col cols="6" sm="3">
+              <v-card class="metadata-mini-card pa-2" variant="tonal" color="success">
+                <div class="text-center">
+                  <v-icon icon="tabler-file-spreadsheet" color="success" size="16" class="mb-1" />
+                  <div class="text-caption text-medium-emphasis">Hojas</div>
+                  <div class="text-body-2 font-weight-bold">
+                    {{ debugData.current_sheet || 1 }} / {{ debugData.total_sheets || 1 }}
+                  </div>
+                </div>
+              </v-card>
+            </v-col>
+
+            <!-- Errores -->
+            <v-col cols="6" sm="3">
+              <v-card class="metadata-mini-card pa-2" variant="tonal"
+                :color="(debugData.errors_count || 0) > 0 ? 'error' : 'grey'">
+                <div class="text-center">
+                  <v-icon :icon="(debugData.errors_count || 0) > 0 ? 'tabler-alert-circle' : 'tabler-check-circle'"
+                    :color="(debugData.errors_count || 0) > 0 ? 'error' : 'success'" size="16" class="mb-1" />
+                  <div class="text-caption text-medium-emphasis">Errores</div>
+                  <div class="text-body-2 font-weight-bold">{{ debugData.errors_count || 0 }}</div>
+                </div>
+              </v-card>
+            </v-col>
+
+            <!-- Velocidad -->
+            <v-col cols="6" sm="3">
+              <v-card class="metadata-mini-card pa-2" variant="tonal" color="warning">
+                <div class="text-center">
+                  <v-icon icon="tabler-gauge" color="warning" size="16" class="mb-1" />
+                  <div class="text-caption text-medium-emphasis">Velocidad</div>
+                  <div class="text-body-2 font-weight-bold">
+                    {{ debugData.processing_speed || 0 }} reg/s
+                  </div>
+                </div>
+              </v-card>
+            </v-col>
+          </v-row>
         </div>
 
         <!-- Steps Section -->
@@ -76,12 +132,53 @@
             <v-expansion-panel title="Información de Debug" bg-color="grey-850">
               <v-expansion-panel-text>
                 <div class="debug-info">
-                  <div v-for="(value, key) in debugData" :key="key"
-                    class="debug-item d-flex justify-space-between mb-2">
-                    <span class="text-caption text-grey-400">{{ key }}:</span>
+                  <div class="debug-item d-flex justify-space-between mb-2">
+                    <span class="text-caption text-grey-400">Batch ID:</span>
+                    <span class="text-caption font-weight-medium text-white">{{ debugData.batchId }}</span>
+                  </div>
+                  <div class="debug-item d-flex justify-space-between mb-2">
+                    <span class="text-caption text-grey-400">Total Records:</span>
+                    <span class="text-caption font-weight-medium text-white">{{ debugData.total_records }}</span>
+                  </div>
+                  <div class="debug-item d-flex justify-space-between mb-2">
+                    <span class="text-caption text-grey-400">Processed:</span>
+                    <span class="text-caption font-weight-medium text-white">{{ debugData.processed_records }}</span>
+                  </div>
+                  <div class="debug-item d-flex justify-space-between mb-2">
+                    <span class="text-caption text-grey-400">Current Sheet:</span>
+                    <span class="text-caption font-weight-medium text-white">{{ debugData.current_sheet }} / {{
+                      debugData.total_sheets }}</span>
+                  </div>
+                  <div class="debug-item d-flex justify-space-between mb-2">
+                    <span class="text-caption text-grey-400">Errors:</span>
                     <span class="text-caption font-weight-medium"
-                      :class="key === 'connectionStatus' ? `text-${getConnectionColor(value as string)}` : 'text-white'">
-                      {{ value }}
+                      :class="debugData.errors_count > 0 ? 'text-error' : 'text-success'">
+                      {{ debugData.errors_count }}
+                    </span>
+                  </div>
+                  <div class="debug-item d-flex justify-space-between mb-2">
+                    <span class="text-caption text-grey-400">Warnings:</span>
+                    <span class="text-caption font-weight-medium text-warning">{{ debugData.warnings_count }}</span>
+                  </div>
+                  <div class="debug-item d-flex justify-space-between mb-2">
+                    <span class="text-caption text-grey-400">File Size:</span>
+                    <span class="text-caption font-weight-medium text-white">{{ debugData.fileSize }}</span>
+                  </div>
+                  <div class="debug-item d-flex justify-space-between mb-2">
+                    <span class="text-caption text-grey-400">Speed:</span>
+                    <span class="text-caption font-weight-medium text-white">{{ debugData.processingSpeedFormatted
+                      }}</span>
+                  </div>
+                  <div class="debug-item d-flex justify-space-between mb-2">
+                    <span class="text-caption text-grey-400">ETA:</span>
+                    <span class="text-caption font-weight-medium text-white">{{ debugData.estimatedTimeFormatted
+                      }}</span>
+                  </div>
+                  <div class="debug-item d-flex justify-space-between mb-2">
+                    <span class="text-caption text-grey-400">Connection:</span>
+                    <span class="text-caption font-weight-medium"
+                      :class="`text-${getConnectionColor(debugData.connection_status)}`">
+                      {{ debugData.connection_status }}
                     </span>
                   </div>
                 </div>
@@ -96,16 +193,14 @@
             <v-icon start icon="tabler-minimize" size="18" />
             Minimizar
           </v-btn>
-
           <div class="d-flex gap-2">
             <v-btn v-if="showDebugToggle" variant="text" color="grey" size="small" @click="toggleDebugInfo">
               <v-icon :icon="showDebugInfo ? 'tabler-chevron-up' : 'tabler-bug'" size="16" />
             </v-btn>
-
             <v-btn v-if="showMultipleButton" variant="elevated" color="warning" class="text-none"
               @click="$emit('show-multiple')">
               <v-icon start icon="tabler-stack-2" size="18" />
-              Ver todos ({{ debugData.totalRecords || 2 }})
+              Ver todos ({{ debugData.totalProcesses || 2 }})
             </v-btn>
           </div>
         </div>
@@ -127,6 +222,21 @@ interface DebugData {
   lastUpdate?: string;
   sheet?: number;
   chunk?: number;
+  // ✅ NUEVOS CAMPOS PARA METADATA
+  total_records?: number;
+  processed_records?: number;
+  current_sheet?: number;
+  total_sheets?: number;
+  errors_count?: number;
+  warnings_count?: number;
+  connection_status?: string;
+  processing_speed?: number;
+  estimated_time_remaining?: number;
+  file_size?: number;
+  fileSize?: string;
+  processingSpeedFormatted?: string;
+  estimatedTimeFormatted?: string;
+  totalProcesses?: number;
 }
 
 const props = defineProps({
@@ -153,7 +263,7 @@ const props = defineProps({
   },
   showDebugToggle: {
     type: Boolean,
-    default: false
+    default: true // ✅ ACTIVAR DEBUG POR DEFECTO PARA VER LOS DATOS
   },
   debugData: {
     type: Object as () => DebugData,
@@ -193,6 +303,11 @@ const currentStepIndex = ref(0)
 const isMinimized = ref(false)
 const showDebugInfo = ref(false)
 let tipInterval: NodeJS.Timeout | null = null
+
+// ✅ WATCH PARA VER CAMBIOS EN DEBUG DATA
+watch(() => props.debugData, (newData) => {
+  console.log(`🔍 [LOADING-COMPONENT] Debug data actualizada:`, newData)
+}, { deep: true })
 
 // Funciones de control
 const minimize = () => {
@@ -433,6 +548,26 @@ defineExpose({
 
 .debug-item:last-child {
   border-bottom: none;
+}
+
+/* ✅ ESTILOS PARA METADATA CARDS */
+.metadata-section {
+  margin-bottom: 1.5rem;
+}
+
+.metadata-grid {
+  margin: 0 -4px;
+}
+
+.metadata-mini-card {
+  height: 100%;
+  transition: all 0.2s ease;
+  min-height: 70px;
+}
+
+.metadata-mini-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Enhanced Animations */

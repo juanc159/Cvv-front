@@ -27,6 +27,7 @@ interface ImportProcess {
     last_activity?: string
     memory_usage?: number
     cpu_usage?: number
+    processing_start_time?: string
   }
 }
 
@@ -84,6 +85,7 @@ const startWebSocket = (batchId: string) => {
     // Escuchar eventos de progreso
     channel.listen(".progress.update", (data: any) => {
       console.log(`🔥 [WEBSOCKET] EVENTO RECIBIDO:`, data)
+      console.log(`📊 [WEBSOCKET] METADATA RECIBIDA:`, data.metadata)
       handleProgressUpdate(batchId, data)
     })
 
@@ -116,7 +118,8 @@ const handleProgressUpdate = (batchId: string, data: any) => {
     return
   }
 
-  console.log(`📊 [UPDATE] Datos recibidos:`, data)
+  console.log(`📊 [UPDATE] Datos recibidos para ${batchId}:`, data)
+  console.log(`🔍 [UPDATE] Metadata del backend:`, data.metadata)
 
   // Extraer progreso
   let progress = 0
@@ -133,26 +136,44 @@ const handleProgressUpdate = (batchId: string, data: any) => {
   process.current_student = data.current_student || "Procesando..."
   process.current_action = data.current_action || "Importando datos"
 
-  // ✅ ACTUALIZAR METADATA DETALLADA
+  // ✅ ACTUALIZAR METADATA COMPLETA CON DATOS DEL BACKEND
   if (!process.metadata) {
     process.metadata = {}
   }
 
-  // Actualizar metadata con datos del servidor
-  process.metadata = {
-    ...process.metadata,
-    total_records: data.total_records || process.metadata.total_records || 0,
-    processed_records: data.processed_records || process.metadata.processed_records || 0,
-    current_sheet: data.current_sheet || process.metadata.current_sheet || 1,
-    total_sheets: data.total_sheets || process.metadata.total_sheets || 1,
-    errors_count: data.errors_count || process.metadata.errors_count || 0,
-    warnings_count: data.warnings_count || process.metadata.warnings_count || 0,
-    connection_status: "connected",
-    last_activity: new Date().toISOString(),
-    // ✅ CALCULAR VELOCIDAD DE PROCESAMIENTO
-    processing_speed: calculateProcessingSpeed(process),
-    // ✅ CALCULAR TIEMPO ESTIMADO
-    estimated_time_remaining: calculateEstimatedTime(process, progress),
+  // ✅ MAPEAR TODOS LOS DATOS DEL BACKEND
+  if (data.metadata) {
+    console.log(`🔄 [UPDATE] Actualizando metadata:`)
+    console.log(`   - Total records: ${data.metadata.total_records}`)
+    console.log(`   - Processed: ${data.metadata.processed_records}`)
+    console.log(`   - Current sheet: ${data.metadata.current_sheet}`)
+    console.log(`   - Total sheets: ${data.metadata.total_sheets}`)
+    console.log(`   - Errors: ${data.metadata.errors_count}`)
+    console.log(`   - Warnings: ${data.metadata.warnings_count}`)
+    console.log(`   - File size: ${data.metadata.file_size}`)
+    console.log(`   - Memory usage: ${data.metadata.memory_usage}`)
+
+    process.metadata = {
+      ...process.metadata,
+      // ✅ DATOS DIRECTOS DEL BACKEND
+      total_records: data.metadata.total_records || 0,
+      processed_records: data.metadata.processed_records || 0,
+      current_sheet: data.metadata.current_sheet || 1,
+      total_sheets: data.metadata.total_sheets || 1,
+      errors_count: data.metadata.errors_count || 0,
+      warnings_count: data.metadata.warnings_count || 0,
+      file_size: data.metadata.file_size || 0,
+      processing_start_time: data.metadata.processing_start_time || process.metadata.processing_start_time,
+      memory_usage: data.metadata.memory_usage || 0,
+      cpu_usage: data.metadata.cpu_usage || 0,
+      connection_status: "connected",
+      last_activity: new Date().toISOString(),
+      // ✅ CALCULAR VELOCIDAD Y TIEMPO ESTIMADO CON DATOS ACTUALIZADOS
+      processing_speed: calculateProcessingSpeed(process),
+      estimated_time_remaining: calculateEstimatedTime(process, progress),
+    }
+
+    console.log(`✅ [UPDATE] Metadata actualizada:`, process.metadata)
   }
 
   // ✅ ACTUALIZAR EN LA LISTA COMPLETA TAMBIÉN
@@ -162,6 +183,8 @@ const handleProgressUpdate = (batchId: string, data: any) => {
     processInList.current_student = process.current_student
     processInList.current_action = process.current_action
     processInList.metadata = { ...process.metadata }
+
+    console.log(`🔄 [UPDATE] Proceso en lista actualizado:`, processInList.metadata)
   }
 
   console.log(`✅ [UPDATE] Progreso actualizado a ${progress}%`)
@@ -192,9 +215,9 @@ const handleProgressUpdate = (batchId: string, data: any) => {
 
 // ✅ FUNCIÓN PARA CALCULAR VELOCIDAD DE PROCESAMIENTO
 const calculateProcessingSpeed = (process: ImportProcess): number => {
-  if (!process.metadata?.processed_records || !process.started_at) return 0
+  if (!process.metadata?.processed_records || !process.metadata?.processing_start_time) return 0
 
-  const startTime = new Date(process.started_at).getTime()
+  const startTime = new Date(process.metadata.processing_start_time).getTime()
   const currentTime = new Date().getTime()
   const elapsedSeconds = (currentTime - startTime) / 1000
 
@@ -205,9 +228,9 @@ const calculateProcessingSpeed = (process: ImportProcess): number => {
 
 // ✅ FUNCIÓN PARA CALCULAR TIEMPO ESTIMADO
 const calculateEstimatedTime = (process: ImportProcess, progress: number): number => {
-  if (progress === 0 || !process.started_at) return 0
+  if (progress === 0 || !process.metadata?.processing_start_time) return 0
 
-  const startTime = new Date(process.started_at).getTime()
+  const startTime = new Date(process.metadata.processing_start_time).getTime()
   const currentTime = new Date().getTime()
   const elapsedSeconds = (currentTime - startTime) / 1000
 
@@ -255,6 +278,7 @@ const processNextInQueue = () => {
         // ✅ ACTUALIZAR METADATA
         if (queuedProcess.metadata) {
           queuedProcess.metadata.connection_status = "connecting"
+          queuedProcess.metadata.processing_start_time = new Date().toISOString()
         }
       }
 
@@ -289,8 +313,12 @@ const startLoadingInternal = (batchId: string, fileName?: string) => {
       warnings_count: 0,
       processing_speed: 0,
       estimated_time_remaining: 0,
+      file_size: 0,
       connection_status: "connecting",
       last_activity: new Date().toISOString(),
+      processing_start_time: new Date().toISOString(),
+      memory_usage: 0,
+      cpu_usage: 0,
     },
   }
 
@@ -329,6 +357,9 @@ const debugInfo = computed(() => {
   const process = currentProcess.value
   if (!process) return {}
 
+  console.log(`🔍 [DEBUG] Generando debug info para:`, process.batch_id)
+  console.log(`🔍 [DEBUG] Metadata actual:`, process.metadata)
+
   return {
     batchId: process.batch_id,
     progress: process.progress,
@@ -337,8 +368,21 @@ const debugInfo = computed(() => {
     currentAction: process.current_action,
     queueLength: processQueue.value.length,
     totalProcesses: allProcesses.value.length,
-    // ✅ METADATA PARA DEBUG
-    ...process.metadata,
+    // ✅ METADATA PARA DEBUG - USAR DATOS REALES
+    total_records: process.metadata?.total_records || 0,
+    processed_records: process.metadata?.processed_records || 0,
+    current_sheet: process.metadata?.current_sheet || 1,
+    total_sheets: process.metadata?.total_sheets || 1,
+    errors_count: process.metadata?.errors_count || 0,
+    warnings_count: process.metadata?.warnings_count || 0,
+    connection_status: process.metadata?.connection_status || "disconnected",
+    processing_speed: process.metadata?.processing_speed || 0,
+    estimated_time_remaining: process.metadata?.estimated_time_remaining || 0,
+    file_size: process.metadata?.file_size || 0,
+    memory_usage: process.metadata?.memory_usage || 0,
+    cpu_usage: process.metadata?.cpu_usage || 0,
+    last_activity: process.metadata?.last_activity || "N/A",
+    processing_start_time: process.metadata?.processing_start_time || "N/A",
     // ✅ FORMATEAR ALGUNOS VALORES
     fileSize: process.metadata?.file_size ? formatFileSize(process.metadata.file_size) : "N/A",
     processingSpeedFormatted: process.metadata?.processing_speed ? `${process.metadata.processing_speed} reg/s` : "N/A",
@@ -389,8 +433,12 @@ const startLoading = (batchId: string, fileName?: string) => {
       warnings_count: 0,
       processing_speed: 0,
       estimated_time_remaining: 0,
+      file_size: 0,
       connection_status: "disconnected",
       last_activity: new Date().toISOString(),
+      processing_start_time: new Date().toISOString(),
+      memory_usage: 0,
+      cpu_usage: 0,
     },
   }
 
