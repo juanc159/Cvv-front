@@ -153,6 +153,15 @@ const handleProgressUpdate = (batchId: string, data: any) => {
     console.log(`   - File size: ${data.metadata.file_size}`)
     console.log(`   - Memory usage: ${data.metadata.memory_usage}`)
 
+    // ✅ MEJORAR CÁLCULO DE TIEMPO ESTIMADO
+    const startTime = data.metadata.processing_start_time || process.metadata.processing_start_time
+    const estimatedTime = calculateEstimatedTimeImproved(
+      progress,
+      startTime,
+      data.metadata.processed_records || 0,
+      data.metadata.total_records || 0,
+    )
+
     process.metadata = {
       ...process.metadata,
       // ✅ DATOS DIRECTOS DEL BACKEND
@@ -163,17 +172,18 @@ const handleProgressUpdate = (batchId: string, data: any) => {
       errors_count: data.metadata.errors_count || 0,
       warnings_count: data.metadata.warnings_count || 0,
       file_size: data.metadata.file_size || 0,
-      processing_start_time: data.metadata.processing_start_time || process.metadata.processing_start_time,
+      processing_start_time: startTime,
       memory_usage: data.metadata.memory_usage || 0,
       cpu_usage: data.metadata.cpu_usage || 0,
       connection_status: "connected",
       last_activity: new Date().toISOString(),
       // ✅ CALCULAR VELOCIDAD Y TIEMPO ESTIMADO CON DATOS ACTUALIZADOS
-      processing_speed: calculateProcessingSpeed(process),
-      estimated_time_remaining: calculateEstimatedTime(process, progress),
+      processing_speed: calculateProcessingSpeed(process, data.metadata),
+      estimated_time_remaining: estimatedTime,
     }
 
     console.log(`✅ [UPDATE] Metadata actualizada:`, process.metadata)
+    console.log(`⏱️ [UPDATE] Tiempo estimado: ${estimatedTime}s`)
   }
 
   // ✅ ACTUALIZAR EN LA LISTA COMPLETA TAMBIÉN
@@ -213,32 +223,77 @@ const handleProgressUpdate = (batchId: string, data: any) => {
   }
 }
 
-// ✅ FUNCIÓN PARA CALCULAR VELOCIDAD DE PROCESAMIENTO
-const calculateProcessingSpeed = (process: ImportProcess): number => {
-  if (!process.metadata?.processed_records || !process.metadata?.processing_start_time) return 0
+// ✅ FUNCIÓN MEJORADA PARA CALCULAR VELOCIDAD DE PROCESAMIENTO
+const calculateProcessingSpeed = (process: ImportProcess, backendMetadata?: any): number => {
+  const processedRecords = backendMetadata?.processed_records || process.metadata?.processed_records || 0
+  const startTime = backendMetadata?.processing_start_time || process.metadata?.processing_start_time
 
-  const startTime = new Date(process.metadata.processing_start_time).getTime()
-  const currentTime = new Date().getTime()
-  const elapsedSeconds = (currentTime - startTime) / 1000
+  if (!processedRecords || !startTime) return 0
 
-  if (elapsedSeconds === 0) return 0
+  const startTimeMs = new Date(startTime).getTime()
+  const currentTimeMs = new Date().getTime()
+  const elapsedSeconds = (currentTimeMs - startTimeMs) / 1000
 
-  return Math.round(process.metadata.processed_records / elapsedSeconds)
+  if (elapsedSeconds <= 0) return 0
+
+  const speed = Math.round(processedRecords / elapsedSeconds)
+  console.log(
+    `📈 [SPEED] Calculando velocidad: ${processedRecords} registros / ${elapsedSeconds.toFixed(1)}s = ${speed} reg/s`,
+  )
+
+  return speed
 }
 
-// ✅ FUNCIÓN PARA CALCULAR TIEMPO ESTIMADO
-const calculateEstimatedTime = (process: ImportProcess, progress: number): number => {
-  if (progress === 0 || !process.metadata?.processing_start_time) return 0
+// ✅ FUNCIÓN MEJORADA PARA CALCULAR TIEMPO ESTIMADO
+const calculateEstimatedTimeImproved = (
+  progress: number,
+  startTime: string | undefined,
+  processedRecords: number,
+  totalRecords: number,
+): number => {
+  if (!startTime || progress === 0 || totalRecords === 0) {
+    console.log(
+      `⏱️ [ETA] No se puede calcular: startTime=${startTime}, progress=${progress}, totalRecords=${totalRecords}`,
+    )
+    return 0
+  }
 
-  const startTime = new Date(process.metadata.processing_start_time).getTime()
-  const currentTime = new Date().getTime()
-  const elapsedSeconds = (currentTime - startTime) / 1000
+  const startTimeMs = new Date(startTime).getTime()
+  const currentTimeMs = new Date().getTime()
+  const elapsedSeconds = (currentTimeMs - startTimeMs) / 1000
 
+  if (elapsedSeconds <= 0) return 0
+
+  // Método 1: Basado en progreso porcentual
   const remainingProgress = 100 - progress
   const estimatedTotalTime = (elapsedSeconds * 100) / progress
-  const estimatedRemaining = estimatedTotalTime - elapsedSeconds
+  const estimatedRemainingByProgress = estimatedTotalTime - elapsedSeconds
 
-  return Math.max(0, Math.round(estimatedRemaining))
+  // Método 2: Basado en registros procesados
+  let estimatedRemainingByRecords = 0
+  if (processedRecords > 0) {
+    const recordsPerSecond = processedRecords / elapsedSeconds
+    const remainingRecords = totalRecords - processedRecords
+    estimatedRemainingByRecords = remainingRecords / recordsPerSecond
+  }
+
+  // Usar el promedio de ambos métodos si ambos están disponibles
+  let finalEstimate = estimatedRemainingByProgress
+  if (estimatedRemainingByRecords > 0) {
+    finalEstimate = (estimatedRemainingByProgress + estimatedRemainingByRecords) / 2
+  }
+
+  const result = Math.max(0, Math.round(finalEstimate))
+
+  console.log(`⏱️ [ETA] Cálculo detallado:`)
+  console.log(`   - Tiempo transcurrido: ${elapsedSeconds.toFixed(1)}s`)
+  console.log(`   - Progreso: ${progress}%`)
+  console.log(`   - Registros: ${processedRecords}/${totalRecords}`)
+  console.log(`   - ETA por progreso: ${estimatedRemainingByProgress.toFixed(1)}s`)
+  console.log(`   - ETA por registros: ${estimatedRemainingByRecords.toFixed(1)}s`)
+  console.log(`   - ETA final: ${result}s`)
+
+  return result
 }
 
 const stopWebSocket = (batchId: string) => {
@@ -323,7 +378,13 @@ const startLoadingInternal = (batchId: string, fileName?: string) => {
   }
 
   isLoading.value = true
-  isMinimized.value = false
+
+  // ✅ SOLO MOSTRAR MODAL SI NO ESTÁ ABIERTA LA LISTA DE PROCESOS
+  if (!showProcessList.value) {
+    isMinimized.value = false
+  } else {
+    isMinimized.value = true // Mantener minimizado si la lista está abierta
+  }
 
   console.log(`✅ [START-INTERNAL] Proceso creado para ${batchId}`)
 
@@ -331,7 +392,7 @@ const startLoadingInternal = (batchId: string, fileName?: string) => {
   startWebSocket(batchId)
 }
 
-// ✅ COMPUTED PROPERTIES PARA LA LISTA
+// ✅ COMPUTED PROPERTIES PARA LA LISTA ORDENADA
 const activeProcesses = computed(() => {
   return allProcesses.value.filter((p) => p.status === "active")
 })
@@ -342,6 +403,24 @@ const queuedProcesses = computed(() => {
 
 const completedProcesses = computed(() => {
   return allProcesses.value.filter((p) => p.status === "completed")
+})
+
+// ✅ LISTA ORDENADA: ACTIVOS -> EN COLA -> COMPLETADOS
+const sortedProcesses = computed(() => {
+  const active = activeProcesses.value
+  const queued = queuedProcesses.value
+  const completed = completedProcesses.value.sort((a, b) => {
+    // Ordenar completados por fecha de finalización (más recientes primero)
+    const dateA = new Date(a.completed_at || a.started_at || "").getTime()
+    const dateB = new Date(b.completed_at || b.started_at || "").getTime()
+    return dateB - dateA
+  })
+
+  console.log(
+    `📋 [SORT] Procesos ordenados: ${active.length} activos, ${queued.length} en cola, ${completed.length} completados`,
+  )
+
+  return [...active, ...queued, ...completed]
 })
 
 const hasMultipleProcesses = computed(() => {
@@ -505,6 +584,17 @@ const removeProcess = (batchId: string) => {
   }
 }
 
+// ✅ NUEVA FUNCIÓN PARA LIMPIAR COMPLETADOS
+const clearCompletedProcesses = () => {
+  console.log(`🧹 [CLEAR] Limpiando procesos completados`)
+
+  const beforeCount = allProcesses.value.length
+  allProcesses.value = allProcesses.value.filter((p) => p.status !== "completed")
+  const afterCount = allProcesses.value.length
+
+  console.log(`✅ [CLEAR] Eliminados ${beforeCount - afterCount} procesos completados`)
+}
+
 const cleanup = () => {
   console.log(`🧹 [CLEANUP] Limpiando`)
   const process = currentProcess.value
@@ -547,6 +637,7 @@ export function useGlobalLoading() {
     activeProcesses,
     queuedProcesses,
     completedProcesses,
+    sortedProcesses, // ✅ NUEVA: Lista ordenada
     hasMultipleProcesses,
 
     // Funciones principales
@@ -561,6 +652,7 @@ export function useGlobalLoading() {
     showProcessListModal,
     hideProcessListModal,
     removeProcess,
+    clearCompletedProcesses, // ✅ NUEVA: Limpiar completados
 
     // Event listeners
     onCompleted,

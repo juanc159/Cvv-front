@@ -3,7 +3,7 @@
   <LoadingV2Enhanced v-if="globalLoading.isLoading.value && !globalLoading.isMinimized.value" :is-loading="true"
     :progress="globalLoading.currentProgress.value" :title="title" :subtitle="subtitle" @minimized="handleMinimize"
     @completed="handleCompleted" :show-multiple-button="globalLoading.hasMultipleProcesses.value"
-    @show-multiple="handleShowMultiple" />
+    @show-multiple="handleShowMultiple" :debug-data="globalLoading.debugInfo.value" />
 
   <!-- Estado Minimizado -->
   <div v-else-if="globalLoading.isLoading.value && globalLoading.isMinimized.value" class="minimized-overlay">
@@ -32,8 +32,9 @@
   <!-- Lista de Procesos -->
   <ProcessListModal v-if="globalLoading.showProcessList.value" :all-processes="globalLoading.allProcesses.value"
     :active-processes="globalLoading.activeProcesses.value"
-    :completed-processes="globalLoading.completedProcesses.value" @remove-process="handleRemoveProcess"
-    @close="handleCloseProcessList" />
+    :completed-processes="globalLoading.completedProcesses.value"
+    :queued-processes="globalLoading.queuedProcesses.value" :sorted-processes="globalLoading.sortedProcesses.value"
+    @remove-process="handleRemoveProcess" @clear-completed="handleClearCompleted" @close="handleCloseProcessList" />
 
   <!-- Notification cuando completa -->
   <v-snackbar v-model="showCompletionNotification" :timeout="5000" color="success" location="top">
@@ -55,6 +56,7 @@ import ProcessListModal from './ProcessListModal.vue';
 
 const globalLoading = useGlobalLoading();
 const showCompletionNotification = ref(false);
+const progress = computed(() => globalLoading.currentProgress.value);
 
 const title = computed(() => {
   const process = globalLoading.currentProcess.value;
@@ -102,6 +104,11 @@ const handleShowMultiple = () => {
 
 const handleRemoveProcess = (batchId: string) => {
   globalLoading.removeProcess(batchId);
+};
+
+// ✅ NUEVA FUNCIÓN PARA LIMPIAR COMPLETADOS
+const handleClearCompleted = () => {
+  globalLoading.clearCompletedProcesses();
 };
 
 const handleCloseProcessList = () => {

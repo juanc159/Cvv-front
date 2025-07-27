@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="isOpen" max-width="60rem" persistent>
+  <v-dialog v-model="isOpen" max-width="900" persistent>
     <v-card class="process-list-card">
       <v-card-title class="d-flex align-center justify-space-between pa-6 pb-4">
         <div class="d-flex align-center">
@@ -9,10 +9,18 @@
             <p class="text-body-2 text-medium-emphasis mb-0">Gestiona tus importaciones activas y completadas</p>
           </div>
         </div>
-        <v-chip :color="getOverallStatusColor()" size="large" variant="elevated">
-          <v-icon start icon="tabler-files" />
-          {{ allProcesses.length }} proceso{{ allProcesses.length !== 1 ? 's' : '' }}
-        </v-chip>
+        <div class="d-flex align-center gap-2">
+          <v-chip :color="getOverallStatusColor()" size="large" variant="elevated">
+            <v-icon start icon="tabler-files" />
+            {{ allProcesses.length }} proceso{{ allProcesses.length !== 1 ? 's' : '' }}
+          </v-chip>
+          <!-- ✅ BOTÓN PARA LIMPIAR COMPLETADOS -->
+          <v-btn v-if="completedProcesses.length > 0" variant="outlined" color="warning" size="small"
+            @click="clearCompleted" :disabled="activeProcesses.length === 0 && queuedProcesses.length === 0">
+            <v-icon start icon="tabler-trash" />
+            Limpiar ({{ completedProcesses.length }})
+          </v-btn>
+        </div>
       </v-card-title>
 
       <!-- Progreso General -->
@@ -33,11 +41,15 @@
         </v-card>
       </v-card-text>
 
-      <v-card-text class="pa-4">
+      <v-card-text class="pa-0">
+        <!-- ✅ USAR LISTA ORDENADA -->
         <v-list class="process-list">
-
-          <v-list-item v-for="process in allProcesses" :key="process.batch_id" class="process-item pa-4 ma-2 rounded-lg"
-            :class="{ 'active-process': process.status === 'active', 'queued-process': process.status === 'queued' }">
+          <v-list-item v-for="process in sortedProcesses" :key="process.batch_id"
+            class="process-item pa-4 ma-2 rounded-lg" :class="{
+              'active-process': process.status === 'active',
+              'queued-process': process.status === 'queued',
+              'completed-process': process.status === 'completed'
+            }">
 
             <!-- Process Header -->
             <div class="d-flex align-center justify-space-between mb-3">
@@ -151,7 +163,6 @@
                       <v-icon icon="tabler-user" color="primary" class="me-2" />
                       <div>
                         <div class="text-caption text-medium-emphasis">Procesando</div>
-
                         <div class="text-body-1 font-weight-medium">{{ process.current_student }}</div>
                       </div>
                     </div>
@@ -161,6 +172,7 @@
                     </div>
                   </div>
                 </v-card>
+                {{ process.metadata }}
               </div>
 
               <!-- Información para procesos en cola -->
@@ -171,6 +183,27 @@
                     <div>
                       <div class="text-caption text-medium-emphasis">Estado</div>
                       <div class="text-body-1 font-weight-medium">En cola de espera</div>
+                    </div>
+                  </div>
+                </v-card>
+              </div>
+
+              <!-- Información para procesos completados -->
+              <div v-else-if="process.status === 'completed'" class="mt-3">
+                <v-card class="completed-details pa-3" variant="tonal" color="success">
+                  <div class="d-flex align-center justify-space-between">
+                    <div class="d-flex align-center">
+                      <v-icon icon="tabler-circle-check" color="success" class="me-2" />
+                      <div>
+                        <div class="text-caption text-medium-emphasis">Completado</div>
+                        <div class="text-body-1 font-weight-medium">
+                          {{ process.metadata.total_records || 0 }} registros procesados
+                        </div>
+                      </div>
+                    </div>
+                    <div v-if="process.completed_at" class="text-right">
+                      <div class="text-caption text-medium-emphasis">Finalizado</div>
+                      <div class="text-body-2">{{ formatTime(process.completed_at) }}</div>
                     </div>
                   </div>
                 </v-card>
@@ -232,10 +265,13 @@ const props = defineProps<{
   allProcesses: ProcessInfo[];
   activeProcesses: ProcessInfo[];
   completedProcesses: ProcessInfo[];
+  queuedProcesses: ProcessInfo[];
+  sortedProcesses: ProcessInfo[]; // ✅ NUEVA PROP
 }>();
 
 const emit = defineEmits<{
   removeProcess: [batchId: string];
+  clearCompleted: [];
   close: [];
 }>();
 
@@ -250,6 +286,11 @@ const overallProgress = computed(() => {
 const getOverallStatusColor = () => {
   if (props.activeProcesses.length === 0) return 'success';
   return 'primary';
+};
+
+// ✅ FUNCIÓN PARA LIMPIAR COMPLETADOS
+const clearCompleted = () => {
+  emit('clearCompleted');
 };
 
 const getStatusColor = (status: string) => {
@@ -320,6 +361,8 @@ const formatLastActivity = (timestamp: string) => {
 };
 
 const formatEstimatedTime = (seconds?: number) => {
+  console.log("seconds", seconds);
+
   if (!seconds || seconds === 0) return 'N/A';
   if (seconds < 60) return `${seconds}s`;
   const minutes = Math.floor(seconds / 60);
@@ -370,6 +413,13 @@ const formatEstimatedTime = (seconds?: number) => {
   border-color: rgba(255, 152, 0, 0.2);
 }
 
+/* ✅ NUEVO ESTILO PARA COMPLETADOS */
+.completed-process {
+  background: rgba(76, 175, 80, 0.04);
+  border-color: rgba(76, 175, 80, 0.2);
+  opacity: 0.8;
+}
+
 .process-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -393,12 +443,14 @@ const formatEstimatedTime = (seconds?: number) => {
 }
 
 .active-details,
-.queued-details {
+.queued-details,
+.completed-details {
   border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .v-theme--dark .active-details,
-.v-theme--dark .queued-details {
+.v-theme--dark .queued-details,
+.v-theme--dark .completed-details {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 </style>
