@@ -80,7 +80,7 @@ const connectWebSocket = () => {
   try {
     const channel = window.Echo.channel(`import.progress.${props.batchId}`)
 
-    channel.listen('progress.update', (event: any) => {
+    channel.listen('.progress.update', (event: any) => {
       console.log(`🔥 [WEBSOCKET] Evento recibido:`, event)
       isConnected.value = true
       updateProgress(event)
@@ -177,7 +177,7 @@ const restore = () => {
 <template>
   <!-- Modal Principal -->
   <v-overlay v-if="show && !isMinimized" :model-value="true" class="loading-overlay d-flex align-center justify-center"
-    :persistent="true" :opacity="0.95" :z-index="9999">
+    :opacity="0.95" :z-index="9999">
     <v-card class="loading-card" elevation="24" rounded="xl" min-width="400" width="90%">
       <v-card-text class="pa-6">
         <!-- Header -->

@@ -80,9 +80,8 @@ const verticalNavAttrs = computed(() => {
           <slot />
         </div>
       </main>
-      hola
       <!-- NUEVO: Componente global de loading para importaciones -->
-      <!-- <GlobalLoadingManager /> -->
+      <GlobalLoadingManager />
       <!-- <footer class="layout-footer">
         <div class="footer-content-container">
           <slot name="footer" />

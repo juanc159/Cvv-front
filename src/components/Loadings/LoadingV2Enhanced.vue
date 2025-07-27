@@ -1,42 +1,113 @@
 <template>
   <v-overlay v-if="!isMinimized && isLoading" :model-value="isLoading"
-    class="loading-overlay d-flex align-center justify-center" :persistent="false" :opacity="0.95" :z-index="9999">
-    <v-card class="loading-card" elevation="24" rounded="xl" min-width="400" width="90%">
-      <v-card-text class="pa-6">
+    class="loading-overlay d-flex align-center justify-center" :persistent="false" :opacity="0.98" :z-index="9999">
+    <v-card class="loading-card" elevation="0" rounded="xl" min-width="420" width="90%" max-width="500">
+      <v-card-text class="pa-8">
+        <!-- Header Section -->
+        <div class="text-center mb-6">
+          <!-- Status Indicator -->
+          <div class="d-flex align-center justify-center mb-4">
+            <v-avatar size="72" class="loading-avatar" :color="progress >= 100 ? 'success' : 'primary'">
+              <v-icon :size="progress >= 100 ? '32' : '28'" :icon="currentIcon" color="white"
+                :class="progress < 100 ? 'spin-animation' : ''" />
+            </v-avatar>
+            <div v-if="showMultipleButton" class="ml-4">
+              <v-chip color="warning" variant="elevated" size="small" prepend-icon="tabler-stack-2">
+                {{ debugData.totalRecords || 2 }} procesos
+              </v-chip>
+            </div>
+          </div>
 
-        <!-- Header -->
-        <div class="text-center mb-4">
-          <v-avatar size="60" class="loading-avatar mb-3" color="primary">
-            <v-icon size="30" icon="tabler-upload" color="white" />
-          </v-avatar>
-          <h2 class="text-h6 font-weight-bold mb-2">
-            {{ title }}
+          <!-- Title and Subtitle -->
+          <h2 class="text-h5 font-weight-bold text-white mb-2">
+            {{ currentTitle }}
           </h2>
-          <p class="text-body-2 text-medium-emphasis">
-            {{ subtitle }}
+          <p class="text-body-1 text-grey-400 mb-0">
+            {{ currentSubtitle }}
           </p>
         </div>
 
         <!-- Progress Section -->
-        <div class="progress-section mb-4">
-          <div class="d-flex justify-space-between align-center mb-2">
-            <span class="text-body-2 font-weight-medium">
+        <div class="progress-section mb-6">
+          <div class="d-flex justify-space-between align-center mb-3">
+            <span class="text-body-2 font-weight-medium text-grey-300">
               Progreso
             </span>
-            <span class="text-body-2 font-weight-bold text-primary">
-              {{ Math.round(progress) }}%
-            </span>
+            <div class="d-flex align-center">
+              <span class="text-h6 font-weight-bold text-primary mr-2">
+                {{ Math.round(progress) }}%
+              </span>
+              <v-icon v-if="progress >= 100" icon="tabler-eye" size="16" color="grey-400" />
+            </div>
           </div>
-          <v-progress-linear :model-value="progress" height="8" rounded color="primary" class="loading-progress">
-          </v-progress-linear>
+          <v-progress-linear :model-value="progress" height="6" rounded color="primary" bg-color="grey-800"
+            class="loading-progress" />
+        </div>
+
+        <!-- Steps Section -->
+        <div class="steps-section mb-6">
+          <v-card class="steps-card pa-4" color="grey-900" variant="elevated" elevation="2" rounded="lg">
+            <div v-for="(step, index) in loadingSteps" :key="index" class="step-item d-flex align-center mb-3"
+              :class="{ 'mb-0': index === loadingSteps.length - 1 }">
+              <v-icon :icon="getStepIcon(index)" :color="getStepColor(index)" size="20" class="step-icon mr-3"
+                :class="{ 'spin-animation': index === currentStepIndex && progress < 100 }" />
+              <span class="text-body-2" :class="getStepTextClass(index)">
+                {{ step }}
+              </span>
+            </div>
+          </v-card>
+        </div>
+
+        <!-- Tips Section -->
+        <div v-if="showTips" class="tips-section mb-6">
+          <v-card class="tip-card pa-3" color="grey-800" variant="flat" rounded="lg">
+            <div class="d-flex align-center">
+              <v-icon icon="tabler-bulb" color="warning" size="20" class="mr-3" />
+              <span class="text-body-2 text-grey-300 tip-text">
+                {{ currentTip }}
+              </span>
+            </div>
+          </v-card>
+        </div>
+
+        <!-- Debug Info Section -->
+        <div v-if="showDebugToggle && showDebugInfo" class="debug-section mb-6">
+          <v-expansion-panels variant="accordion" class="debug-panels">
+            <v-expansion-panel title="Información de Debug" bg-color="grey-850">
+              <v-expansion-panel-text>
+                <div class="debug-info">
+                  <div v-for="(value, key) in debugData" :key="key"
+                    class="debug-item d-flex justify-space-between mb-2">
+                    <span class="text-caption text-grey-400">{{ key }}:</span>
+                    <span class="text-caption font-weight-medium"
+                      :class="key === 'connectionStatus' ? `text-${getConnectionColor(value as string)}` : 'text-white'">
+                      {{ value }}
+                    </span>
+                  </div>
+                </div>
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
         </div>
 
         <!-- Action Buttons -->
-        <div class="text-center">
-          <v-btn variant="text" color="primary" @click="minimize">
-            <v-icon start icon="tabler-window-minimize" />
+        <div class="actions-section d-flex justify-space-between align-center">
+          <v-btn variant="text" color="info" class="text-none" @click="minimize">
+            <v-icon start icon="tabler-minimize" size="18" />
             Minimizar
           </v-btn>
+
+          <div class="d-flex gap-2">
+            <v-btn v-if="showDebugToggle" variant="text" color="grey" size="small" @click="toggleDebugInfo">
+              <v-icon :icon="showDebugInfo ? 'tabler-chevron-up' : 'tabler-bug'" size="16" />
+            </v-btn>
+
+            <v-btn v-if="showMultipleButton" variant="elevated" color="warning" class="text-none"
+              @click="$emit('show-multiple')">
+              <v-icon start icon="tabler-stack-2" size="18" />
+              Ver todos ({{ debugData.totalRecords || 2 }})
+            </v-btn>
+          </div>
         </div>
       </v-card-text>
     </v-card>
@@ -88,10 +159,14 @@ const props = defineProps({
     type: Object as () => DebugData,
     default: () => ({})
   },
+  showMultipleButton: {
+    type: Boolean,
+    default: false
+  },
   tips: {
     type: Array as () => string[],
     default: () => [
-      '💡 Tip: Puedes minimizar esta ventana y continuar navegando',
+      '💡 Puedes cargar múltiples archivos simultáneamente',
       '🚀 El proceso continuará ejecutándose en segundo plano',
       '⚡ Recibirás una notificación cuando termine',
       '🎨 Puedes cambiar entre modo claro y oscuro',
@@ -101,16 +176,16 @@ const props = defineProps({
   steps: {
     type: Array as () => string[],
     default: () => [
-      'Inicializando componentes',
-      'Cargando configuración',
-      'Conectando servicios',
-      'Preparando interfaz',
-      'Finalizando proceso'
+      'Validando archivo Excel',
+      'Procesando estructura de datos',
+      'Importando registros de estudiantes',
+      'Guardando notas en base de datos',
+      'Finalizando importación'
     ]
   }
 })
 
-const emit = defineEmits(['minimized', 'restored', 'completed'])
+const emit = defineEmits(['minimized', 'restored', 'completed', 'show-multiple'])
 
 // Estado local
 const currentTipIndex = ref(0)
@@ -155,32 +230,32 @@ const progress = computed(() => {
 
 const currentTitle = computed(() => {
   const progressValue = progress.value
-  if (progressValue < 20) return props.title
-  if (progressValue < 40) return 'Cargando recursos...'
-  if (progressValue < 60) return 'Procesando datos...'
-  if (progressValue < 80) return 'Casi terminado...'
-  if (progressValue < 95) return 'Finalizando...'
-  return '¡Completado!'
+  if (progressValue >= 100) return '¡Completado!'
+  if (progressValue >= 80) return 'Casi terminado...'
+  if (progressValue >= 60) return 'Procesando datos...'
+  if (progressValue >= 40) return 'Cargando recursos...'
+  if (progressValue >= 20) return 'Inicializando...'
+  return props.title
 })
 
 const currentSubtitle = computed(() => {
   const progressValue = progress.value
-  if (progressValue < 20) return props.subtitle
-  if (progressValue < 40) return 'Descargando componentes necesarios'
-  if (progressValue < 60) return 'Organizando la información'
-  if (progressValue < 80) return 'Aplicando configuraciones finales'
-  if (progressValue < 95) return 'Preparando la experiencia'
-  return 'Todo está listo para usar'
+  if (progressValue >= 100) return 'Todo está listo para usar'
+  if (progressValue >= 80) return 'Aplicando configuraciones finales'
+  if (progressValue >= 60) return 'Organizando la información'
+  if (progressValue >= 40) return 'Descargando componentes necesarios'
+  if (progressValue >= 20) return 'Preparando el sistema'
+  return props.subtitle
 })
 
 const currentIcon = computed(() => {
   const progressValue = progress.value
-  if (progressValue < 20) return 'tabler-download'
-  if (progressValue < 40) return 'tabler-settings'
-  if (progressValue < 60) return 'tabler-database'
-  if (progressValue < 80) return 'tabler-layers-intersect'
-  if (progressValue < 95) return 'tabler-circle-check'
-  return 'tabler-checks'
+  if (progressValue >= 100) return 'tabler-checks'
+  if (progressValue >= 80) return 'tabler-circle-check'
+  if (progressValue >= 60) return 'tabler-database'
+  if (progressValue >= 40) return 'tabler-settings'
+  if (progressValue >= 20) return 'tabler-download'
+  return 'tabler-upload'
 })
 
 const currentTip = computed(() => {
@@ -189,23 +264,30 @@ const currentTip = computed(() => {
 
 const loadingSteps = computed(() => props.steps)
 
+// Computed para el step actual basado en el progreso
+watch(() => props.progress, (newProgress) => {
+  const stepProgress = Math.floor((newProgress / 100) * props.steps.length)
+  currentStepIndex.value = Math.min(stepProgress, props.steps.length - 1)
+})
+
 // Métodos para los pasos
 const getStepIcon = (index: number) => {
-  if (index < currentStepIndex.value) return 'tabler-circle-check'
-  if (index === currentStepIndex.value) return 'tabler-loader'
+  if (index < currentStepIndex.value) return 'tabler-circle-check-filled'
+  if (index === currentStepIndex.value && progress.value < 100) return 'tabler-loader-2'
+  if (index === currentStepIndex.value && progress.value >= 100) return 'tabler-circle-check-filled'
   return 'tabler-circle'
 }
 
 const getStepColor = (index: number) => {
   if (index < currentStepIndex.value) return 'success'
-  if (index === currentStepIndex.value) return 'primary'
-  return 'secondary'
+  if (index === currentStepIndex.value) return progress.value >= 100 ? 'success' : 'primary'
+  return 'grey-600'
 }
 
 const getStepTextClass = (index: number) => {
   if (index < currentStepIndex.value) return 'text-success font-weight-medium'
-  if (index === currentStepIndex.value) return 'text-primary font-weight-medium'
-  return 'text-medium-emphasis'
+  if (index === currentStepIndex.value) return progress.value >= 100 ? 'text-success font-weight-medium' : 'text-primary font-weight-medium'
+  return 'text-grey-500'
 }
 
 // Funciones de control de tips
@@ -213,7 +295,7 @@ const startTipRotation = () => {
   if (props.showTips && props.tips.length > 1) {
     tipInterval = setInterval(() => {
       currentTipIndex.value = (currentTipIndex.value + 1) % props.tips.length
-    }, 4000)
+    }, 5000)
   }
 }
 
@@ -252,7 +334,7 @@ defineExpose({
 
 <style scoped>
 .spin-animation {
-  animation: spin 1s linear infinite !important;
+  animation: spin 2s linear infinite !important;
 }
 
 @keyframes spin {
@@ -267,7 +349,8 @@ defineExpose({
 
 .loading-overlay {
   position: fixed !important;
-  backdrop-filter: blur(12px) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  background: rgba(15, 23, 42, 0.85) !important;
   height: 100vh !important;
   width: 100vw !important;
   top: 0 !important;
@@ -275,70 +358,106 @@ defineExpose({
 }
 
 .loading-card {
-  border: 1px solid rgba(255, 255, 255, 10%) !important;
+  background: linear-gradient(145deg, #1e293b 0%, #334155 100%) !important;
+  border: 1px solid rgba(148, 163, 184, 0.1) !important;
   backdrop-filter: blur(20px) !important;
-  box-shadow: 0 32px 64px rgba(0, 0, 0, 20%) !important;
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05) !important;
 }
 
 .loading-avatar {
-  animation: pulse 2s ease-in-out infinite;
-  box-shadow: 0 0 20px rgba(25, 118, 210, 30%);
+  animation: avatarPulse 3s ease-in-out infinite;
+  box-shadow:
+    0 0 30px rgba(59, 130, 246, 0.4),
+    0 0 60px rgba(59, 130, 246, 0.2);
+  transition: all 0.3s ease;
 }
 
 .loading-progress {
   position: relative;
   overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.step-icon {
+.steps-card {
+  background: rgba(17, 24, 39, 0.8) !important;
+  border: 1px solid rgba(75, 85, 99, 0.3) !important;
+}
+
+.step-item {
   transition: all 0.3s ease;
 }
 
+.step-icon {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .tip-card {
-  animation: fadeInUp 0.5s ease-out;
+  background: rgba(31, 41, 55, 0.8) !important;
+  border: 1px solid rgba(75, 85, 99, 0.2) !important;
+  animation: fadeInUp 0.6s ease-out;
+  transition: all 0.3s ease;
+}
+
+.tip-card:hover {
+  background: rgba(31, 41, 55, 0.9) !important;
+  transform: translateY(-1px);
 }
 
 .tip-text {
-  animation: typewriter 0.5s ease-out;
+  animation: fadeIn 0.8s ease-out;
+  line-height: 1.5;
 }
 
-@keyframes pulse {
+.actions-section {
+  border-top: 1px solid rgba(75, 85, 99, 0.2);
+  padding-top: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.debug-panels {
+  background: transparent !important;
+}
+
+.debug-info {
+  background: rgba(17, 24, 39, 0.5);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.debug-item {
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(75, 85, 99, 0.1);
+}
+
+.debug-item:last-child {
+  border-bottom: none;
+}
+
+/* Enhanced Animations */
+@keyframes avatarPulse {
 
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(25, 118, 210, 30%);
+    box-shadow:
+      0 0 30px rgba(59, 130, 246, 0.4),
+      0 0 60px rgba(59, 130, 246, 0.2);
     transform: scale(1);
   }
 
   50% {
-    box-shadow: 0 0 30px rgba(25, 118, 210, 50%);
-    transform: scale(1.05);
-  }
-}
-
-@keyframes bounce {
-
-  0%,
-  20%,
-  50%,
-  80%,
-  100% {
-    transform: translateY(0);
-  }
-
-  40% {
-    transform: translateY(-5px);
-  }
-
-  60% {
-    transform: translateY(-3px);
+    box-shadow:
+      0 0 40px rgba(59, 130, 246, 0.6),
+      0 0 80px rgba(59, 130, 246, 0.3);
+    transform: scale(1.02);
   }
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
 
   to {
@@ -347,7 +466,7 @@ defineExpose({
   }
 }
 
-@keyframes typewriter {
+@keyframes fadeIn {
   from {
     opacity: 0;
   }
@@ -355,5 +474,53 @@ defineExpose({
   to {
     opacity: 1;
   }
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .loading-card {
+    margin: 16px;
+    min-width: unset;
+  }
+
+  .loading-avatar {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  .actions-section {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+/* Dark theme optimizations */
+.v-theme--dark .loading-card {
+  background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%) !important;
+}
+
+.v-theme--dark .steps-card {
+  background: rgba(15, 23, 42, 0.9) !important;
+}
+
+.v-theme--dark .tip-card {
+  background: rgba(15, 23, 42, 0.8) !important;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition: all 0.2s ease;
+}
+
+/* Enhanced button styles */
+.v-btn {
+  text-transform: none !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+}
+
+.v-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 </style>
