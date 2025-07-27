@@ -141,49 +141,52 @@ const handleProgressUpdate = (batchId: string, data: any) => {
     process.metadata = {}
   }
 
-  // ✅ MAPEAR TODOS LOS DATOS DEL BACKEND
+  // ✅ MAPEAR TODOS LOS DATOS DEL BACKEND CON ACTUALIZACIÓN CORRECTA
   if (data.metadata) {
     console.log(`🔄 [UPDATE] Actualizando metadata:`)
     console.log(`   - Total records: ${data.metadata.total_records}`)
-    console.log(`   - Processed: ${data.metadata.processed_records}`)
+    console.log(`   - Processed records: ${data.metadata.processed_records}`)
     console.log(`   - Current sheet: ${data.metadata.current_sheet}`)
     console.log(`   - Total sheets: ${data.metadata.total_sheets}`)
     console.log(`   - Errors: ${data.metadata.errors_count}`)
     console.log(`   - Warnings: ${data.metadata.warnings_count}`)
     console.log(`   - File size: ${data.metadata.file_size}`)
     console.log(`   - Memory usage: ${data.metadata.memory_usage}`)
+    console.log(`   - Processing speed: ${data.metadata.processing_speed}`)
+    console.log(`   - Estimated time: ${data.metadata.estimated_time_remaining}`)
 
-    // ✅ MEJORAR CÁLCULO DE TIEMPO ESTIMADO
-    const startTime = data.metadata.processing_start_time || process.metadata.processing_start_time
-    const estimatedTime = calculateEstimatedTimeImproved(
-      progress,
-      startTime,
-      data.metadata.processed_records || 0,
-      data.metadata.total_records || 0,
-    )
+    // ✅ OBTENER VALORES DIRECTOS DEL BACKEND (NO CALCULAR EN FRONTEND)
+    const backendSpeed = data.metadata.processing_speed || 0
+    const backendETA = data.metadata.estimated_time_remaining || 0
 
+    console.log(`📊 [UPDATE] Valores del backend - Speed: ${backendSpeed}, ETA: ${backendETA}`)
+
+    // ✅ ACTUALIZAR METADATA COMPLETA CON VALORES DEL BACKEND
     process.metadata = {
-      ...process.metadata,
-      // ✅ DATOS DIRECTOS DEL BACKEND
-      total_records: data.metadata.total_records || 0,
-      processed_records: data.metadata.processed_records || 0,
-      current_sheet: data.metadata.current_sheet || 1,
-      total_sheets: data.metadata.total_sheets || 1,
-      errors_count: data.metadata.errors_count || 0,
-      warnings_count: data.metadata.warnings_count || 0,
-      file_size: data.metadata.file_size || 0,
-      processing_start_time: startTime,
-      memory_usage: data.metadata.memory_usage || 0,
-      cpu_usage: data.metadata.cpu_usage || 0,
+      ...process.metadata, // Mantener valores existentes
+      // ✅ DATOS DIRECTOS DEL BACKEND - SIEMPRE ACTUALIZAR
+      total_records: data.metadata.total_records || process.metadata.total_records || 0,
+      processed_records: data.metadata.processed_records || process.metadata.processed_records || 0,
+      current_sheet: data.metadata.current_sheet || process.metadata.current_sheet || 1,
+      total_sheets: data.metadata.total_sheets || process.metadata.total_sheets || 1,
+      errors_count: data.metadata.errors_count || process.metadata.errors_count || 0,
+      warnings_count: data.metadata.warnings_count || process.metadata.warnings_count || 0,
+      file_size: data.metadata.file_size || process.metadata.file_size || 0,
+      processing_start_time: data.metadata.processing_start_time || process.metadata.processing_start_time,
+      memory_usage: data.metadata.memory_usage || process.metadata.memory_usage || 0,
+      cpu_usage: data.metadata.cpu_usage || process.metadata.cpu_usage || 0,
       connection_status: "connected",
       last_activity: new Date().toISOString(),
-      // ✅ CALCULAR VELOCIDAD Y TIEMPO ESTIMADO CON DATOS ACTUALIZADOS
-      processing_speed: calculateProcessingSpeed(process, data.metadata),
-      estimated_time_remaining: estimatedTime,
+      // ✅ USAR VALORES DEL BACKEND DIRECTAMENTE (NO CALCULAR)
+      processing_speed: backendSpeed,
+      estimated_time_remaining: backendETA,
     }
 
-    console.log(`✅ [UPDATE] Metadata actualizada:`, process.metadata)
-    console.log(`⏱️ [UPDATE] Tiempo estimado: ${estimatedTime}s`)
+    console.log(`✅ [UPDATE] Metadata actualizada con valores del backend:`)
+    console.log(`   - Processing Speed: ${process.metadata.processing_speed}`)
+    console.log(`   - Estimated Time: ${process.metadata.estimated_time_remaining}`)
+    console.log(`   - Memory Usage: ${process.metadata.memory_usage}`)
+    console.log(`   - CPU Usage: ${process.metadata.cpu_usage}`)
   }
 
   // ✅ ACTUALIZAR EN LA LISTA COMPLETA TAMBIÉN
@@ -438,6 +441,8 @@ const debugInfo = computed(() => {
 
   console.log(`🔍 [DEBUG] Generando debug info para:`, process.batch_id)
   console.log(`🔍 [DEBUG] Metadata actual:`, process.metadata)
+  console.log(`🔍 [DEBUG] Processing speed actual:`, process.metadata?.processing_speed)
+  console.log(`🔍 [DEBUG] ETA actual:`, process.metadata?.estimated_time_remaining)
 
   return {
     batchId: process.batch_id,
@@ -447,7 +452,7 @@ const debugInfo = computed(() => {
     currentAction: process.current_action,
     queueLength: processQueue.value.length,
     totalProcesses: allProcesses.value.length,
-    // ✅ METADATA PARA DEBUG - USAR DATOS REALES
+    // ✅ METADATA PARA DEBUG - USAR DATOS REALES ACTUALIZADOS
     total_records: process.metadata?.total_records || 0,
     processed_records: process.metadata?.processed_records || 0,
     current_sheet: process.metadata?.current_sheet || 1,
@@ -455,14 +460,15 @@ const debugInfo = computed(() => {
     errors_count: process.metadata?.errors_count || 0,
     warnings_count: process.metadata?.warnings_count || 0,
     connection_status: process.metadata?.connection_status || "disconnected",
+    // ✅ VALORES CRÍTICOS QUE DEBEN ACTUALIZARSE
     processing_speed: process.metadata?.processing_speed || 0,
     estimated_time_remaining: process.metadata?.estimated_time_remaining || 0,
-    file_size: process.metadata?.file_size || 0,
     memory_usage: process.metadata?.memory_usage || 0,
     cpu_usage: process.metadata?.cpu_usage || 0,
+    file_size: process.metadata?.file_size || 0,
     last_activity: process.metadata?.last_activity || "N/A",
     processing_start_time: process.metadata?.processing_start_time || "N/A",
-    // ✅ FORMATEAR ALGUNOS VALORES
+    // ✅ FORMATEAR ALGUNOS VALORES CON VALORES ACTUALIZADOS
     fileSize: process.metadata?.file_size ? formatFileSize(process.metadata.file_size) : "N/A",
     processingSpeedFormatted: process.metadata?.processing_speed ? `${process.metadata.processing_speed} reg/s` : "N/A",
     estimatedTimeFormatted: process.metadata?.estimated_time_remaining

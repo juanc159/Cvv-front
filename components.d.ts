@@ -31,6 +31,7 @@ declare module 'vue' {
     Attachments: typeof import('./src/components/Attachment/Attachments.vue')['default']
     AutoCompleteData: typeof import('./src/components/CustomComponents/Input/AutoCompleteData.vue')['default']
     BtnBack: typeof import('./src/components/BtnBack.vue')['default']
+    BtnShowAllLoading: typeof import('./src/components/Loadings/BtnShowAllLoading.vue')['default']
     BuyNow: typeof import('./src/@core/components/BuyNow.vue')['default']
     CardAddEditDialog: typeof import('./src/components/dialogs/CardAddEditDialog.vue')['default']
     CardStatisticsHorizontal: typeof import('./src/@core/components/cards/CardStatisticsHorizontal.vue')['default']

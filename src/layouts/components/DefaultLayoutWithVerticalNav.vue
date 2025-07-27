@@ -10,6 +10,8 @@ import NavBarI18n from '@core/components/I18n.vue'
 
 // @layouts plugin
 import { VerticalNavLayout } from '@layouts'
+
+
 </script>
 
 <template>
@@ -22,8 +24,11 @@ import { VerticalNavLayout } from '@layouts'
         </IconBtn>
 
         <NavbarThemeSwitcher />
+
+
         <!-- NUEVO: Componente global de loading para importaciones -->
-        <!-- <GlobalLoadingManager /> -->
+        <BtnShowAllLoading />
+
 
         <VSpacer />
 

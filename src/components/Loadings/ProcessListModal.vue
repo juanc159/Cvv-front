@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="isOpen" max-width="900" persistent>
+  <v-dialog v-model="isOpen" max-width="60rem" persistent>
     <v-card class="process-list-card">
       <v-card-title class="d-flex align-center justify-space-between pa-6 pb-4">
         <div class="d-flex align-center">
@@ -16,7 +16,7 @@
           </v-chip>
           <!-- ✅ BOTÓN PARA LIMPIAR COMPLETADOS -->
           <v-btn v-if="completedProcesses.length > 0" variant="outlined" color="warning" size="small"
-            @click="clearCompleted" :disabled="activeProcesses.length === 0 && queuedProcesses.length === 0">
+            @click="clearCompleted">
             <v-icon start icon="tabler-trash" />
             Limpiar ({{ completedProcesses.length }})
           </v-btn>
@@ -41,7 +41,7 @@
         </v-card>
       </v-card-text>
 
-      <v-card-text class="pa-0">
+      <v-card-text class="pa-4">
         <!-- ✅ USAR LISTA ORDENADA -->
         <v-list class="process-list">
           <v-list-item v-for="process in sortedProcesses" :key="process.batch_id"
@@ -172,7 +172,6 @@
                     </div>
                   </div>
                 </v-card>
-                {{ process.metadata }}
               </div>
 
               <!-- Información para procesos en cola -->

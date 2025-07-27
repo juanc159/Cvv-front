@@ -1,6 +1,6 @@
 <template>
   <v-overlay v-if="!isMinimized && isLoading" :model-value="isLoading"
-    class="loading-overlay d-flex align-center justify-center" :persistent="false" :opacity="0.98" :z-index="9999">
+    class="loading-overlay d-flex align-center justify-center" :persistent="true" :opacity="0.98" :z-index="9999">
     <v-card class="loading-card" elevation="0" rounded="xl" min-width="420" width="90%" max-width="500">
       <v-card-text class="pa-8">
         <!-- Header Section -->
@@ -11,11 +11,6 @@
               <v-icon :size="progress >= 100 ? '32' : '28'" :icon="currentIcon" color="white"
                 :class="progress < 100 ? 'spin-animation' : ''" />
             </v-avatar>
-            <div v-if="showMultipleButton" class="ml-4">
-              <v-chip color="warning" variant="elevated" size="small" prepend-icon="tabler-stack-2">
-                {{ debugData.totalProcesses || 2 }} procesos
-              </v-chip>
-            </div>
           </div>
           <!-- Title and Subtitle -->
           <h2 class="text-h5 font-weight-bold text-white mb-2">
@@ -41,63 +36,6 @@
           </div>
           <v-progress-linear :model-value="progress" height="6" rounded color="primary" bg-color="grey-800"
             class="loading-progress" />
-        </div>
-
-        <!-- ✅ METADATA CARDS SECTION -->
-        <div v-if="debugData.total_records > 0" class="metadata-section mb-6">
-          <v-row class="metadata-grid">
-            <!-- Registros -->
-            <v-col cols="6" sm="3">
-              <v-card class="metadata-mini-card pa-2" variant="tonal" color="info">
-                <div class="text-center">
-                  <v-icon icon="tabler-database" color="info" size="16" class="mb-1" />
-                  <div class="text-caption text-medium-emphasis">Registros</div>
-                  <div class="text-body-2 font-weight-bold">
-                    {{ debugData.processed_records || 0 }} / {{ debugData.total_records || 0 }}
-                  </div>
-                </div>
-              </v-card>
-            </v-col>
-
-            <!-- Hojas -->
-            <v-col cols="6" sm="3">
-              <v-card class="metadata-mini-card pa-2" variant="tonal" color="success">
-                <div class="text-center">
-                  <v-icon icon="tabler-file-spreadsheet" color="success" size="16" class="mb-1" />
-                  <div class="text-caption text-medium-emphasis">Hojas</div>
-                  <div class="text-body-2 font-weight-bold">
-                    {{ debugData.current_sheet || 1 }} / {{ debugData.total_sheets || 1 }}
-                  </div>
-                </div>
-              </v-card>
-            </v-col>
-
-            <!-- Errores -->
-            <v-col cols="6" sm="3">
-              <v-card class="metadata-mini-card pa-2" variant="tonal"
-                :color="(debugData.errors_count || 0) > 0 ? 'error' : 'grey'">
-                <div class="text-center">
-                  <v-icon :icon="(debugData.errors_count || 0) > 0 ? 'tabler-alert-circle' : 'tabler-check-circle'"
-                    :color="(debugData.errors_count || 0) > 0 ? 'error' : 'success'" size="16" class="mb-1" />
-                  <div class="text-caption text-medium-emphasis">Errores</div>
-                  <div class="text-body-2 font-weight-bold">{{ debugData.errors_count || 0 }}</div>
-                </div>
-              </v-card>
-            </v-col>
-
-            <!-- Velocidad -->
-            <v-col cols="6" sm="3">
-              <v-card class="metadata-mini-card pa-2" variant="tonal" color="warning">
-                <div class="text-center">
-                  <v-icon icon="tabler-gauge" color="warning" size="16" class="mb-1" />
-                  <div class="text-caption text-medium-emphasis">Velocidad</div>
-                  <div class="text-body-2 font-weight-bold">
-                    {{ debugData.processing_speed || 0 }} reg/s
-                  </div>
-                </div>
-              </v-card>
-            </v-col>
-          </v-row>
         </div>
 
         <!-- Steps Section -->
@@ -126,81 +64,17 @@
           </v-card>
         </div>
 
-        <!-- Debug Info Section -->
-        <div v-if="showDebugToggle && showDebugInfo" class="debug-section mb-6">
-          <v-expansion-panels variant="accordion" class="debug-panels">
-            <v-expansion-panel title="Información de Debug" bg-color="grey-850">
-              <v-expansion-panel-text>
-                <div class="debug-info">
-                  <div class="debug-item d-flex justify-space-between mb-2">
-                    <span class="text-caption text-grey-400">Batch ID:</span>
-                    <span class="text-caption font-weight-medium text-white">{{ debugData.batchId }}</span>
-                  </div>
-                  <div class="debug-item d-flex justify-space-between mb-2">
-                    <span class="text-caption text-grey-400">Total Records:</span>
-                    <span class="text-caption font-weight-medium text-white">{{ debugData.total_records }}</span>
-                  </div>
-                  <div class="debug-item d-flex justify-space-between mb-2">
-                    <span class="text-caption text-grey-400">Processed:</span>
-                    <span class="text-caption font-weight-medium text-white">{{ debugData.processed_records }}</span>
-                  </div>
-                  <div class="debug-item d-flex justify-space-between mb-2">
-                    <span class="text-caption text-grey-400">Current Sheet:</span>
-                    <span class="text-caption font-weight-medium text-white">{{ debugData.current_sheet }} / {{
-                      debugData.total_sheets }}</span>
-                  </div>
-                  <div class="debug-item d-flex justify-space-between mb-2">
-                    <span class="text-caption text-grey-400">Errors:</span>
-                    <span class="text-caption font-weight-medium"
-                      :class="debugData.errors_count > 0 ? 'text-error' : 'text-success'">
-                      {{ debugData.errors_count }}
-                    </span>
-                  </div>
-                  <div class="debug-item d-flex justify-space-between mb-2">
-                    <span class="text-caption text-grey-400">Warnings:</span>
-                    <span class="text-caption font-weight-medium text-warning">{{ debugData.warnings_count }}</span>
-                  </div>
-                  <div class="debug-item d-flex justify-space-between mb-2">
-                    <span class="text-caption text-grey-400">File Size:</span>
-                    <span class="text-caption font-weight-medium text-white">{{ debugData.fileSize }}</span>
-                  </div>
-                  <div class="debug-item d-flex justify-space-between mb-2">
-                    <span class="text-caption text-grey-400">Speed:</span>
-                    <span class="text-caption font-weight-medium text-white">{{ debugData.processingSpeedFormatted
-                      }}</span>
-                  </div>
-                  <div class="debug-item d-flex justify-space-between mb-2">
-                    <span class="text-caption text-grey-400">ETA:</span>
-                    <span class="text-caption font-weight-medium text-white">{{ debugData.estimatedTimeFormatted
-                      }}</span>
-                  </div>
-                  <div class="debug-item d-flex justify-space-between mb-2">
-                    <span class="text-caption text-grey-400">Connection:</span>
-                    <span class="text-caption font-weight-medium"
-                      :class="`text-${getConnectionColor(debugData.connection_status)}`">
-                      {{ debugData.connection_status }}
-                    </span>
-                  </div>
-                </div>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-          </v-expansion-panels>
-        </div>
-
         <!-- Action Buttons -->
         <div class="actions-section d-flex justify-space-between align-center">
-          <v-btn variant="text" color="info" class="text-none" @click="minimize">
+          <v-btn variant="elevated" color="info" class="text-none" @click="minimize">
             <v-icon start icon="tabler-minimize" size="18" />
             Minimizar
           </v-btn>
           <div class="d-flex gap-2">
-            <v-btn v-if="showDebugToggle" variant="text" color="grey" size="small" @click="toggleDebugInfo">
-              <v-icon :icon="showDebugInfo ? 'tabler-chevron-up' : 'tabler-bug'" size="16" />
-            </v-btn>
             <v-btn v-if="showMultipleButton" variant="elevated" color="warning" class="text-none"
               @click="$emit('show-multiple')">
               <v-icon start icon="tabler-stack-2" size="18" />
-              Ver todos ({{ debugData.totalProcesses || 2 }})
+              Ver todos ({{ totalProcesses || 2 }})
             </v-btn>
           </div>
         </div>
@@ -211,33 +85,6 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
-
-interface DebugData {
-  strategy?: string;
-  connectionStatus?: string;
-  batchId?: string;
-  processedRecords?: number;
-  totalRecords?: number;
-  currentStudent?: string;
-  lastUpdate?: string;
-  sheet?: number;
-  chunk?: number;
-  // ✅ NUEVOS CAMPOS PARA METADATA
-  total_records?: number;
-  processed_records?: number;
-  current_sheet?: number;
-  total_sheets?: number;
-  errors_count?: number;
-  warnings_count?: number;
-  connection_status?: string;
-  processing_speed?: number;
-  estimated_time_remaining?: number;
-  file_size?: number;
-  fileSize?: string;
-  processingSpeedFormatted?: string;
-  estimatedTimeFormatted?: string;
-  totalProcesses?: number;
-}
 
 const props = defineProps({
   progress: {
@@ -261,17 +108,13 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
-  showDebugToggle: {
-    type: Boolean,
-    default: true // ✅ ACTIVAR DEBUG POR DEFECTO PARA VER LOS DATOS
-  },
-  debugData: {
-    type: Object as () => DebugData,
-    default: () => ({})
-  },
   showMultipleButton: {
     type: Boolean,
     default: false
+  },
+  totalProcesses: {
+    type: Number,
+    default: 2
   },
   tips: {
     type: Array as () => string[],
@@ -301,13 +144,7 @@ const emit = defineEmits(['minimized', 'restored', 'completed', 'show-multiple']
 const currentTipIndex = ref(0)
 const currentStepIndex = ref(0)
 const isMinimized = ref(false)
-const showDebugInfo = ref(false)
 let tipInterval: NodeJS.Timeout | null = null
-
-// ✅ WATCH PARA VER CAMBIOS EN DEBUG DATA
-watch(() => props.debugData, (newData) => {
-  console.log(`🔍 [LOADING-COMPONENT] Debug data actualizada:`, newData)
-}, { deep: true })
 
 // Funciones de control
 const minimize = () => {
@@ -320,20 +157,6 @@ const restore = () => {
   emit('restored')
 }
 
-const toggleDebugInfo = () => {
-  showDebugInfo.value = !showDebugInfo.value
-}
-
-const getConnectionColor = (status?: string) => {
-  switch (status) {
-    case 'connected': return 'success';
-    case 'connecting': return 'warning';
-    case 'reconnecting': return 'info';
-    case 'error': return 'error';
-    default: return 'secondary';
-  }
-}
-
 // Computed properties
 const progress = computed(() => {
   const progressValue = Math.max(0, Math.min(100, props.progress))
@@ -344,14 +167,22 @@ const progress = computed(() => {
 })
 
 const currentTitle = computed(() => {
-  const progressValue = progress.value
-  if (progressValue >= 100) return '¡Completado!'
-  if (progressValue >= 80) return 'Casi terminado...'
-  if (progressValue >= 60) return 'Procesando datos...'
-  if (progressValue >= 40) return 'Cargando recursos...'
-  if (progressValue >= 20) return 'Inicializando...'
-  return props.title
-})
+  const progressValue = progress.value;
+
+  if (progressValue >= 100) return '🎉 ¡Proceso completado con éxito!';
+  if (progressValue >= 90) return '🔍 Realizando verificaciones finales...';
+  if (progressValue >= 80) return '📤 Guardando resultados en el sistema...';
+  if (progressValue >= 70) return '⚙️ Optimizando datos procesados...';
+  if (progressValue >= 60) return '📊 Procesando información recolectada...';
+  if (progressValue >= 50) return '📦 Organizando datos intermedios...';
+  if (progressValue >= 40) return '🔄 Cargando módulos secundarios...';
+  if (progressValue >= 30) return '🚀 Proceso en marcha, avanzando...';
+  if (progressValue >= 20) return '⚡ Preparando componentes principales...';
+  if (progressValue >= 10) return '🔌 Conectando con los servicios...';
+  if (progressValue >= 0) return '⏳ Inicializando sistema...';
+
+  return props.title || 'Preparando carga...';
+});
 
 const currentSubtitle = computed(() => {
   const progressValue = progress.value
@@ -359,7 +190,7 @@ const currentSubtitle = computed(() => {
   if (progressValue >= 80) return 'Aplicando configuraciones finales'
   if (progressValue >= 60) return 'Organizando la información'
   if (progressValue >= 40) return 'Descargando componentes necesarios'
-  if (progressValue >= 20) return 'Preparando el sistema'
+  if (progressValue >= 0) return 'Preparando el sistema'
   return props.subtitle
 })
 
@@ -369,8 +200,8 @@ const currentIcon = computed(() => {
   if (progressValue >= 80) return 'tabler-circle-check'
   if (progressValue >= 60) return 'tabler-database'
   if (progressValue >= 40) return 'tabler-settings'
-  if (progressValue >= 20) return 'tabler-download'
-  return 'tabler-upload'
+  if (progressValue >= 20) return 'tabler-rotate-2'
+  return 'tabler-rotate-clockwise-2'
 })
 
 const currentTip = computed(() => {
@@ -379,7 +210,7 @@ const currentTip = computed(() => {
 
 const loadingSteps = computed(() => props.steps)
 
-// Computed para el step actual basado en el progreso
+// Watch para actualizar el step actual basado en el progreso
 watch(() => props.progress, (newProgress) => {
   const stepProgress = Math.floor((newProgress / 100) * props.steps.length)
   currentStepIndex.value = Math.min(stepProgress, props.steps.length - 1)
@@ -442,7 +273,6 @@ watch(() => props.isLoading, (newValue) => {
 defineExpose({
   minimize,
   restore,
-  toggleDebugInfo,
   isMinimized
 })
 </script>
@@ -529,45 +359,6 @@ defineExpose({
   border-top: 1px solid rgba(75, 85, 99, 0.2);
   padding-top: 1.5rem;
   margin-top: 0.5rem;
-}
-
-.debug-panels {
-  background: transparent !important;
-}
-
-.debug-info {
-  background: rgba(17, 24, 39, 0.5);
-  border-radius: 8px;
-  padding: 12px;
-}
-
-.debug-item {
-  padding: 4px 0;
-  border-bottom: 1px solid rgba(75, 85, 99, 0.1);
-}
-
-.debug-item:last-child {
-  border-bottom: none;
-}
-
-/* ✅ ESTILOS PARA METADATA CARDS */
-.metadata-section {
-  margin-bottom: 1.5rem;
-}
-
-.metadata-grid {
-  margin: 0 -4px;
-}
-
-.metadata-mini-card {
-  height: 100%;
-  transition: all 0.2s ease;
-  min-height: 70px;
-}
-
-.metadata-mini-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Enhanced Animations */
