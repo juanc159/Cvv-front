@@ -8,6 +8,7 @@ import '@core/scss/template/index.scss'
 import '@styles/styles.scss'
 
 import Editor from '@tinymce/tinymce-vue'
+import axios from 'axios'
 
 
 import Echo from 'laravel-echo'
@@ -18,12 +19,33 @@ const accessToken = useCookie("accessToken").value;
 
 window.Echo = new Echo({
   broadcaster: 'reverb',
-  key: 'otm5syqaviw1uw9iqpen',
-  wsHost: 'colegiovirgendelvalle.com.co', // Tu dominio real
-  wsPort: 443,  // Puerto SSL público
-  wssPort: 443, // Puerto SSL público
-  forceTLS: true, // Obligatorio en producción
-  enabledTransports: ['wss'], // Solo WebSocket seguro
+  key: import.meta.env.VITE_REVERB_APP_KEY,
+  wsHost: import.meta.env.VITE_REVERB_HOST,
+  wsPort: 443,
+  wssPort: 443,
+  forceTLS: true,
+  enabledTransports: ['ws', 'wss'],
+
+  authorizer: (channel: { name: any }, options: any) => {
+    return {
+      authorize: (socketId: any, callback: (arg0: boolean, arg1: any) => void) => {
+        axios.post(`${import.meta.env.VITE_API_BASE_URL}/broadcasting/auth`, {
+          socket_id: socketId,
+          channel_name: channel.name
+        }, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}` // Agregar el Bearer Token a los encabezados
+          }
+        })
+          .then(response => {
+            callback(false, response.data);
+          })
+          .catch(error => {
+            callback(true, error.response);
+          });
+      }
+    };
+  },
 });
 
 
