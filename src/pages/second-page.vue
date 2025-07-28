@@ -14,6 +14,14 @@ onMounted(() => {
     console.log('Event received:', e.message);
     message.value = e.message;
   });
+  window.Echo.channel('test-channel').listen('.TestEvent', (e) => {
+    console.log('Event received:', e.message);
+    message.value = e.message;
+  });
+  window.Echo.channel('test-channel').listen('.test_event', (e) => {
+    console.log('Event received:', e.message);
+    message.value = e.message;
+  });
 });
 </script>
 
