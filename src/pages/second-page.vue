@@ -7,28 +7,31 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-
 const message = ref('Waiting for message...');
 
 onMounted(() => {
-  console.log('Setting up WebSocket listener at', new Date().toISOString());
-  window.Echo.connector.pusher.connection.bind('connected', () => {
-    console.log('WebSocket connected at', new Date().toISOString());
+  console.log('WebSocket Config:', {
+    key: import.meta.env.VITE_REVERB_APP_KEY,
+    host: import.meta.env.VITE_REVERB_HOST,
+    port: 443,
+    tls: import.meta.env.VITE_REVERB_SCHEME === 'https'
   });
+
+  window.Echo.connector.pusher.connection.bind('connected', () => {
+    console.log('WebSocket connected');
+  });
+
   window.Echo.connector.pusher.connection.bind('error', (err) => {
     console.error('WebSocket error:', err);
   });
 
   window.Echo.channel('test-channel')
     .subscribed(() => {
-      console.log('Subscribed to test-channel at', new Date().toISOString());
+      console.log('Subscribed to test-channel');
     })
     .listen('.TestEvent', (payload) => {
-      console.log('Evento recibido at', new Date().toISOString(), '- Payload:', payload);
+      console.log('Evento recibido:', payload);
       message.value = payload.message;
-    })
-    .listenAny((event, payload) => {
-      console.log('Any event received at', new Date().toISOString(), '- Event:', event, '- Payload:', payload);
     });
 });
 </script>
