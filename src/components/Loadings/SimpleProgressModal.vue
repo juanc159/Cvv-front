@@ -80,7 +80,7 @@ const connectWebSocket = () => {
   try {
     const channel = window.Echo.channel(`import.progress.${props.batchId}`)
 
-    channel.listen('.progress.update', (event: any) => {
+    channel.listen(".progress.update", (event: any) => {
       console.log(`🔥 [WEBSOCKET] Evento recibido:`, event)
       isConnected.value = true
       updateProgress(event)
