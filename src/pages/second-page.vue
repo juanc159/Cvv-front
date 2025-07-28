@@ -10,15 +10,14 @@ import { onMounted, ref } from 'vue';
 const message = ref('Waiting for message...');
 
 onMounted(() => {
-  // window.Echo.channel('test-channel').listen('TestEvent', (e) => {
-  //   console.log('Event received:', e.message);
-  //   message.value = e.message;
-  // });
-
+  console.log('Connecting to WebSocket...');
   window.Echo.channel('test-channel')
-    .listen('.TestEvent', (payload) => { // ¡El punto es crucial!
+    .listen('.TestEvent', (payload) => {
       console.log('Evento recibido:', payload.message);
-      // Actualiza tu estado Vue aquí
+      message.value = payload.message;
+    })
+    .subscribed(() => {
+      console.log('Subscribed to test-channel');
     });
 });
 </script>
