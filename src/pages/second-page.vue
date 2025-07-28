@@ -10,18 +10,16 @@ import { onMounted, ref } from 'vue';
 const message = ref('Waiting for message...');
 
 onMounted(() => {
-  window.Echo.channel('test-channel').listen('TestEvent', (e) => {
-    console.log('Event received:', e.message);
-    message.value = e.message;
-  });
-  window.Echo.channel('test-channel').listen('.TestEvent', (e) => {
-    console.log('Event received:', e.message);
-    message.value = e.message;
-  });
-  window.Echo.channel('test-channel').listen('.test_event', (e) => {
-    console.log('Event received:', e.message);
-    message.value = e.message;
-  });
+  // window.Echo.channel('test-channel').listen('TestEvent', (e) => {
+  //   console.log('Event received:', e.message);
+  //   message.value = e.message;
+  // });
+
+  window.Echo.channel('test-channel')
+    .listen('.TestEvent', (payload) => { // ¡El punto es crucial!
+      console.log('Evento recibido:', payload.message);
+      // Actualiza tu estado Vue aquí
+    });
 });
 </script>
 
