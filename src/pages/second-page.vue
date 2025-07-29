@@ -4,6 +4,10 @@
     <p>Connection Status: {{ connectionStatus }}</p>
     <p>Message from Reverb: {{ message }}</p>
     <button @click="testConnection">Test Connection</button>
+    <div>
+      <h3>Debug Info:</h3>
+      <pre>{{ debugInfo }}</pre>
+    </div>
   </div>
 </template>
 
@@ -12,6 +16,7 @@ import { onMounted, ref } from 'vue';
 
 const message = ref('Waiting for message...');
 const connectionStatus = ref('Connecting...');
+const debugInfo = ref({});
 
 onMounted(() => {
   console.log('WebSocket Config:', {
@@ -33,24 +38,43 @@ onMounted(() => {
   });
 
   // Suscribirse al canal
-  window.Echo.channel('test-channel')
-    .subscribed(() => {
-      console.log('Subscribed to test-channel');
-      connectionStatus.value = 'Connected & Subscribed';
-    })
-    .listen('TestEvent', (payload) => {
-      console.log('Evento recibido:', payload);
-      message.value = payload.message;
-    });
+  const channel = window.Echo.channel('test-channel');
+
+  channel.subscribed(() => {
+    console.log('✅ Subscribed to test-channel');
+    connectionStatus.value = 'Connected & Subscribed';
+  });
+
+  // ⚠️ CAMBIO IMPORTANTE: Sin punto antes de TestEvent
+  channel.listen('TestEvent', (payload) => {
+    console.log('🎉 Evento recibido:', payload);
+    message.value = payload.message;
+    debugInfo.value = payload;
+  });
+
+  // También escuchar TODOS los eventos para debug
+  channel.listenForWhisper('*', (eventName, data) => {
+    console.log('📢 Evento whisper:', eventName, data);
+  });
+
+  // Bind directo para capturar cualquier evento
+  window.Echo.connector.pusher.bind_global((eventName, data) => {
+    console.log('🌍 Global event:', eventName, data);
+    if (eventName.includes('TestEvent')) {
+      console.log('🎯 TestEvent capturado globalmente:', data);
+      message.value = data.message || 'Evento recibido sin mensaje';
+    }
+  });
 });
 
 const testConnection = async () => {
   try {
+    console.log('🚀 Enviando test broadcast...');
     const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/test-broadcast`);
     const data = await response.json();
-    console.log('Test broadcast result:', data);
+    console.log('✅ Test broadcast result:', data);
   } catch (error) {
-    console.error('Error testing broadcast:', error);
+    console.error('❌ Error testing broadcast:', error);
   }
 };
 </script>
