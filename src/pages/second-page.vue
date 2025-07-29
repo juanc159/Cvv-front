@@ -45,8 +45,8 @@ onMounted(() => {
     connectionStatus.value = 'Connected & Subscribed';
   });
 
-  // ⚠️ CAMBIO IMPORTANTE: Sin punto antes de TestEvent
-  channel.listen('TestEvent', (payload) => {
+  // ⚠️ CAMBIO IMPORTANTE: Sin punto antes de .TestEvent
+  channel.listen('.TestEvent', (payload) => {
     console.log('🎉 Evento recibido:', payload);
     message.value = payload.message;
     debugInfo.value = payload;
@@ -60,8 +60,8 @@ onMounted(() => {
   // Bind directo para capturar cualquier evento
   window.Echo.connector.pusher.bind_global((eventName, data) => {
     console.log('🌍 Global event:', eventName, data);
-    if (eventName.includes('TestEvent')) {
-      console.log('🎯 TestEvent capturado globalmente:', data);
+    if (eventName.includes('.TestEvent')) {
+      console.log('🎯 .TestEvent capturado globalmente:', data);
       message.value = data.message || 'Evento recibido sin mensaje';
     }
   });
