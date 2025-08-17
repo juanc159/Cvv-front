@@ -69,6 +69,7 @@ declare module 'vue' {
     ModalChangePassword: typeof import('./src/components/ModalChangePassword.vue')['default']
     ModalContactanosMenu: typeof import('./src/components/ModalContactanosMenu.vue')['default']
     ModalContactanosStudent: typeof import('./src/components/ModalContactanosStudent.vue')['default']
+    ModalListErrors: typeof import('./src/components/Loadings/ModalListErrors.vue')['default']
     ModalQuestion: typeof import('./src/components/ModalQuestion.vue')['default']
     ModalUploadExcelNomina: typeof import('./src/components/ModalUploadExcelNomina.vue')['default']
     MoreBtn: typeof import('./src/@core/components/MoreBtn.vue')['default']

@@ -2,6 +2,8 @@
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import type { VForm } from "vuetify/components/VForm";
+const globalLoading = useGlobalLoading();
+
 const authenticationStore = useAuthenticationStore();
 
 const errorsBack = ref<IErrorsBack>({});
@@ -42,11 +44,11 @@ const loading = reactive({ form: false })
 const fetchDataForm = async () => {
 
   loading.form = true
-  const { data, response } = await useApi('note-dataForm').get()
+  const { data, response } = await useAxios('note-dataForm').get()
   loading.form = false
 
-  if (response.value?.ok && data.value) {
-    typeEducations.value = data.value.typeEducations
+  if (response.status == 200 && data) {
+    typeEducations.value = data.typeEducations
   }
 }
 
@@ -62,13 +64,17 @@ const submitForm = async () => {
       formData.append(key, form.value[key])
 
 
-    formData.append("teacher_id", authenticationStore.user.id)
+    formData.append('user_id', String(authenticationStore.user.id));
+    formData.append("teacher_id", String(authenticationStore.user.id));
 
     loading.form = true
-    const { data, response } = await useApi('note-store').post(formData)
+    const { data, response } = await useAxios('note-store').post(formData);
+
     loading.form = false
 
-    if (response.value?.ok && data.value) {
+    if (response.status == 200 && data) {
+      const success = globalLoading.startLoading(data.batch_id);
+
       handleDialogVisible();
 
     }

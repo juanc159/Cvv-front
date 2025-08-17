@@ -2,6 +2,7 @@
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import { VForm } from "vuetify/components";
+const globalLoading = useGlobalLoading();
 
 definePage({
   name: "Note-Index",
@@ -11,7 +12,6 @@ definePage({
 
 const authenticationStore = useAuthenticationStore();
 const { toast } = useToast();
-const globalLoading = useGlobalLoading();
 const archive = ref(useFileUpload());
 archive.value.allowedExtensions = ["xls", "xlsx"];
 
@@ -43,9 +43,6 @@ const selectedSwitch = ref<boolean>(false);
 const selectedNotes = ref({});
 const requiredValidator = (value: any) => !!value || 'Campo requerido';
 
-const hasActiveProcess = computed(() => {
-  return globalLoading.hasActiveProcess();
-});
 
 const submitForm = async () => {
   form.value.archive = archive.value.imageFile;
@@ -55,6 +52,7 @@ const submitForm = async () => {
   if (validation?.valid) {
     const formData = new FormData();
     formData.append('company_id', String(form.value.company_id));
+    formData.append('user_id', String(authenticationStore.user.id));
     formData.append('type_education_id', String(form.value.type_education_id));
     formData.append('teacher_id', String(form.value.teacher_id || ''));
     formData.append('archive', form.value.archive);
@@ -62,15 +60,15 @@ const submitForm = async () => {
     loading.form = true;
     try {
       console.log('📤 [FORM] Enviando formulario...');
-      const { data, response } = await useApi('note-store').post(formData);
+      const { data, response } = await useAxios('note-store').post(formData);
       console.log('📥 [FORM] Respuesta del servidor:', data.value);
 
-      if (response.value?.ok && data.value) {
-        if (data.value.status === 'success') {
-          console.log(`🚀 [FORM] Iniciando loading para batch_id:`, data.value.batch_id);
+      if (response.status == 200 && data) {
+        if (data.status === 'success') {
+          console.log(`🚀 [FORM] Iniciando loading para batch_id:`, data.batch_id);
 
-          const fileName = archive.value.imageFile?.name || 'Archivo desconocido';
-          const success = globalLoading.startLoading(data.value.batch_id, fileName);
+          const success = globalLoading.startLoading(data.batch_id);
+
 
           if (success) {
             toast("Importación iniciada correctamente", "", "success");
@@ -88,10 +86,10 @@ const submitForm = async () => {
             toast("Error iniciando la importación", "", "danger");
           }
 
-        } else if (data.value.status === 'error') {
-          toast("Error en la importación", data.value.message, "danger");
-          if (data.value.errors) {
-            errorsBack.value = data.value.errors;
+        } else if (data.status === 'error') {
+          toast("Error en la importación", data.message, "danger");
+          if (data.errors) {
+            errorsBack.value = data.errors;
           }
         }
       } else {
@@ -112,11 +110,15 @@ const submitForm = async () => {
 
 const loadTypeEducationsAndTeachers = async () => {
   loading.form = true;
-  const { data, response } = await useApi('note-dataForm').get();
-  if (response.value?.ok && data.value) {
-    typeEducations.value = data.value.typeEducations;
-    selectedSwitch.value = data.value.blockData;
-    teachers.value = data.value.teachers;
+  const { data, response } = await useAxios('note-dataForm').get({
+    params: {
+      company_id: authenticationStore.company.id
+    }
+  });
+  if (response.status == 200 && data) {
+    typeEducations.value = data.typeEducations;
+    selectedSwitch.value = data.blockData;
+    teachers.value = data.teachers;
   }
   loading.form = false;
 };
@@ -231,52 +233,9 @@ onMounted(async () => {
 
 <template>
   <div>
-    <!-- ✅ RESUMEN CON BOTÓN VER TODAS -->
-    <VCard class="mb-3" v-if="globalLoading.allProcesses.value.length > 0">
-      <VCardTitle class="d-flex align-center justify-space-between">
-        <div class="d-flex align-center">
-          🔄 Importaciones
-          <VChip color="primary" size="small" class="ms-2">
-            {{ globalLoading.activeProcesses.value.length }} activa{{ globalLoading.activeProcesses.value.length !== 1 ?
-              's' : '' }}
-          </VChip>
-          <VChip v-if="globalLoading.queuedProcesses.value.length > 0" color="warning" size="small" class="ms-2">
-            {{ globalLoading.queuedProcesses.value.length }} en cola
-          </VChip>
-          <VChip v-if="globalLoading.completedProcesses.value.length > 0" color="success" size="small" class="ms-2">
-            {{ globalLoading.completedProcesses.value.length }} completada{{
-              globalLoading.completedProcesses.value.length !== 1 ? 's' : '' }}
-          </VChip>
-        </div>
-        <VBtn variant="outlined" size="small" @click="globalLoading.showProcessListModal()">
-          <VIcon start icon="tabler-list" />
-          Ver Todas ({{ globalLoading.allProcesses.value.length }})
-        </VBtn>
-      </VCardTitle>
-      <VCardText>
-        <VAlert type="info" variant="tonal">
-          <div class="d-flex align-center mb-2">
-            <VIcon icon="tabler-info-circle" class="me-2" />
-            <strong>Sistema de cola activo</strong>
-          </div>
-          <div class="text-body-2">
-            Puedes subir múltiples archivos. Se procesarán uno después del otro automáticamente.
-            Usa el botón "Ver Todas" para gestionar todos los procesos.
-          </div>
-          <div class="text-body-2 mt-2" v-if="hasActiveProcess">
-            <strong>Progreso actual:</strong> {{ Math.round(globalLoading.currentProgress.value || 0) }}%
-          </div>
-        </VAlert>
-      </VCardText>
-    </VCard>
-
     <VCard :disabled="loading.form" :loading="loading.form" v-if="hasPermission('note.upload_notes')">
       <VCardTitle primary-title>
         Cargar Notas
-        <VChip v-if="globalLoading.allProcesses.value.length > 0" color="info" size="small" class="ms-2">
-          {{ globalLoading.allProcesses.value.length }} proceso{{ globalLoading.allProcesses.value.length !== 1 ? 's' :
-            '' }}
-        </VChip>
       </VCardTitle>
       <VCardText>
         <VForm ref="formValidation" lazy-validation>

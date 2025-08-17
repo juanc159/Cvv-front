@@ -1,12 +1,23 @@
 <template>
   <!-- Loading Principal -->
-  <LoadingV2Enhanced v-if="globalLoading.isLoading.value && !globalLoading.isMinimized.value" :is-loading="true"
-    :progress="globalLoading.currentProgress.value" :title="title" :subtitle="subtitle" @minimized="handleMinimize"
-    @completed="handleCompleted" :show-multiple-button="globalLoading.hasMultipleProcesses.value"
-    @show-multiple="handleShowMultiple" :debug-data="globalLoading.debugInfo.value" />
+  <LoadingV2Enhanced
+    v-if="globalLoading.isLoading.value && globalLoading.currentProcess.value && !globalLoading.isMinimized.value && !globalLoading.showProcessList.value"
+    :is-loading="true"
+    :progress="globalLoading.currentProgress.value"
+    :title="title"
+    :subtitle="subtitle"
+    @minimized="handleMinimize"
+    @completed="handleCompleted"
+    :show-multiple-button="globalLoading.hasMultipleProcesses.value"
+    @show-multiple="handleShowMultiple"
+    :debug-data="globalLoading.debugInfo.value"
+  />
 
   <!-- Estado Minimizado -->
-  <div v-else-if="globalLoading.isLoading.value && globalLoading.isMinimized.value" class="minimized-overlay">
+  <div
+    v-else-if="globalLoading.isLoading.value && globalLoading.currentProcess.value && globalLoading.isMinimized.value"
+    class="minimized-overlay"
+  >
     <v-card class="minimized-card" @click="handleRestore">
       <v-progress-circular :model-value="globalLoading.currentProgress.value" color="primary" size="40" width="3">
         {{ Math.round(globalLoading.currentProgress.value) }}%
@@ -16,7 +27,7 @@
           {{ globalLoading.activeProcesses.value.length }} activo{{ globalLoading.activeProcesses.value.length !== 1 ?
             's' : '' }}
           {{ globalLoading.queuedProcesses.value.length > 0 ? `, ${globalLoading.queuedProcesses.value.length} en cola`
-          : '' }}
+            : '' }}
         </div>
         <div class="text-caption text-medium-emphasis">
           {{ Math.round(globalLoading.currentProgress.value) }}% completado
@@ -30,11 +41,16 @@
   </div>
 
   <!-- Lista de Procesos -->
-  <ProcessListModal v-if="globalLoading.showProcessList.value" :all-processes="globalLoading.allProcesses.value"
-    :active-processes="globalLoading.activeProcesses.value"
-    :completed-processes="globalLoading.completedProcesses.value"
-    :queued-processes="globalLoading.queuedProcesses.value" :sorted-processes="globalLoading.sortedProcesses.value"
-    @remove-process="handleRemoveProcess" @clear-completed="handleClearCompleted" @close="handleCloseProcessList" />
+  <ProcessListModal
+    v-if="globalLoading.showProcessList.value"
+    @remove-process="handleRemoveProcess"
+    @clear-completed="handleClearCompleted"
+    @close="handleCloseProcessList"
+    @showDataProcess="handleShowDataProcess"
+  />
+
+  <!-- Modal Listado de errores -->
+  <ModalListErrors ref="refModalListErrors" />
 
   <!-- Notification cuando completa -->
   <v-snackbar v-model="showCompletionNotification" :timeout="5000" color="success" location="top">
@@ -50,20 +66,28 @@
 
 <script setup lang="ts">
 import { useGlobalLoading } from '@/composables/useGlobalLoading';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import LoadingV2Enhanced from './LoadingV2Enhanced.vue';
+import ModalListErrors from './ModalListErrors.vue';
 import ProcessListModal from './ProcessListModal.vue';
 
+const authenticationStore = useAuthenticationStore();
 const globalLoading = useGlobalLoading();
 const showCompletionNotification = ref(false);
-const progress = computed(() => globalLoading.currentProgress.value);
 
+// Referencia al modal de errores
+const refModalListErrors = ref();
+const openModalListErrors = (batchId: string) => {
+  refModalListErrors.value.openModal(batchId);
+};
+
+// Computed properties para el título y subtítulo del loading principal
 const title = computed(() => {
   const process = globalLoading.currentProcess.value;
   const progress = globalLoading.currentProgress.value;
-
   if (!process) return 'Sin proceso activo';
-  if (progress >= 100) return '¡Importación Completada!';
+  if (progress >= 100 && process.status === 'completed') return '¡Importación Completada!'; // Asegurarse de que el estado sea final
   if (progress === 0) return 'Procesando importación';
   return process.current_action || 'Procesando importación';
 });
@@ -71,21 +95,17 @@ const title = computed(() => {
 const subtitle = computed(() => {
   const process = globalLoading.currentProcess.value;
   const progress = globalLoading.currentProgress.value;
-
   if (!process) return 'Sin proceso activo';
-  if (progress >= 100) return '¡El archivo se ha procesado exitosamente!';
+  if (progress >= 100 && process.status === 'completed') return '¡El archivo se ha procesado exitosamente!'; // Asegurarse de que el estado sea final
   if (progress === 0) return 'Iniciando proceso de importación...';
-
-  let subtitle = `${Math.round(progress)}% completado - ${process.current_student}`;
-
-  // ✅ AGREGAR INFO DE COLA SI HAY PROCESOS PENDIENTES
+  let subtitleText = `${Math.round(progress)}% completado - ${process.current_element}`;
   if (globalLoading.queuedProcesses.value.length > 0) {
-    subtitle += ` • ${globalLoading.queuedProcesses.value.length} en cola`;
+    subtitleText += ` • ${globalLoading.queuedProcesses.value.length} en cola`;
   }
-
-  return subtitle;
+  return subtitleText;
 });
 
+// Handlers para eventos del LoadingV2Enhanced
 const handleCompleted = () => {
   console.log('✅ [MANAGER] Loading completed');
 };
@@ -106,7 +126,10 @@ const handleRemoveProcess = (batchId: string) => {
   globalLoading.removeProcess(batchId);
 };
 
-// ✅ NUEVA FUNCIÓN PARA LIMPIAR COMPLETADOS
+const handleShowDataProcess = (batchId: string) => {
+  openModalListErrors(batchId);
+};
+
 const handleClearCompleted = () => {
   globalLoading.clearCompletedProcesses();
 };
@@ -115,24 +138,34 @@ const handleCloseProcessList = () => {
   globalLoading.hideProcessListModal();
 };
 
+// Configuración de callbacks para eventos del composable
 const setupCallbacks = () => {
   globalLoading.onCompleted((batchId: string) => {
     console.log(`🎉 [MANAGER] ¡IMPORTACIÓN COMPLETADA! Batch: ${batchId}`);
-
-    if (globalLoading.isMinimized.value) {
+    // Solo muestra la notificación si el proceso completado es el que estaba en la vista principal o si está minimizado
+    if (globalLoading.currentProcess.value?.batch_id === batchId || globalLoading.isMinimized.value) {
       showCompletionNotification.value = true;
     }
   });
-
   globalLoading.onError((batchId: string, error: any) => {
     console.error(`❌ [MANAGER] Error en batch ${batchId}:`, error);
   });
-
   globalLoading.onProgressUpdated((batchId: string, progress: number) => {
     console.log(`📊 [MANAGER] Progreso: ${progress}% para batch ${batchId}`);
   });
+
+  if (authenticationStore.user?.id) {
+    globalLoading.getUserProcesses(authenticationStore.user.id);
+  } else {
+    watch(() => authenticationStore.user?.id, (newId) => {
+      if (newId) {
+        globalLoading.getUserProcesses(newId);
+      }
+    }, { immediate: true });
+  }
 };
 
+// Lifecycle hooks
 onMounted(() => {
   console.log('🚀 [MANAGER] GlobalLoadingManager mounted');
   setupCallbacks();

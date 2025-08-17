@@ -86,7 +86,7 @@ const iconClasses = computed(() => {
 </script>
 
 <template>
-  <div v-if="shouldShowButton">
+  <div>
     <IconBtn :color="currentColor" @click="globalLoading.showProcessListModal()" class="loading-btn" :class="{
       'loading-btn--animated': hasActiveOrQueuedProcesses,
       'loading-btn--active': globalLoading.activeProcesses.value.length > 0,
@@ -122,7 +122,6 @@ const iconClasses = computed(() => {
 }
 
 @keyframes badgePulse {
-
   0%,
   100% {
     transform: scale(1);
@@ -134,7 +133,6 @@ const iconClasses = computed(() => {
 }
 
 @keyframes buttonGlow {
-
   0%,
   100% {
     box-shadow: 0 0 5px rgba(var(--v-theme-primary-rgb), 0.3);
@@ -155,6 +153,7 @@ const iconClasses = computed(() => {
 .loading-btn {
   position: relative;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
   /* border-radius: 12px !important; */
 }
 
@@ -175,14 +174,14 @@ const iconClasses = computed(() => {
 }
 
 .loading-btn:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 15%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* ✅ ESTILOS PARA EL ICONO */
 .loading-icon {
-  transition: transform 0.3s ease;
   display: inline-block;
+  transition: transform 0.3s ease;
 }
 
 .loading-btn:hover .loading-icon:not(.spin-animation) {
@@ -192,8 +191,8 @@ const iconClasses = computed(() => {
 /* ✅ ESTILOS PARA EL BADGE */
 .loading-badge {
   position: absolute !important;
-  top: -6px !important;
-  right: -6px !important;
+  inset-block-start: -6px !important;
+  inset-inline-end: -6px !important;
 }
 
 .loading-badge--pulse {
@@ -220,13 +219,13 @@ const iconClasses = computed(() => {
 /* ✅ RESPONSIVE */
 @media (max-width: 600px) {
   .loading-badge {
-    top: -4px !important;
-    right: -4px !important;
+    inset-block-start: -4px !important;
+    inset-inline-end: -4px !important;
   }
 
   .loading-btn {
-    min-width: 44px;
-    min-height: 44px;
+    min-block-size: 44px;
+    min-inline-size: 44px;
   }
 }
 
@@ -243,7 +242,6 @@ const iconClasses = computed(() => {
 
 /* ✅ MEJORAS PARA ACCESIBILIDAD */
 @media (prefers-reduced-motion: reduce) {
-
   .spin-animation,
   .loading-badge--pulse,
   .loading-btn--animated {
