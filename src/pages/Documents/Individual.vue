@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { useAuthenticationStore } from '@/stores/useAuthenticationStore';
 import { computed, ref } from 'vue';
+const authenticationStore = useAuthenticationStore();
 
 // Define interfaces for better type safety
 interface Student {
@@ -290,6 +292,10 @@ const documentTypes = [
 const handleIsDialogVisible = (isVisible: boolean = false) => {
   showAdditionalInfoModal.value = isVisible;
 };
+
+const params = ref({
+  company_id: authenticationStore.company?.id
+});
 </script>
 
 <template>
@@ -306,8 +312,8 @@ const handleIsDialogVisible = (isVisible: boolean = false) => {
           <VRow>
             <VCol cols="12" md="8" class="mx-auto">
               <AppSelectRemote :return-object="false" v-model="searchQuery" url="selectInfiniteStudent"
-                arrayInfo="student" label="Estudiante" @update:model-value="searchStudent"
-                @click:clear="clearSelection" />
+                arrayInfo="student" label="Estudiante" @update:model-value="searchStudent" @click:clear="clearSelection"
+                :params="params" />
             </VCol>
           </VRow>
         </div>
