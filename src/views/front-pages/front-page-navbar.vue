@@ -95,7 +95,7 @@ const menu = ref<
   // },
   {
     title: "Inscripciones Virtuales",
-    to: "https://docs.google.com/forms/d/e/1FAIpQLSdpFCCns9x0ngiVVck-Cil-HKyKnw5kSdV0bS7mkPTIF6PAeA/viewform",
+    to: "https://docs.google.com/forms/d/e/1FAIpQLSdcycZnXHLTyudzofgxtlB1LagywZY6wBdh2Z9yJII4ImMFPg/viewform?usp=header",
     hash: "",
     isExternal: true, // Marca como externa
     icon: "tabler-books",
