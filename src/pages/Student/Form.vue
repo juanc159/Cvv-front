@@ -74,7 +74,11 @@ const fetchDataForm = async () => {
   const url = form.value.id ? `/student/${form.value.id}/edit` : `/student/create`
 
   loading.form = true
-  const { response, data } = await useAxios(url).get();
+  const { response, data } = await useAxios(url).get({
+    params: {
+      company_id: authenticationStore.company.id
+    }
+  });
   loading.form = false
 
   if (response.status == 200 && data) {
