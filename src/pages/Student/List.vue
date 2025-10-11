@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ModalUnsubscribe from "@/pages/Student/ModalUnsubscribe.vue";
 import { router } from '@/plugins/1.router';
+import ModalImportStudents from '@/pages/Student/ModalImportStudents.vue';
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
 definePage({
@@ -179,6 +180,13 @@ const downloadExcel = async () => {
     downloadExcelBase64(data.excel, "Lista de estudiantes")
   }
 }
+
+//ModalImportStudents
+const refModalImportStudents = ref()
+const openModalImportStudents = () => {
+  refModalImportStudents.value.openModal()
+}
+
 </script>
 
 <template>
@@ -195,6 +203,12 @@ const downloadExcel = async () => {
             @click="downloadExcel()">
             <VIcon icon="tabler-file-spreadsheet"></VIcon>
             <VTooltip location="top" transition="scale-transition" activator="parent" text="Descargar Excel">
+            </VTooltip>
+          </VBtn>
+          <VBtn  size="38" color="primary" icon
+            @click="openModalImportStudents()">
+            <VIcon icon="tabler-upload"></VIcon>
+            <VTooltip location="top" transition="scale-transition" activator="parent" text="Importar Excel">
             </VTooltip>
           </VBtn>
 
@@ -263,6 +277,9 @@ const downloadExcel = async () => {
     </VDialog>
 
     <ModalUnsubscribe ref="refModalUnsubscribe" @execute="refreshTable" />
+
+    <ModalImportStudents ref="refModalImportStudents" :maxFileSizeMB="200" />
+
 
   </div>
 </template>
