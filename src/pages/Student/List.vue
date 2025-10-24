@@ -106,6 +106,7 @@ const loading = reactive({
   table: false,
   btnPdf: false,
   excel: false,
+  downloadFormatLoadStudents: false,
 })
 
 const resetPassword = async (id: number) => {
@@ -187,6 +188,23 @@ const openModalImportStudents = () => {
   refModalImportStudents.value.openModal()
 }
 
+
+const downloadFormatLoadStudents = async () => {
+  loading.downloadFormatLoadStudents = true;
+
+  const { data, response } = await useAxios("/students/downloadFormatLoadStudents").get({
+    params: { 
+      company_id: authenticationStore.company.id
+    }
+  })
+
+  loading.downloadFormatLoadStudents = false;
+
+  if (response.status == 200 && data) {
+    downloadExcelBase64(data.excel, "Formato de estudiantes")
+  }
+}
+
 </script>
 
 <template>
@@ -205,12 +223,16 @@ const openModalImportStudents = () => {
             <VTooltip location="top" transition="scale-transition" activator="parent" text="Descargar Excel">
             </VTooltip>
           </VBtn>
-          <VBtn  size="38" color="primary" icon
-            @click="openModalImportStudents()">
+          <!-- <VBtn size="38" color="primary" icon @click="openModalImportStudents()">
             <VIcon icon="tabler-upload"></VIcon>
             <VTooltip location="top" transition="scale-transition" activator="parent" text="Importar Excel">
             </VTooltip>
           </VBtn>
+          <VBtn :loading="loading.downloadFormatLoadStudents" :disabled="loading.downloadFormatLoadStudents" size="38" color="primary" icon @click="downloadFormatLoadStudents()">
+            <VIcon icon="tabler-download"></VIcon>
+            <VTooltip location="top" transition="scale-transition" activator="parent" text="Exportar formato">
+            </VTooltip>
+          </VBtn> -->
 
           <VBtn @click="goViewCreate()">
             Agregar estudiante
