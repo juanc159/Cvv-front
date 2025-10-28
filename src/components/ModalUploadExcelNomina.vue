@@ -57,6 +57,7 @@ const submitForm = async () => {
   form.value.company_id = authenticationStore.user.company_id;
 
   const validation = await formValidation.value?.validate();
+
   if (validation?.valid) {
 
     const formData = new FormData()
@@ -68,7 +69,7 @@ const submitForm = async () => {
     formData.append("teacher_id", String(authenticationStore.user.id));
 
     loading.form = true
-    const { data, response } = await useAxios('note-store').post(formData);
+    const { data, response } = await useAxios('/note-store-teachers').post(formData);
 
     loading.form = false
 
