@@ -166,7 +166,7 @@ const dowloadNomina = async () => {
     toast("Faltan Campos Por Diligenciar", "", "danger");
   }
 }
-const dowloadNominaPorcentaje = async () => {
+const dowloadNominaPorcentajes = async () => {
 
   const validation = await formValidationDownload.value?.validate();
 
@@ -174,17 +174,19 @@ const dowloadNominaPorcentaje = async () => {
     loading.download_notes = true;
 
     const search = typeEducations.value.find(ele => ele.value == formDownload.value.type_education_id)
-
-    const { data, response } = await useAxios(`/note-downloadAllConsolidated`).get({
-      params: {
-        type_education_id: formDownload.value.type_education_id,
-        company_id: authenticationStore.company.id,
-      }
-    })
+    const { data, response } = await useApi<any>(
+      createUrl(`/note-downloadConsolidatedPocentage`, {
+        query: {
+          type_education_id: formDownload.value.type_education_id,
+          company_id: authenticationStore.company.id,
+        },
+      })
+    );
 
     loading.download_notes = false;
-    if (response.status == 200 && data) {
-      downloadExcelBase64(data.excel, "Consolidado " + search?.title)
+
+    if (response.value?.ok && data.value) {
+      downloadExcelBase64(data.value.excel, "Consolidado " + search?.title)
     }
   } else {
     toast("Faltan Campos Por Diligenciar", "", "danger");
@@ -308,14 +310,14 @@ onMounted(async () => {
             </VCol>
           </VRow>
           <VRow>
-            <VCol cols="12" class="d-flex align-center justify-center gap-4">
+            <VCol cols="12" class="d-flex justify-start gap-3 flex-wrap mt-5">
               <VBtn :loading="loading.download_notes" :disabled="loading.download_notes" color="primary"
                 @click="dowloadNomina()">
                 Descargar
               </VBtn>
               <VBtn :loading="loading.download_notes" :disabled="loading.download_notes" color="primary"
-                @click="dowloadNominaPorcentaje()">
-                Descargar porcentajes
+                @click="dowloadNominaPorcentajes()">
+                Descargar notas con procentajes
               </VBtn>
             </VCol>
           </VRow>

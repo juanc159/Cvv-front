@@ -33,22 +33,20 @@ export const useAuthenticationStore = defineStore("useAuthenticationStore", {
     },
     async login(formulario: ILogin): Promise<IPromise> {
       this.loading = true;
-      const { data, response } = await useApi("/login").post(
-        formulario
-      );
+      const { data, response } = await useAxios("/login").post(formulario);
       this.loading = false;
 
-      if (response.value?.ok && data.value) {
+      if (response.status == 200 && data) {
         this.isAuthenticate = true;
-        this.user = data.value.user;
-        this.company = data.value.company;
-        this.menu = data.value.menu;
-        this.permissions = data.value.permissions;
-        this.access_token = data.value.access_token;
+        this.user = data.user;
+        this.company = data.company;
+        this.menu = data.menu;
+        this.permissions = data.permissions;
+        this.access_token = data.access_token;
         useCookie("accessToken").value = this.access_token;
       }
 
-      return data.value;
+      return data;
     },
 
     checkAuthentication() {

@@ -21,11 +21,11 @@ const title = ref()
 const isLoading = ref<boolean>(false)
 onMounted(async () => {
   isLoading.value = true
-  const response = await useApi(`pw-dataGradeSection/${school_id}/${grade_id}/${section_id}`).get();
+  const { data, response } = await useAxios(`pw-dataGradeSection/${school_id}/${grade_id}/${section_id}`).get();
   isLoading.value = false
-  if (response.data) {
-    teachers.value = response.data.value.teachers;
-    title.value = response.data.value.title;
+  if (response.status == 200 && data) {
+    teachers.value = data.teachers;
+    title.value = data.title;
   }
 }); 
 </script>

@@ -1,7 +1,12 @@
 <script lang="ts" setup>
+import { useAuthenticationStore } from '@/stores/useAuthenticationStore';
 import { VerticalNav } from '@layouts/components';
 import { useLayoutConfigStore } from '@layouts/stores/config';
 import type { VerticalNavItems } from '@layouts/types';
+
+const authenticationStore = useAuthenticationStore();
+
+const { company, user } = storeToRefs(authenticationStore);
 
 interface Props {
   navItems: VerticalNavItems
@@ -81,7 +86,11 @@ const verticalNavAttrs = computed(() => {
         </div>
       </main>
       <!-- NUEVO: Componente global de loading para importaciones -->
-      <GlobalLoadingManager />
+      <template v-if="user.type_user != 'student'">
+
+        <GlobalLoadingManager />
+      </template>
+
       <!-- <footer class="layout-footer">
         <div class="footer-content-container">
           <slot name="footer" />

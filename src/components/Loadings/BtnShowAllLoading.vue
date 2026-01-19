@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { useGlobalLoading } from '@/composables/useGlobalLoading' 
+import { useGlobalLoading } from '@/composables/useGlobalLoading'
+import { computed } from 'vue'
 
 const globalLoading = useGlobalLoading()
 

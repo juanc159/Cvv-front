@@ -50,7 +50,8 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 const login = async () => {
   const validation = await refForm.value?.validate();
   if (validation?.valid) {
-    const promise = await authenticationStore.login(form);
+    const promise = await authenticationStore.login(form.value);
+    console.log(promise);
 
     if (promise.code == 200) {
       if (promise.user.type_user == 'student') {
