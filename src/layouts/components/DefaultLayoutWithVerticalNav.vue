@@ -9,9 +9,11 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
 import NavBarI18n from '@core/components/I18n.vue'
 
 // @layouts plugin
+import { useAuthenticationStore } from '@/stores/useAuthenticationStore'
 import { VerticalNavLayout } from '@layouts'
 
-
+const authenticationStore = useAuthenticationStore();
+const { company, user } = storeToRefs(authenticationStore);
 </script>
 
 <template>
@@ -28,7 +30,9 @@ import { VerticalNavLayout } from '@layouts'
         <VSpacer />
 
         <!-- NUEVO: Componente global de loading para importaciones -->
-        <BtnShowAllLoading />
+        <template v-if="user.type_user != 'student'">
+          <BtnShowAllLoading />
+        </template>
 
 
 

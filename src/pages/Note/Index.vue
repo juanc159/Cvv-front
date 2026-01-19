@@ -166,6 +166,32 @@ const dowloadNomina = async () => {
     toast("Faltan Campos Por Diligenciar", "", "danger");
   }
 }
+const dowloadNominaPorcentajes = async () => {
+
+  const validation = await formValidationDownload.value?.validate();
+
+  if (validation?.valid) {
+    loading.download_notes = true;
+
+    const search = typeEducations.value.find(ele => ele.value == formDownload.value.type_education_id)
+    const { data, response } = await useApi<any>(
+      createUrl(`/note-downloadAllConsolidated`, {
+        query: {
+          type_education_id: formDownload.value.type_education_id,
+          company_id: authenticationStore.company.id,
+        },
+      })
+    );
+
+    loading.download_notes = false;
+
+    if (response.value?.ok && data.value) {
+      downloadExcelBase64(data.value.excel, "Consolidado " + search?.title)
+    }
+  } else {
+    toast("Faltan Campos Por Diligenciar", "", "danger");
+  }
+}
 
 
 
@@ -284,11 +310,15 @@ onMounted(async () => {
             </VCol>
           </VRow>
           <VRow>
-            <VCol cols="12" class="d-flex justify-center">
+            <VCol cols="12" class="d-flex justify-start gap-3 flex-wrap mt-5">
               <VBtn :loading="loading.download_notes" :disabled="loading.download_notes" color="primary"
                 @click="dowloadNomina()">
                 Descargar
               </VBtn>
+              <!-- <VBtn :loading="loading.download_notes" :disabled="loading.download_notes" color="primary"
+                @click="dowloadNominaPorcentajes()">
+                Descargar notas con procentajes
+              </VBtn> -->
             </VCol>
           </VRow>
         </VForm>

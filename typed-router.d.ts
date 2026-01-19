@@ -19,6 +19,8 @@ declare module 'vue-router/auto-routes' {
    */
   export interface RouteNamedMap {
     '$error': RouteRecordInfo<'$error', '/:error(.*)', { error: ParamValue<true> }, { error: ParamValue<false> }>,
+    'ActivitiesStudent': RouteRecordInfo<'ActivitiesStudent', '/dashboard/student/activities', Record<never, never>, Record<never, never>>,
+    'ActivitiesTeacher': RouteRecordInfo<'ActivitiesTeacher', '/dashboard/teacher/activities', Record<never, never>, Record<never, never>>,
     'ForgotPassword': RouteRecordInfo<'ForgotPassword', '/ForgotPassword', Record<never, never>, Record<never, never>>,
     'ResetPassword': RouteRecordInfo<'ResetPassword', '/ResetPassword/:token', Record<never, never>, Record<never, never>>,
     'VerifyEmail': RouteRecordInfo<'VerifyEmail', '/VerifyEmail', Record<never, never>, Record<never, never>>,
@@ -35,6 +37,7 @@ declare module 'vue-router/auto-routes' {
     'Home': RouteRecordInfo<'Home', '/home', Record<never, never>, Record<never, never>>,
     'Login': RouteRecordInfo<'Login', '/login', Record<never, never>, Record<never, never>>,
     'Note-Index': RouteRecordInfo<'Note-Index', '/Note/Index', Record<never, never>, Record<never, never>>,
+    'Notifications-Index': RouteRecordInfo<'Notifications-Index', '/Notifications/Index', Record<never, never>, Record<never, never>>,
     'PendingRegistration-List': RouteRecordInfo<'PendingRegistration-List', '/PendingRegistration/List', Record<never, never>, Record<never, never>>,
     'PendingRegistration-Files': RouteRecordInfo<'PendingRegistration-Files', 'pendingRegistration-Files/:id', Record<never, never>, Record<never, never>>,
     'PendingRegistration-Form': RouteRecordInfo<'PendingRegistration-Form', 'pendingRegistration-form/:action/:id?', Record<never, never>, Record<never, never>>,
