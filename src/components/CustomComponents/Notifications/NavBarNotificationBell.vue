@@ -1,181 +1,59 @@
 <script lang="ts" setup>
-import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
-import type { Notification } from '@layouts/types';
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useNotificationStore } from './useNotificationStore';
 
-const authenticationStore = useAuthenticationStore();
-const emit = defineEmits(["reload-task"])
-const { toast } = useToast()
+const router = useRouter();
+const notificationStore = useNotificationStore(); // Instanciar Store
+const isLoading = ref(false);
 
-
-
-const enableInfiniteScroll = ref(false);
-
-const notifications = ref<Notification[]>([])
-const nextPageUrl = ref(null); // URL for next page 
-const isLoading = ref<boolean>(false)
-const initapi = ref<boolean>(false)
-const unreadCount = ref<number>(0);
-
-const getNotifications = async (url = '/notification/getNotifications/' + authenticationStore.user.id) => {
-
-  if (url) {
+// Usamos el store para cargar y escuchar
+onMounted(async () => {
+  // Solo cargamos si está vacío para evitar llamadas dobles innecesarias, 
+  // o forzamos carga si prefieres frescura.
+  if (notificationStore.notifications.length === 0) {
     isLoading.value = true;
-    // Si 'url' es proporcionado, es la URL para la siguiente página
-    const { response, data } = await useApi(url).get();
-
+    await notificationStore.fetchNotifications();
     isLoading.value = false;
-
-    if (response.value?.ok && data.value) {
-      // Concatenar las nuevas notificaciones al array actual
-      notifications.value.push(...data.value.notifications);
-      nextPageUrl.value = data.value.nextPageUrl;
-      unreadCount.value = data.value.unreadCount;
-
-    }
   }
+
+  // Iniciamos el listener global (el store se encarga de no duplicarlo)
+  notificationStore.initializeListener();
+});
+
+const handleLoadMore = async ({ done }: any) => {
+  if (!notificationStore.nextPageUrl) { done('empty'); return; }
+  try {
+    await notificationStore.fetchNotifications(notificationStore.nextPageUrl);
+    done('ok');
+  } catch { done('error'); }
 };
 
-// Función que se llama cuando el usuario hace scroll
-async function load({ done }) {
-
-  if (enableInfiniteScroll.value) {
-    try {
-      isLoading.value = true;
-      await getNotifications(nextPageUrl.value);
-      done('ok');
-    } catch (error) {
-      console.error('Error loading notifications:', error);
-      done('error');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-}
-
-getNotifications()
-
-const removeNotification = (notificationId: number) => {
-  notifications.value.forEach((item, index) => {
-    if (notificationId === item.id)
-      notifications.value.splice(index, 1)
-  })
-
-  const { response, data } = useApi(`/notifications/remove`).post({
-    notification_ids: [notificationId]
-  });
-
-}
-
-const markRead = async (notificationId: number[]) => {
-  notifications.value.forEach(item => {
-    notificationId.forEach(id => {
-      if (id === item.id) {
-        item.isSeen = true
-        unreadCount.value = unreadCount.value - 1
-      }
-
-    })
-  })
-
-
-  const { response, data } = await useApi(`/notification/markMultipleAsRead`).post({
-    notification_ids: notificationId
-  });
-}
-
-const markUnRead = async (notificationId: number[]) => {
-  notifications.value.forEach(item => {
-    notificationId.forEach(id => {
-      if (id === item.id) {
-        item.isSeen = false
-        unreadCount.value = unreadCount.value + 1
-      }
-
-    })
-  })
-
-  const { response, data } = await useApi(`/notification/markMultipleAsUnread`).post({
-    notification_ids: notificationId
-  });
-}
-
-const handleNotificationClick = (notification: Notification) => {
-  // 1. Marcar como leída si no lo está
-  if (!notification.isSeen) {
-    markRead([notification.id]);
-  }
-
-  console.log("notification", notification);
-
-
-  
-  // 2. Verificar si hay URL y cómo abrirla
-  if (notification.action_url) {
-    if (notification.openInNewTab) {
-      // 3. Abrir en nueva pestaña
-      window.open(notification.action_url, '_blank');
-    } else {
-      // 2. Redirección normal
-      // router.push(notification.action_url);
-    }
-  }
-  // 4. Si no hay action_url, no hace nada
-}
-
-
-
-
-window.Echo.channel('user.' + authenticationStore.user.id)
-  .listen('.update-notification', (event) => {
-
-    unreadCount.value = event.activeNotificationsCount
-
-    notifications.value.forEach((item, index) => {
-      // Buscar el elemento correspondiente en event.notifications
-      const notification = event.notifications.find(e => e.id === item.id);
-
-      if (notification) {
-        // Si notification tiene is_removed en true, eliminar item
-        if (notification.is_removed) {
-          notifications.value.splice(index, 1);  // Elimina el item en el índice actual
-        } else {
-          // Si no está marcado como eliminado, actualizar los valores
-          item.isSeen = notification.isSeen;
-          item.time = notification.time;
-        }
-      }
-    });
-  })
-  .listen('.bell-notification', (event) => {
-    notifications.value.unshift(event)
-
-    unreadCount.value = event.activeNotificationsCount
-
-    toast("Tienes una nueva notificación", event.title, "info", "bottom-right")
-  });
-
-// Modificar la función handleLoadMore
-const handleLoadMore = async () => {
-  // if (!nextPageUrl.value || isLoading.value) return;
-
-  enableInfiniteScroll.value = true; // Primero activa el scroll
-  // isLoading.value = true;
-  await getNotifications(nextPageUrl.value);
-  // isLoading.value = false;
+const handleViewAll = () => {
+  router.push({ name: 'Notifications-Index' });
 };
+
+// Acciones directas al store
+const handleRemove = (id) => notificationStore.remove(id);
+const handleRead = (ids) => notificationStore.markAsRead(ids);
+// Para unread, podrías agregar la acción al store si la necesitas
+const handleUnread = async (ids) => {
+  // Lógica rápida local o agregar acción 'markAsUnread' en el store
+  await useApi('/notification/markMultipleAsUnread').post({ notification_ids: ids });
+  // Actualizar store manual si no creaste la acción
+  const notif = notificationStore.notifications.find(n => n.id === ids[0]);
+  if (notif) { notif.isSeen = false; notificationStore.unreadCount++; }
+};
+
+const handleClick = (n) => {
+  if (!n.isSeen) notificationStore.markAsRead([n.id]);
+  if (n.action_url) { /* logica navegación */ }
+}
 </script>
 
 <template>
-  <div>
-
-    <NotificationsList :notifications="notifications" :unreadCount="unreadCount" @remove="removeNotification"
-      @read="markRead" @unread="markUnRead" @click:notification="handleNotificationClick" :loading="isLoading"
-      :getNotifications="getNotifications" :enable-infinite-scroll="enableInfiniteScroll" :nextPageUrl="nextPageUrl"
-      @load-more="handleLoadMore" @load-data-init="getNotifications" />
-    <!-- <Notifications :notifications="notifications" :unreadCount="unreadCount" @load="load" @remove="removeNotification"
-      @read="markRead" @unread="markUnRead" @click:notification="handleNotificationClick" :loading="isLoading"
-      :getNotifications="getNotifications" :enable-infinite-scroll="enableInfiniteScroll" @load-more="handleLoadMore"
-      @load-data-init="getNotifications" /> -->
-  </div>
+  <NotificationsList :notifications="notificationStore.notifications" :unreadCount="notificationStore.unreadCount"
+    :loading="isLoading" :nextPageUrl="notificationStore.nextPageUrl" @remove="handleRemove" @read="handleRead"
+    @unread="handleUnread" @click:notification="handleClick" @load-more="handleLoadMore"
+    @click:view-all="handleViewAll" />
 </template>

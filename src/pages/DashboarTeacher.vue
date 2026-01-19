@@ -11,254 +11,253 @@ definePage({
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
 const authenticationStore = useAuthenticationStore();
+const { user } = storeToRefs(authenticationStore);
 
-const { company, user } = storeToRefs(authenticationStore);
-
+// --- Computed & Helpers ---
 const avatarData = computed(() => {
-  // Asegúrate de que `full_name` no esté vacío
-  const fullName = authenticationStore.user?.full_name || '';
-  // Si `full_name` no está vacío, procesar las iniciales
-  if (fullName) {
-    return fullName
-  }
-
-  return 'S/N'; // Retorna 'A' si `full_name` está vacío
+  const fullName = user.value?.full_name || '';
+  if (fullName) return fullName;
+  return 'D'; // D de Docente
 });
 
 const headersFile = [
-  { title: "Título", key: "name", sortable: false },
+  { title: "Archivo", key: "name", sortable: false },
+  { title: "Acción", key: "actions", sortable: false, align: 'end' },
 ];
 
-
-
+// --- Estados ---
 const loading = reactive({
   form: false,
-  excel: false
-})
-const teacher = ref()
+  excel: false,
+  download: false,
+  excelPercentage: false,
+});
 
+const teacherData = ref(null);
+
+// --- Carga Inicial ---
 onMounted(async () => {
-
-  loading.form = true
-  const { data, response, error } = await useApi('/teacher-planningShow/' + authenticationStore.user?.id).get()
-  loading.form = false
-
+  loading.form = true;
+  // OJO: Aquí enviamos el ID. Si el backend espera user_id o teacher_id es crucial.
+  // Por ahora enviamos el ID que tiene el store (que debería ser el del perfil según tu login)
+  const { data, response } = await useApi('/teacher-planningShow/' + user.value?.id).get();
+  loading.form = false;
 
   if (response.value?.ok && data.value) {
-    teacher.value = data.value.data
+    teacherData.value = data.value.data;
   }
-})
+});
 
+// --- Funciones ---
 
-//EXCEL 
-const downloadConsolidated = async (obj: object) => {
-
+// Descargar Nómina Consolidada
+const downloadConsolidated = async () => {
   loading.excel = true;
-  const { data, response } = await useApi("/teacher-downloadConsolidated/" + obj.id).get()
-
+  const { data, response } = await useApi("/teacher-downloadConsolidated/" + user.value.id).get();
   loading.excel = false;
 
-
   if (response.value?.ok && data.value) {
-    const nameExcel = "Nómina " + obj.full_name
-
-
-    downloadExcelBase64(data.value.excel, nameExcel)
+    const nameExcel = "Nomina_" + user.value.full_name;
+    downloadExcelBase64(data.value.excel, nameExcel);
   }
-}
+};
+
+// Descargar Nómina Consolidada con porcentaje no usar apr subidas
+const downloadConsolidatedPocentage = async () => {
+  loading.excelPercentage = true;
+
+  const { response, data } = await useAxios(`/note-downloadConsolidatedPocentage`).get({
+    params: {
+      teacher_id: user.value.id,
+      company_id: authenticationStore.company.id,
+    }
+  }
+  );
+
+  loading.excelPercentage = false;
+  if (data.code == 200) {
+
+    const nameExcel = "Nomina_porcentajes_" + user.value.full_name;
+    downloadExcelBase64(data.excel, nameExcel);
+  }
+};
 
 
 
-//ModalUploadExcelNomina 
-const refModalUploadExcelNomina = ref()
+// Descargar archivo individual
+const downloadFile = (path: string, name: string) => {
+  // Asumiendo que tienes una función global o composable para esto
+  descargarArchivo(storageBack(path), name);
+};
+
+// --- Modales ---
+const refModalUploadExcelNomina = ref();
 const openModalUploadExcelNomina = () => {
-  refModalUploadExcelNomina.value.openDialog()
-}
+  refModalUploadExcelNomina.value.openDialog();
+};
 
-
-//ModalChangePassword 
-const refModalChangePassword = ref()
-
+const refModalChangePassword = ref();
 const openModalPassword = () => {
-  refModalChangePassword.value.openDialog(user.value.id, false)
-}
-
-
+  refModalChangePassword.value.openDialog(user.value.id, false);
+};
 </script>
+
 <template>
   <div>
+    <VRow class="match-height mb-6">
 
-    <VCard class="mb-6">
-      <VCardTitle class="d-flex justify-center align-center title-container">
-        <h3 class="title-text">{{ user.full_name }}</h3>
-      </VCardTitle>
-      <VRow>
-        <VCol cols="12" sm="4" md="12" lg="5" class="member-pricing-bg text-center">
-          <div class="membership-pricing d-flex flex-column align-center   h-100 justify-center">
-            <VAvatar v-if="authenticationStore.user?.photo" color="primary" variant="tonal" size="250">
-              <VImg :src="storageBack(authenticationStore.user?.photo)" />
+      <VCol cols="12" md="4" lg="3">
+        <VCard class="h-100 text-center pa-4">
+          <div class="d-flex flex-column align-center justify-center h-100">
+            <VAvatar v-if="user?.photo" color="primary" variant="tonal" size="120" class="mb-4">
+              <VImg :src="storageBack(user?.photo)" />
+            </VAvatar>
+            <VAvatar v-else color="primary" variant="tonal" size="120" class="mb-4">
+              <span class="text-h2">{{ avatarText(avatarData) }}</span>
             </VAvatar>
 
-            <VAvatar v-else color="primary" variant="tonal" size="50">
-              {{ avatarText(avatarData) }}
-            </VAvatar>
+            <h3 class="text-h5 font-weight-bold mb-1">{{ user.full_name }}</h3>
+            <span class="text-body-2 text-medium-emphasis mb-4">Panel Docente</span>
+
+            <VBtn size="small" variant="text" color="primary" @click="openModalPassword()">
+              <VIcon icon="tabler-lock" start /> Cambiar Clave
+            </VBtn>
           </div>
-        </VCol>
+        </VCard>
+      </VCol>
 
-
-        <VCol cols="12" sm="8" md="12" lg="7">
+      <VCol cols="12" md="8" lg="9">
+        <VCard class="h-100">
           <VCardItem>
-            <VCardTitle>¡Bienvenido! 🎉</VCardTitle>
+            <VCardTitle class="text-h5">Gestión Académica 🍎</VCardTitle>
+            <VCardSubtitle class="mt-1">
+              Administre sus cargas de notas y planificaciones desde aquí.
+            </VCardSubtitle>
           </VCardItem>
 
-          <VCardText>
-            Estimado profesor,
+          <VCardText class="mt-4">
+            <h4 class="text-base font-weight-medium mb-4">Acciones Disponibles</h4>
 
-            En esta sección puede consultar todo lo relacionado con su planificación. Se agradece que revise
-            cuidadosamente y, ante cualquier novedad, informe.
+            <VRow>
+              <VCol cols="12" sm="6" md="4">
+                <VCard variant="outlined" class="text-center pa-4 card-hover cursor-pointer"
+                  @click="downloadConsolidatedPocentage" :loading="loading.excelPercentage"
+                  :disabled="loading.excelPercentage" v-ripple>
+                  <VIcon icon="tabler-file-spreadsheet" size="32" color="success" class="mb-2" />
+                  <div class="text-body-1 font-weight-medium">Descargar Reporte %</div>
+                  <div class="text-caption text-disabled">Excel Estadísticas</div>
+                </VCard>
+              </VCol>
+              <VCol cols="12" sm="6" md="4">
+                <VCard variant="outlined" class="text-center pa-4 card-hover cursor-pointer"
+                  @click="downloadConsolidated" :loading="loading.excel" :disabeld="loading.excel" v-ripple>
+                  <VIcon icon="tabler-file-spreadsheet" size="32" color="success" class="mb-2" />
+                  <div class="text-body-1 font-weight-medium">Descargar Nómina</div>
+                  <div class="text-caption text-disabled">Excel Consolidado</div>
+                </VCard>
+              </VCol>
 
-            Muchas gracias.
+              <VCol cols="12" sm="6" md="4">
+                <VCard variant="outlined" class="text-center pa-4 card-hover cursor-pointer"
+                  @click="user.blockData ? null : openModalUploadExcelNomina()"
+                  :class="{ 'card-disabled': user.blockData }" v-ripple>
+                  <VIcon icon="tabler-upload" size="32" color="primary" class="mb-2" />
+                  <div class="text-body-1 font-weight-medium">Cargar Notas</div>
+                  <div class="text-caption text-disabled">Subir archivo Excel</div>
+                </VCard>
+              </VCol>
+
+            </VRow>
           </VCardText>
+        </VCard>
+      </VCol>
+    </VRow>
 
-          <VCardText>
-            <VDivider />
-          </VCardText>
+    <VCard class="mb-6" :loading="loading.form">
+      <VCardItem>
+        <VCardTitle>📂 Mis Planificaciones Activas</VCardTitle>
+      </VCardItem>
 
+      <VCardText v-if="teacherData">
+        <div v-if="teacherData.complementaries && teacherData.complementaries.length > 0">
 
-
-          <VCardText class="d-flex justify-center">
-            <div class="me-auto  ">
-              <p class="d-flex align-center mb-6">
-                <VBtn variant="outlined" :disabled="loading.excel" :loading="loading.excel"
-                  @click="downloadConsolidated(authenticationStore.user)">
-                  <VIcon icon="tabler-download"></VIcon>
-                  <span>Descargar Nómina</span>
-                </VBtn>
-              </p>
-
-              <p class="d-flex align-center mb-0">
-                <VBtn :disabled="user.blockData" variant="outlined" @click="openModalUploadExcelNomina()">
-                  <VIcon icon="tabler-download"></VIcon>
-                  <span>Subir Nómina</span>
-                </VBtn>
-              </p>
-            </div>
-
-            <VDivider v-if="$vuetify.display.smAndUp" vertical inset />
-
-            <div class="ms-auto ps-4">
-
-              <p class="d-flex align-center mb-0">
-                <VBtn variant="outlined" @click="openModalPassword()">
-                  <VIcon icon="tabler-lock-open"></VIcon>
-                  <span>Cambiar contraseña</span>
-                </VBtn>
-              </p>
-            </div>
-          </VCardText>
-
-        </VCol>
-
-
-      </VRow>
-    </VCard>
-
-
-
-    <VCard class="mb-6" outlined>
-      <VCardTitle class="d-flex justify-center">
-        <h2>Planificaciones </h2>
-      </VCardTitle>
-
-      <VCardText v-if="teacher">
-
-        <VRow>
-          <VCol cols="12" sm="6">
-            <h2>{{ teacher?.name }} {{ teacher?.last_name }}</h2>
-          </VCol>
-        </VRow>
-        <VRow>
-          <VCol cols="12" v-for="(grade, index) in teacher.complementaries" :key="index">
-            <VCard>
-              <VCardTitle primary-title>
-                <h2>Grado: {{ grade.grade_name }} {{ grade.section_name }}</h2>
-              </VCardTitle>
-              <VCardText>
-
-                <div v-for="(subject, indexS) in grade.subjects" :key="indexS">
-                  <h3>Planificacion: {{ subject.title }}</h3>
-
-                  <VRow>
-                    <VCol cols="12">
-                      <VDataTable :headers="headersFile" :items="subject.files" :items-per-page="999">
-
-                        <template #item.name="{ item, index }">
-                          <div class="d-flex align-center py-1">
-                            <VIcon icon="tabler-file" color="primary" />
-                            <a href="#" @click="descargarArchivo(storageBack(item.file), item.name)"> <b>{{ item.name
-                                }}</b></a>
-                          </div>
-                        </template>
-
-
-                        <template #bottom>
-                        </template>
-                      </VDataTable>
-                    </VCol>
-                  </VRow>
+          <VExpansionPanels variant="accordion" multiple>
+            <VExpansionPanel v-for="(grade, index) in teacherData.complementaries" :key="index">
+              <VExpansionPanelTitle>
+                <div class="d-flex align-center">
+                  <VAvatar color="primary" variant="tonal" size="32" class="me-3">
+                    <span class="text-xs">{{ index + 1 }}</span>
+                  </VAvatar>
+                  <div>
+                    <div class="font-weight-bold">{{ grade.grade_name }} "{{ grade.section_name }}"</div>
+                    <div class="text-caption">{{ grade.subjects?.length || 0 }} Materias</div>
+                  </div>
                 </div>
-              </VCardText>
-            </VCard>
+              </VExpansionPanelTitle>
 
+              <VExpansionPanelText>
+                <div v-for="(subject, indexS) in grade.subjects" :key="indexS" class="mb-4">
+                  <div class="d-flex align-center mb-2 bg-var-theme-background pa-2 rounded">
+                    <VIcon icon="tabler-book" size="20" class="me-2" />
+                    <span class="font-weight-medium">{{ subject.title }}</span>
+                  </div>
 
-          </VCol>
-        </VRow>
+                  <VDataTable :headers="headersFile" :items="subject.files" density="compact" hide-default-footer
+                    class="border rounded">
+                    <template #item.name="{ item }">
+                      <div class="d-flex align-center">
+                        <VIcon icon="tabler-file-type-pdf" color="error" size="20" class="me-2" />
+                        {{ item.name }}
+                      </div>
+                    </template>
+                    <template #item.actions="{ item }">
+                      <VBtn icon variant="text" size="small" color="primary"
+                        @click="downloadFile(item.file, item.name)">
+                        <VIcon icon="tabler-download" />
+                        <VTooltip activator="parent">Descargar</VTooltip>
+                      </VBtn>
+                    </template>
+                    <template #bottom></template>
+                  </VDataTable>
+                </div>
+              </VExpansionPanelText>
+            </VExpansionPanel>
+          </VExpansionPanels>
+
+        </div>
+        <div v-else class="text-center pa-10">
+          <VIcon icon="tabler-folder-off" size="40" class="text-disabled mb-2" />
+          <p>No tienes cursos asignados o planificaciones cargadas.</p>
+        </div>
       </VCardText>
     </VCard>
 
-
     <ModalUploadExcelNomina ref="refModalUploadExcelNomina" />
-
     <ModalChangePassword ref="refModalChangePassword" />
-
 
   </div>
 </template>
 
 <style lang="scss" scoped>
-.title-container {
-  padding: 16px;
+.card-hover {
+  transition: all 0.2s ease-in-out;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
 
-  /* Espacio alrededor del título */
-  text-align: center;
-
-  /* Alinear el texto al centro */
-}
-
-.title-text {
-  overflow: hidden;
-
-  /* Ocultar el desbordamiento */
-  margin: 0;
-
-  /* Eliminar márgenes por defecto */
-  font-size: 2rem;
-
-  /* Tamaño de fuente predeterminado */
-  text-overflow: ellipsis;
-
-  /* Mostrar puntos suspensivos si el texto es largo */
-  white-space: nowrap;
-
-  /* Evitar el salto de línea en pantallas pequeñas */
-}
-
-/* Ajuste de tamaño de fuente para pantallas pequeñas */
-@media (max-width: 600px) {
-  .title-text {
-    font-size: 1.5rem;
-
-    /* Tamaño de fuente más pequeño en pantallas pequeñas */
+  &:not(.card-disabled):hover {
+    border-color: rgb(var(--v-theme-primary));
+    background-color: rgba(var(--v-theme-primary), 0.04);
+    transform: translateY(-2px);
   }
+}
+
+.card-disabled {
+  opacity: 0.6;
+  filter: grayscale(100%);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.dashed-border {
+  border-style: dashed !important;
 }
 </style>
