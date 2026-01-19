@@ -166,6 +166,30 @@ const dowloadNomina = async () => {
     toast("Faltan Campos Por Diligenciar", "", "danger");
   }
 }
+const dowloadNominaPorcentaje = async () => {
+
+  const validation = await formValidationDownload.value?.validate();
+
+  if (validation?.valid) {
+    loading.download_notes = true;
+
+    const search = typeEducations.value.find(ele => ele.value == formDownload.value.type_education_id)
+
+    const { data, response } = await useAxios(`/note-downloadAllConsolidated`).get({
+      params: {
+        type_education_id: formDownload.value.type_education_id,
+        company_id: authenticationStore.company.id,
+      }
+    })
+
+    loading.download_notes = false;
+    if (response.status == 200 && data) {
+      downloadExcelBase64(data.excel, "Consolidado " + search?.title)
+    }
+  } else {
+    toast("Faltan Campos Por Diligenciar", "", "danger");
+  }
+}
 
 
 
@@ -284,10 +308,14 @@ onMounted(async () => {
             </VCol>
           </VRow>
           <VRow>
-            <VCol cols="12" class="d-flex justify-center">
+            <VCol cols="12" class="d-flex align-center justify-center gap-4">
               <VBtn :loading="loading.download_notes" :disabled="loading.download_notes" color="primary"
                 @click="dowloadNomina()">
                 Descargar
+              </VBtn>
+              <VBtn :loading="loading.download_notes" :disabled="loading.download_notes" color="primary"
+                @click="dowloadNominaPorcentaje()">
+                Descargar porcentajes
               </VBtn>
             </VCol>
           </VRow>
