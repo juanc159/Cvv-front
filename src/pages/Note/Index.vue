@@ -174,19 +174,19 @@ const dowloadNominaPorcentajes = async () => {
     loading.download_notes = true;
 
     const search = typeEducations.value.find(ele => ele.value == formDownload.value.type_education_id)
-    const { data, response } = await useApi<any>(
-      createUrl(`/note-downloadAllConsolidated`, {
-        query: {
-          type_education_id: formDownload.value.type_education_id,
-          company_id: authenticationStore.company.id,
-        },
-      })
+
+    const { response, data } = await useAxios(`/note-downloadConsolidatedPocentage`).get({
+      params: {
+        type_education_id: formDownload.value.type_education_id,
+        company_id: authenticationStore.company.id,
+      }
+    }
     );
 
     loading.download_notes = false;
 
-    if (response.value?.ok && data.value) {
-      downloadExcelBase64(data.value.excel, "Consolidado " + search?.title)
+    if (data.code == 200) {
+      downloadExcelBase64(data.excel, "Consolidado porcentajes " + search?.title)
     }
   } else {
     toast("Faltan Campos Por Diligenciar", "", "danger");
@@ -313,12 +313,12 @@ onMounted(async () => {
             <VCol cols="12" class="d-flex justify-start gap-3 flex-wrap mt-5">
               <VBtn :loading="loading.download_notes" :disabled="loading.download_notes" color="primary"
                 @click="dowloadNomina()">
-                Descargar
+                Descargar Consolidado
               </VBtn>
-              <!-- <VBtn :loading="loading.download_notes" :disabled="loading.download_notes" color="primary"
-                @click="dowloadNominaPorcentajes()">
-                Descargar notas con procentajes
-              </VBtn> -->
+              <VBtn v-if="formDownload.type_education_id == '3'" :loading="loading.download_notes"
+                :disabled="loading.download_notes" color="primary" @click="dowloadNominaPorcentajes()">
+                Descargar Reporte %
+              </VBtn>
             </VCol>
           </VRow>
         </VForm>

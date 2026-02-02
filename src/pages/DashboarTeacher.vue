@@ -29,7 +29,8 @@ const headersFile = [
 const loading = reactive({
   form: false,
   excel: false,
-  download: false
+  download: false,
+  excelPercentage: false,
 });
 
 const teacherData = ref(null);
@@ -60,6 +61,28 @@ const downloadConsolidated = async () => {
     downloadExcelBase64(data.value.excel, nameExcel);
   }
 };
+
+// Descargar Nómina Consolidada con porcentaje no usar apr subidas
+const downloadConsolidatedPocentage = async () => {
+  loading.excelPercentage = true;
+
+  const { response, data } = await useAxios(`/note-downloadConsolidatedPocentage`).get({
+    params: {
+      teacher_id: user.value.id,
+      company_id: authenticationStore.company.id,
+    }
+  }
+  );
+
+  loading.excelPercentage = false;
+  if (data.code == 200) {
+
+    const nameExcel = "Nomina_porcentajes_" + user.value.full_name;
+    downloadExcelBase64(data.excel, nameExcel);
+  }
+};
+
+
 
 // Descargar archivo individual
 const downloadFile = (path: string, name: string) => {
@@ -118,7 +141,16 @@ const openModalPassword = () => {
             <VRow>
               <VCol cols="12" sm="6" md="4">
                 <VCard variant="outlined" class="text-center pa-4 card-hover cursor-pointer"
-                  @click="downloadConsolidated" :loading="loading.excel" v-ripple>
+                  @click="downloadConsolidatedPocentage" :loading="loading.excelPercentage"
+                  :disabled="loading.excelPercentage" v-ripple>
+                  <VIcon icon="tabler-file-spreadsheet" size="32" color="success" class="mb-2" />
+                  <div class="text-body-1 font-weight-medium">Descargar Reporte %</div>
+                  <div class="text-caption text-disabled">Excel Estadísticas</div>
+                </VCard>
+              </VCol>
+              <VCol cols="12" sm="6" md="4">
+                <VCard variant="outlined" class="text-center pa-4 card-hover cursor-pointer"
+                  @click="downloadConsolidated" :loading="loading.excel" :disabeld="loading.excel" v-ripple>
                   <VIcon icon="tabler-file-spreadsheet" size="32" color="success" class="mb-2" />
                   <div class="text-body-1 font-weight-medium">Descargar Nómina</div>
                   <div class="text-caption text-disabled">Excel Consolidado</div>
