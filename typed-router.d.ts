@@ -20,7 +20,11 @@ declare module 'vue-router/auto-routes' {
   export interface RouteNamedMap {
     '$error': RouteRecordInfo<'$error', '/:error(.*)', { error: ParamValue<true> }, { error: ParamValue<false> }>,
     'ActivitiesStudent': RouteRecordInfo<'ActivitiesStudent', '/dashboard/student/activities', Record<never, never>, Record<never, never>>,
-    'ActivitiesTeacher': RouteRecordInfo<'ActivitiesTeacher', '/dashboard/teacher/activities', Record<never, never>, Record<never, never>>,
+    'ActivitiesTeacher2': RouteRecordInfo<'ActivitiesTeacher2', '/dashboard/teacher/activities2', Record<never, never>, Record<never, never>>,
+    'ActivitiesTeacher-Form': RouteRecordInfo<'ActivitiesTeacher-Form', 'activity-form/:action/:id?', Record<never, never>, Record<never, never>>,
+    'activities-teacher-components-activities-cards': RouteRecordInfo<'activities-teacher-components-activities-cards', '/ActivitiesTeacher/Components/ActivitiesCards', Record<never, never>, Record<never, never>>,
+    'Activity-Form': RouteRecordInfo<'Activity-Form', 'activity-form/:action/:id?', Record<never, never>, Record<never, never>>,
+    'ActivitiesTeacher-List': RouteRecordInfo<'ActivitiesTeacher-List', '/ActivitiesTeacher/List', Record<never, never>, Record<never, never>>,
     'ForgotPassword': RouteRecordInfo<'ForgotPassword', '/ForgotPassword', Record<never, never>, Record<never, never>>,
     'ResetPassword': RouteRecordInfo<'ResetPassword', '/ResetPassword/:token', Record<never, never>, Record<never, never>>,
     'VerifyEmail': RouteRecordInfo<'VerifyEmail', '/VerifyEmail', Record<never, never>, Record<never, never>>,
