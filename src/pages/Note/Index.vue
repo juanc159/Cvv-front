@@ -19,6 +19,7 @@ const loading = reactive({
   form: false,
   download_notes: false,
   block_uploading_of_grades_to_teachers: false,
+  delete_all_student_grade_scores_permission: false,
   viewing_notes: false,
 });
 
@@ -255,6 +256,26 @@ onMounted(async () => {
   await loadTypeEducationsAndTeachers();
 
 });
+
+
+//ModalQuestion
+const refModalQuestionDeleteNoteStudents = ref()
+
+const openModalQuestionDeleteNoteStudents = () => {
+  refModalQuestionDeleteNoteStudents.value.openModal()
+  refModalQuestionDeleteNoteStudents.value.componentData.title = "Esta seguro que desea eliminar todas las notas de los estudiantes"
+}
+
+const deleteAllStudentGradeScores = async () => {
+  loading.delete_all_student_grade_scores_permission = true
+  const { data, response } = await useApi(`/note-deleteAllStudentGradeScores`).post({
+    company_id: authenticationStore.company.id,
+  });
+  if (response.value?.ok && data.value) {
+  };
+  loading.delete_all_student_grade_scores_permission = false
+
+};
 </script>
 
 <template>
@@ -361,6 +382,23 @@ onMounted(async () => {
           </VCardText>
         </VCard>
       </VCol>
+      <VCol cols="4">
+        <VCard :disabled="loading.delete_all_student_grade_scores_permission"
+          :loading="loading.delete_all_student_grade_scores_permission" class="mt-3"
+          v-if="hasPermission('note.delete_all_student_grade_scores_permission')">
+          <VCardTitle primary-title>Borrar todas las notas de los alumnos</VCardTitle>
+          <VCardText>
+            <VRow>
+              <VCol cols="12" sm="4">
+                <div class="demo-space-x">
+                  <VBtn color="primary" @click="openModalQuestionDeleteNoteStudents">Eliminar</VBtn>
+                </div>
+
+              </VCol>
+            </VRow>
+          </VCardText>
+        </VCard>
+      </VCol>
     </VRow>
 
     <VCard :disabled="loading.viewing_notes" :loading="loading.viewing_notes" class="mt-3"
@@ -399,5 +437,6 @@ onMounted(async () => {
     </VCard>
 
     <ModalQuestion ref="refModalQuestion" @success="resetOptionDownloadPdf" />
+    <ModalQuestion ref="refModalQuestionDeleteNoteStudents" @success="deleteAllStudentGradeScores" />
   </div>
 </template>
