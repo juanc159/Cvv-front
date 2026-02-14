@@ -1,21 +1,14 @@
 <template>
   <LoadingV2Enhanced
     v-if="globalLoading.isLoading.value && globalLoading.currentProcess.value && !globalLoading.isMinimized.value && !globalLoading.showProcessList.value"
-    :is-loading="true"
-    :progress="globalLoading.currentProgress.value"
-    :title="title"
-    :subtitle="subtitle"
-    @minimized="handleMinimize"
-    @completed="handleCompleted"
-    :show-multiple-button="globalLoading.hasMultipleProcesses.value"
-    @show-multiple="handleShowMultiple"
-    :debug-data="globalLoading.debugInfo.value"
-  />
+    :is-loading="true" :progress="globalLoading.currentProgress.value" :title="title" :subtitle="subtitle"
+    @minimized="handleMinimize" @completed="handleCompleted"
+    :show-multiple-button="globalLoading.hasMultipleProcesses.value" @show-multiple="handleShowMultiple"
+    :debug-data="globalLoading.debugInfo.value" />
 
   <div
     v-else-if="globalLoading.isLoading.value && globalLoading.currentProcess.value && globalLoading.isMinimized.value"
-    class="minimized-overlay"
-  >
+    class="minimized-overlay">
     <v-card class="minimized-card" @click="handleRestore">
       <v-progress-circular :model-value="globalLoading.currentProgress.value" color="primary" size="40" width="3">
         {{ Math.round(globalLoading.currentProgress.value) }}%
@@ -38,13 +31,8 @@
     </v-card>
   </div>
 
-  <ProcessListModal
-    v-if="globalLoading.showProcessList.value"
-    @remove-process="handleRemoveProcess"
-    @clear-completed="handleClearCompleted"
-    @close="handleCloseProcessList"
-    @showDataProcess="handleShowDataProcess"
-  />
+  <ProcessListModal v-if="globalLoading.showProcessList.value" @remove-process="handleRemoveProcess"
+    @clear-completed="handleClearCompleted" @close="handleCloseProcessList" @showDataProcess="handleShowDataProcess" />
 
   <ModalListErrors ref="refModalListErrors" />
 
@@ -113,11 +101,13 @@ const subtitle = computed(() => {
   return subtitleText;
 });
 
-const handleCompleted = () => { console.log('✅ [MANAGER] Loading completed'); };
+const handleCompleted = () => {
+  // console.log('✅ [MANAGER] Loading completed'); 
+};
 const handleMinimize = () => { globalLoading.minimize(); };
-const handleRestore = () => { 
-    globalLoading.restore(); 
-    showStartNotification.value = false; // Cerrar notificación al abrir
+const handleRestore = () => {
+  globalLoading.restore();
+  showStartNotification.value = false; // Cerrar notificación al abrir
 };
 const handleShowMultiple = () => { globalLoading.showProcessListModal(); };
 const handleRemoveProcess = (batchId: string) => { globalLoading.removeProcess(batchId); };
@@ -128,21 +118,21 @@ const handleCloseProcessList = () => { globalLoading.hideProcessListModal(); };
 const setupCallbacks = () => {
   // ✅ Callback de inicio
   globalLoading.onStarted((batchId: string) => {
-    console.log(`🚀 [MANAGER] Notificación inicio para ${batchId}`);
+    // console.log(`🚀 [MANAGER] Notificación inicio para ${batchId}`);
     showStartNotification.value = true;
   });
 
   globalLoading.onCompleted((batchId: string) => {
-    console.log(`🎉 [MANAGER] Completado ${batchId}`);
+    // console.log(`🎉 [MANAGER] Completado ${batchId}`);
     if (globalLoading.currentProcess.value?.batch_id === batchId || globalLoading.isMinimized.value) {
       showCompletionNotification.value = true;
     }
   });
-  
+
   globalLoading.onError((batchId: string, error: any) => {
     console.error(`❌ [MANAGER] Error en batch ${batchId}:`, error);
   });
-  
+
   globalLoading.onProgressUpdated((batchId: string, progress: number) => { });
 
   if (authenticationStore.user?.id) {
@@ -155,12 +145,12 @@ const setupCallbacks = () => {
 };
 
 onMounted(() => {
-  console.log('🚀 [MANAGER] Mounted');
+  // console.log('🚀 [MANAGER] Mounted');
   setupCallbacks();
 });
 
 onBeforeUnmount(() => {
-  console.log('🧹 [MANAGER] Unmounting');
+  // console.log('🧹 [MANAGER] Unmounting');
   globalLoading.cleanup();
 });
 </script>
@@ -169,7 +159,16 @@ onBeforeUnmount(() => {
 .spin-animation {
   animation: spin 2s linear infinite !important;
 }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
 
 .minimized-overlay {
   position: fixed;
@@ -195,6 +194,11 @@ onBeforeUnmount(() => {
   transform: translateY(-3px);
 }
 
-.minimize-icon { transition: transform 0.3s ease; }
-.minimized-info { flex: 1; }
+.minimize-icon {
+  transition: transform 0.3s ease;
+}
+
+.minimized-info {
+  flex: 1;
+}
 </style>

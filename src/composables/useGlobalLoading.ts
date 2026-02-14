@@ -71,7 +71,7 @@ const startPolling = (process: ImportProcess) => {
 
   console.warn(`⚠️ [WATCHDOG] WebSocket silencioso para ${process.batch_id}. Activando Polling.`);
   process.is_polling = true;
-  
+
   if (process.metadata) process.metadata.connection_status = "polling";
 
   let currentInterval = BASE_POLLING_INTERVAL;
@@ -79,12 +79,12 @@ const startPolling = (process: ImportProcess) => {
   const executePoll = async () => {
     if (!process.is_polling) return;
     if (["completed", "error", "failed", "completed_with_errors"].includes(process.status)) {
-        stopPolling(process);
-        return;
+      stopPolling(process);
+      return;
     }
 
     if (VISIBILITY_CHECK && document.hidden) {
-      process.polling_interval = setTimeout(executePoll, 5000); 
+      process.polling_interval = setTimeout(executePoll, 5000);
       return;
     }
 
@@ -93,7 +93,7 @@ const startPolling = (process: ImportProcess) => {
       // Si te da error de 'useAxios is not defined', impórtalo arriba.
       // @ts-ignore
       const { data } = await useAxios(`/processBatch/status/${process.batch_id}`);
-      
+
       const pollingData = {
         batch_id: process.batch_id,
         progress: data.progress,
@@ -104,7 +104,7 @@ const startPolling = (process: ImportProcess) => {
       };
 
       handleProgressUpdate(process.batch_id, pollingData, true);
-      currentInterval = BASE_POLLING_INTERVAL; 
+      currentInterval = BASE_POLLING_INTERVAL;
 
     } catch (error) {
       console.error(`❌ [POLLING] Error consultando estado:`, error);
@@ -112,7 +112,7 @@ const startPolling = (process: ImportProcess) => {
     }
 
     if (process.is_polling) {
-        process.polling_interval = setTimeout(executePoll, currentInterval);
+      process.polling_interval = setTimeout(executePoll, currentInterval);
     }
   };
 
@@ -141,7 +141,7 @@ const startGlobalWatchdog = () => {
         }
       }
     });
-  }, 2000); 
+  }, 2000);
 }
 startGlobalWatchdog();
 
@@ -150,9 +150,9 @@ startGlobalWatchdog();
 // ==========================================
 
 const startWebSocket = (process: ImportProcess) => {
-  console.log(`🔌 [WEBSOCKET] Iniciando para batch: ${process.batch_id}`)
+  // console.log(`🔌 [WEBSOCKET] Iniciando para batch: ${process.batch_id}`)
   const echoInstance = getEcho()
-  
+
   process.last_heartbeat = Date.now();
 
   if (!echoInstance) {
@@ -171,15 +171,15 @@ const startWebSocket = (process: ImportProcess) => {
     channel.listen(".progress.update", (data: any) => {
       process.last_heartbeat = Date.now();
       if (process.is_polling) {
-          console.log(`⚡ [WATCHDOG] WebSocket recuperado. Deteniendo Polling.`);
-          stopPolling(process);
-          if (process.metadata) process.metadata.connection_status = "connected";
+        // console.log(`⚡ [WATCHDOG] WebSocket recuperado. Deteniendo Polling.`);
+        stopPolling(process);
+        if (process.metadata) process.metadata.connection_status = "connected";
       }
       handleProgressUpdate(process.batch_id, data, false)
     })
 
     channel.subscribed(() => {
-      console.log(`✅ [WEBSOCKET] Conectado al canal ${channelName}`)
+      // console.log(`✅ [WEBSOCKET] Conectado al canal ${channelName}`)
       if (process.metadata) {
         process.metadata.connection_status = "connected"
         process.metadata.last_activity = new Date().toISOString()
@@ -216,7 +216,7 @@ const handleProgressUpdate = (batchId: string, data: any, isFromPolling: boolean
   const process = allProcesses.value.find((p) => p.batch_id === batchId)
   if (!process) return
 
-  if (!isFromPolling) console.log(`📊 [UPDATE] Datos recibidos:`, data)
+  // if (!isFromPolling) console.log(`📊 [UPDATE] Datos recibidos:`, data)
 
   let progress = 0
   if (data.metadata?.general_progress !== undefined) {
@@ -232,7 +232,7 @@ const handleProgressUpdate = (batchId: string, data: any, isFromPolling: boolean
   process.status = data.status
 
   if (!process.metadata) process.metadata = {}
-  
+
   if (data.metadata) {
     process.metadata = {
       ...process.metadata,
@@ -379,14 +379,14 @@ export function useGlobalLoading() {
   // 🔄 RECUPERACIÓN AL RECARGAR (F5)
   // ==========================================
   const getUserProcesses = async (user_id: string) => {
-    console.log("📡 [LOAD] Cargando procesos del usuario")
+    // console.log("📡 [LOAD] Cargando procesos del usuario")
     try {
       // ✅ CORRECCIÓN CRÍTICA: Usar useAxios directamente, no window.useAxios
       // @ts-ignore
       const { response, data } = await useAxios(`/processBatch/getUserProcesses/${user_id}`).get();
 
       if (response.status === 200 && data.processes) {
-        console.log(`✅ [LOAD] ${data.processes.length} procesos cargados`)
+        // console.log(`✅ [LOAD] ${data.processes.length} procesos cargados`)
 
         const loadedProcessesMap = new Map(data.processes.map((p: any) => [p.batch_id, p]))
         const updatedAllProcesses: ImportProcess[] = []
@@ -438,7 +438,7 @@ export function useGlobalLoading() {
 
         // ✅ UX: Si recuperamos procesos activos al recargar, los mostramos MINIMIZADOS
         if (activeOrQueuedProcessesToStartWs.length > 0) {
-            isMinimized.value = true;
+          isMinimized.value = true;
         }
 
         // Reiniciar WebSockets/Watchdogs

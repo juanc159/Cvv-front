@@ -69,7 +69,6 @@ export function useFileUpload() {
 
     loading.value = true
     fileReader.addEventListener("load", () => {
-      console.log("fileReader", fileReader);
 
       imageUrl.value = fileReader.result;
       loading.value = false
