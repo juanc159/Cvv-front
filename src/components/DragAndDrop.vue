@@ -76,7 +76,7 @@ const savefiles = async () => {
         if (response.value?.ok && data.value) {
           fileItem.status = 'completed' // Cambiamos el estado a 'completed' si la carga fue exitosa
           fileItem.progress = 100 // Progreso al 100%
-          console.log(`Archivo ${fileItem.file.name} guardado correctamente`)
+          // console.log(`Archivo ${fileItem.file.name} guardado correctamente`)
         }
       } catch (error) {
         fileItem.status = 'failed' // Cambiamos el estado a 'failed' si hubo un error

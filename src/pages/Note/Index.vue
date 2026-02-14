@@ -60,13 +60,14 @@ const submitForm = async () => {
 
     loading.form = true;
     try {
-      console.log('📤 [FORM] Enviando formulario...');
-      const { data, response } = await useAxios('note-store').post(formData);
-      console.log('📥 [FORM] Respuesta del servidor:', data.value);
+      // console.log('📤 [FORM] Enviando formulario...');
+      // const { data, response } = await useAxios('note-store').post(formData);
+      const { data, response } = await useAxios('/import-consolidated-notes').post(formData);
+      // console.log('📥 [FORM] Respuesta del servidor:', data.value);
 
       if (response.status == 200 && data) {
         if (data.status === 'success') {
-          console.log(`🚀 [FORM] Iniciando loading para batch_id:`, data.batch_id);
+          // console.log(`🚀 [FORM] Iniciando loading para batch_id:`, data.batch_id);
 
           const success = globalLoading.startLoading(data.batch_id);
 
@@ -251,7 +252,7 @@ const openModalQuestion = () => {
 
 onMounted(async () => {
   await loadDataVisualizeNotes()
-  console.log('🚀 [PAGE] Component mounted - Queue system enabled');
+  // console.log('🚀 [PAGE] Component mounted - Queue system enabled');
 
   await loadTypeEducationsAndTeachers();
 

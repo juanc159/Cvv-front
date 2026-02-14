@@ -69,7 +69,8 @@ const submitForm = async () => {
     formData.append("teacher_id", String(authenticationStore.user.id));
 
     loading.form = true
-    const { data, response } = await useAxios('/note-store-teachers').post(formData);
+    const { data, response } = await useAxios('/import-consolidated-notes').post(formData);
+    // const { data, response } = await useAxios('/note-store-teachers').post(formData);
 
     loading.form = false
 

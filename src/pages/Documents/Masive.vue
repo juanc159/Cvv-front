@@ -164,7 +164,7 @@ const downloadCertificate = async (route: string): Promise<void> => {
 // Save literals and generate certificate
 const saveLiteralsAndGenerate = async () => {
   const validation = await formValidateStudents.value?.validate()
-  console.log('Validation result:', validation);
+  // console.log('Validation result:', validation);
 
   if (!validation?.valid) {
     toast('Faltan Campos Por Diligenciar', '', 'danger')

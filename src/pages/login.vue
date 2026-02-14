@@ -51,7 +51,7 @@ const login = async () => {
   const validation = await refForm.value?.validate();
   if (validation?.valid) {
     const promise = await authenticationStore.login(form.value);
-    console.log(promise);
+    // console.log(promise);
 
     if (promise.code == 200) {
       if (promise.user.type_user == 'student') {
