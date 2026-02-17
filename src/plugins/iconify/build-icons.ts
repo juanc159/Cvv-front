@@ -11,12 +11,16 @@
  * For Iconify Tools documentation visit https://docs.iconify.design/tools/tools2/
  */
 import { promises as fs } from 'node:fs'
+import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
 
 // Installation: npm install --save-dev @iconify/tools @iconify/utils @iconify/json @iconify/iconify
 import { cleanupSVG, importDirectory, isEmptyColor, parseColors, runSVGO } from '@iconify/tools'
 import type { IconifyJSON } from '@iconify/types'
 import { getIcons, getIconsCSS, stringToIcon } from '@iconify/utils'
+
+// Create require function for ES modules
+const require = createRequire(import.meta.url)
 
 /**
  * Script configuration
@@ -57,12 +61,13 @@ interface BundleScriptConfig {
 }
 
 const sources: BundleScriptConfig = {
+
   svg: [
-    {
-      dir: 'src/assets/images/iconify-svg',
-      monotone: false,
-      prefix: 'custom',
-    },
+    // {
+    //   dir: 'src/assets/images/iconify-svg',
+    //   monotone: true,
+    //   prefix: 'custom',
+    // },
 
     // {
     //   dir: 'emojis',
@@ -87,11 +92,16 @@ const sources: BundleScriptConfig = {
     // Iconify JSON file (@iconify/json is a package name, /json/ is directory where files are, then filename)
     require.resolve('@iconify-json/tabler/icons.json'),
     {
+      filename: require.resolve('@iconify-json/mdi/icons.json'),
+      icons: [
+        'close-circle',
+        'language-javascript',
+        'language-typescript',
+      ],
+    },
+    {
       filename: require.resolve('@iconify-json/fa/icons.json'),
       icons: [
-        'facebook',
-        'google',
-        'twitter',
         'circle',
       ],
     },
