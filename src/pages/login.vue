@@ -110,7 +110,7 @@ if (isAuthenticated) {
       <VCard flat :max-width="500" class="mt-12 mt-sm-0 pa-6">
         <VCardText>
           <h4 class="text-h4 mb-1">
-            Bienvenido Apreciado Usuario
+            Bienvenido Apreciado Usuario (1)
           </h4>
           <p class="mb-0">
             Por favor, ingrese su usuario (cédula / correo electrónico) y contraseña.
