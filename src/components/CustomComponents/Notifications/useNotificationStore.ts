@@ -2,7 +2,7 @@ import { useToast } from '@/composables/useToast'; // Ajusta la ruta si es neces
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import type { Notification } from '@layouts/types';
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+
 
 export const useNotificationStore = defineStore('notification', () => {
   // --- ESTADO GLOBAL ---
@@ -95,7 +95,7 @@ export const useNotificationStore = defineStore('notification', () => {
   const initializeListener = () => {
     if (isListening.value || !authStore.user?.id) return;
 
-    // console.log('🔌 Iniciando WebSocket Global para Notificaciones');
+    console.log('🔌 Iniciando WebSocket Global para Notificaciones');
 
     // Canal privado estándar de Laravel: App.Models.User.{id}
     window.Echo.private('App.Models.User.' + authStore.user.id)
@@ -145,7 +145,7 @@ export const useNotificationStore = defineStore('notification', () => {
   const stopListening = (userId: string) => {
     if (!userId) return;
 
-    // console.log(`🔌 Desconectando canal de notificaciones: App.Models.User.${userId}`);
+    console.log(`🔌 Desconectando canal de notificaciones: App.Models.User.${userId}`);
 
     // IMPORTANTE: Laravel Echo maneja el prefijo 'private-' internamente.
     // Solo debes pasar el nombre de la clase y el ID.
