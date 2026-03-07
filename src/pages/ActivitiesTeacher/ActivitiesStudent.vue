@@ -1,12 +1,8 @@
-<<<<<<< Updated upstream
-<script lang="ts" setup>
-=======
 <script setup lang="ts">
+import { useAxios } from '@/composables/useAxios';
 import { useToast } from '@/composables/useToast';
 import { computed } from 'vue';
-import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 
->>>>>>> Stashed changes
 definePage({
   name: "ActivitiesStudent",
   path: "/dashboard/student/activities",
@@ -17,28 +13,8 @@ definePage({
 });
 
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-<<<<<<< Updated upstream
-// --- 1. MOCK DATA (TAREAS DEL ESTUDIANTE) ---
-const pendingActivities = ref([
-  {
-    id: 1,
-    title: "Resolución de Ecuaciones Cuadráticas",
-    subject: "Matemáticas",
-    teacher: "Prof. Alberto",
-    deadline: "2025-10-15T23:59", // Fecha futura
-    description: "Resolver los ejercicios de la página 45. Subir foto o PDF.",
-    file_types: "PDF, JPG"
-  },
-  {
-    id: 3,
-    title: "Mapa Mental: La Célula",
-    subject: "Biología",
-    teacher: "Prof. Marta",
-    deadline: "2025-10-12T10:00", // Fecha muy cercana
-    description: "Realizar un mapa mental creativo sobre las partes de la célula.",
-    file_types: "Imagen, PDF"
-=======
 const loading = ref(false)
 const allActivities = ref<any[]>([])
 const tab = ref('pending')
@@ -46,18 +22,20 @@ const tab = ref('pending')
 // --- COMPUTED PROPERTIES ---
 const pendingActivities = computed(() => {
   // "Por Hacer": No están revisadas (004) Y no están vencidas.
-  return allActivities.value.filter(act => 
+  return allActivities.value.filter(act =>
     act.submission_status !== 'ACTIVITY_SUBMISSION_STATUS_004' && !act.is_overdue
   );
 });
 
 const historyActivities = computed(() => {
   // "Historial": Están revisadas (004) O están vencidas.
-  return allActivities.value.filter(act => 
+  return allActivities.value.filter(act =>
     act.submission_status === 'ACTIVITY_SUBMISSION_STATUS_004' || act.is_overdue
   );
 });
 
+const router = useRouter();
+const { toast } = useToast();
 
 const fetchActivities = async () => {
   loading.value = true
@@ -71,34 +49,8 @@ const fetchActivities = async () => {
     toast('Error al cargar actividades', '', 'danger')
   } finally {
     loading.value = false
->>>>>>> Stashed changes
   }
-]);
-
-const historyActivities = ref([
-  {
-    id: 2,
-    title: "Ensayo sobre la Guerra Federal",
-    subject: "Historia",
-    deadline: "2025-09-30",
-    status: "graded", // graded, sent
-    score: 19,
-    feedback: "Excelente redacción, muy buenos argumentos.",
-    file_sent: "ensayo_guerra.pdf",
-    date_sent: "2025-09-29 15:30"
-  },
-  {
-    id: 4,
-    title: "Ejercicios de Inglés: Verbo To Be",
-    subject: "Inglés",
-    deadline: "2025-10-01",
-    status: "sent", // Enviado pero no corregido
-    score: null,
-    feedback: null,
-    file_sent: "homework_1.docx",
-    date_sent: "2025-10-01 09:00"
-  }
-]);
+};
 
 // --- ESTADOS ---
 const currentTab = ref('pending'); // 'pending' | 'history'
@@ -153,7 +105,7 @@ const finishUpload = () => {
       date_sent: new Date().toLocaleString()
     };
 
-    historyActivities.value.unshift(newHistoryItem);
+    // historyActivities.value.unshift(newHistoryItem); // Esto se manejará con la data real
 
     // 2. Eliminar de Pendientes
     pendingActivities.value = pendingActivities.value.filter(a => a.id !== selectedActivity.value.id);
@@ -171,6 +123,10 @@ const finishUpload = () => {
 const openFeedback = (activity: any) => {
   selectedActivity.value = activity;
   showFeedbackModal.value = true;
+};
+
+const goToSubmission = (activityId: number | string) => {
+  router.push({ name: 'ActivitySubmission', params: { id: activityId } });
 };
 
 // Helper: Calcular días restantes
@@ -199,35 +155,18 @@ const getTimeRemaining = (deadlineStr: string) => {
 
     <VTabs v-model="currentTab" class="mb-6">
       <VTab value="pending">
-<<<<<<< Updated upstream
-        <VIcon icon="tabler-bell" class="me-2" /> Por Hacer ({{ pendingActivities.length }})
-      </VTab>
-      <VTab value="history">
-        <VIcon icon="tabler-history" class="me-2" /> Historial y Notas
-=======
         <VIcon start icon="tabler-bell" /> Por Hacer
         <VChip size="small" color="primary" class="ms-2">{{ pendingActivities.length }}</VChip>
       </VTab>
       <VTab value="history">
         <VIcon start icon="tabler-history" /> Historial
         <VChip size="small" color="primary" class="ms-2">{{ historyActivities.length }}</VChip>
->>>>>>> Stashed changes
       </VTab>
     </VTabs>
 
     <VWindow v-model="currentTab">
 
       <VWindowItem value="pending">
-<<<<<<< Updated upstream
-        <VRow v-if="pendingActivities.length > 0">
-          <VCol v-for="item in pendingActivities" :key="item.id" cols="12" md="6" lg="4">
-            <VCard class="h-100 border card-hover border-start-primary">
-              <VCardItem>
-                <div class="d-flex justify-space-between align-start mb-2">
-                  <VChip size="small" color="primary" variant="tonal">{{ item.subject }}</VChip>
-                  <VChip size="small" :color="getTimeRemaining(item.deadline).color" variant="flat">
-                    {{ getTimeRemaining(item.deadline).text }}
-=======
         <div v-if="loading" class="d-flex justify-center py-10">
           <VProgressCircular indeterminate color="primary" size="64" />
         </div>
@@ -252,7 +191,6 @@ const getTimeRemaining = (deadlineStr: string) => {
 
                   <VChip size="small" :color="item.submission_status_color" variant="flat">
                     {{ item.submission_status_description }}
->>>>>>> Stashed changes
                   </VChip>
                 </div>
 
@@ -260,36 +198,31 @@ const getTimeRemaining = (deadlineStr: string) => {
                 <div class="text-caption text-disabled mb-3">Asignado por: {{ item.teacher }}</div>
 
                 <p class="text-body-2 mb-0">{{ item.description }}</p>
-              </VCardItem>
+                </VCardItem>
 
-              <VDivider />
+                <VDivider />
 
-              <VCardActions class="pa-3">
-                <div class="text-caption text-medium-emphasis ms-2">
-                  <VIcon icon="tabler-file-type-doc" size="14" /> {{ item.file_types }}
-                </div>
-<<<<<<< Updated upstream
-                <VSpacer />
-                <VBtn color="primary" variant="elevated" prepend-icon="tabler-upload" @click="openUploadModal(item)">
-=======
+                <VCardActions class="pa-3">
+                  <div class="text-caption text-medium-emphasis ms-2">
+                    <VIcon icon="tabler-file-type-doc" size="14" /> {{ item.file_types }}
+                  </div>
 
-                <div class="text-body-2 text-truncate-2 mb-4" v-html="item.description"></div>
+                  <div class="text-body-2 text-truncate-2 mb-4" v-html="item.description"></div>
 
-                <VDivider class="mb-3" />
+                  <VDivider class="mb-3" />
 
-                <div class="d-flex align-center text-caption mb-4">
-                  <VIcon icon="tabler-calendar-time" size="16" class="me-2" />
-                  <span class="font-weight-medium">Vence: </span>
-                  <span class="ms-1">
-                    {{ item.deadline_at || 'Sin fecha' }}
-                  </span>
-                </div>
+                  <div class="d-flex align-center text-caption mb-4">
+                    <VIcon icon="tabler-calendar-time" size="16" class="me-2" />
+                    <span class="font-weight-medium">Vence: </span>
+                    <span class="ms-1">
+                      {{ item.deadline_at || 'Sin fecha' }}
+                    </span>
+                  </div>
               </VCardText>
 
               <VCardActions class="pa-4 pt-0">
                 <VBtn block color="warning" variant="flat" prepend-icon="tabler-upload"
                   @click="goToSubmission(item.id)">
->>>>>>> Stashed changes
                   Entregar Tarea
                 </VBtn>
               </VCardActions>
@@ -297,49 +230,11 @@ const getTimeRemaining = (deadlineStr: string) => {
           </VCol>
         </VRow>
 
-        <div v-else class="text-center pa-10 bg-var-theme-background rounded">
+        <!-- <div v-else class="text-center pa-10 bg-var-theme-background rounded">
           <VIcon icon="tabler-confetti" size="48" color="success" class="mb-3" />
           <h3 class="text-h6">¡Estás al día!</h3>
           <p>No tienes tareas pendientes por ahora.</p>
-        </div>
-      </VWindowItem>
-
-      <VWindowItem value="history">
-        <VRow>
-          <VCol v-for="item in historyActivities" :key="item.id" cols="12">
-            <VCard class="border">
-              <div class="d-flex flex-wrap align-center pa-4">
-
-                <VAvatar :color="item.status === 'graded' ? 'success' : 'info'" variant="tonal" class="me-4">
-                  <VIcon :icon="item.status === 'graded' ? 'tabler-check' : 'tabler-send'" />
-                </VAvatar>
-
-                <div class="flex-grow-1">
-                  <div class="d-flex align-center gap-2 mb-1">
-                    <h4 class="text-subtitle-1 font-weight-bold mb-0">{{ item.title }}</h4>
-                    <VChip size="x-small" variant="outlined">{{ item.subject }}</VChip>
-                  </div>
-                  <div class="text-body-2 text-medium-emphasis">
-                    Enviado el: {{ item.date_sent }} • Archivo: {{ item.file_sent }}
-                  </div>
-                </div>
-
-                <div class="text-end ms-4">
-                  <div v-if="item.status === 'graded'">
-                    <div class="text-h5 font-weight-bold text-success">{{ item.score }} pts</div>
-                    <VBtn size="small" variant="text" color="primary" class="px-0" @click="openFeedback(item)">
-                      Ver Corrección
-                    </VBtn>
-                  </div>
-                  <div v-else>
-                    <VChip color="info" size="small">Esperando Corrección</VChip>
-                  </div>
-                </div>
-
-              </div>
-            </VCard>
-          </VCol>
-        </VRow>
+        </div> -->
       </VWindowItem>
 
       <VWindowItem value="history">

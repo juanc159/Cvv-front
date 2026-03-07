@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import ModalQuestion from '@/components/ModalQuestion.vue';
 import { useToast } from '@/composables/useToast';
 import IErrorsBack from "@/interfaces/Axios/IErrorsBack";
 import { router } from '@/plugins/1.router';
@@ -6,7 +7,6 @@ import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 import { useTheme } from 'vuetify';
 import type { VForm } from 'vuetify/components/VForm';
-import ModalQuestion from '@/components/ModalQuestion.vue';
 
 definePage({
   path: "activity-form/:action/:id?",
@@ -321,7 +321,7 @@ const isReadOnly = computed(() => {
 </script>
 
 <template>
-  <div> 
+  <div>
     <VCard :disabled="loading.form" :loading="loading.form">
       <VCardTitle class="d-flex justify-space-between">
         <span>
@@ -356,8 +356,8 @@ const isReadOnly = computed(() => {
             <VCol cols="12" sm="4">
               <AppSelect label="Materia" :items="filteredSubjects" v-model="form.subject_id" variant="outlined"
                 density="comfortable" clearable
-                :disabled="!form.grade_id || !form.section_id || isReadOnly || loading.form"
-                :requiredField="true" :rules="[requiredValidator]" />
+                :disabled="!form.grade_id || !form.section_id || isReadOnly || loading.form" :requiredField="true"
+                :rules="[requiredValidator]" />
             </VCol>
 
             <VCol cols="12">
@@ -394,6 +394,6 @@ const isReadOnly = computed(() => {
         </VBtn>
       </VCardText>
     </VCard>
-  <ModalQuestion ref="refModalQuestion" @success="onModalSuccess" />
+    <ModalQuestion ref="refModalQuestion" @success="onModalSuccess" />
   </div>
 </template>
