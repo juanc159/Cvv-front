@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 definePage({
-  name: "ActivitiesTeacher",
-  path: "/dashboard/teacher/activities",
+  name: "ActivitiesTeacher2",
+  path: "/dashboard/teacher/activities2",
   meta: {
     redirectIfLoggedIn: true,
     requiresAuth: true,
