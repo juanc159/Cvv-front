@@ -103,3 +103,16 @@ export const alphaDashValidator = (value: unknown) => {
 
   return /^[\w-]*$/.test(valueAsString) || 'Todos los caracteres no son válidos'
 }
+
+// 👉 Future Date Validator (fecha mayor o igual a la actual)
+export const futureDateValidator = (value: unknown) => {
+  if (isEmpty(value))
+    return true
+
+  const date = new Date(String(value))
+  if (isNaN(date.getTime()))
+    return 'Fecha inválida'
+
+  // permitir igual o ligeramente mayor (evita errores por segundos)
+  return date >= new Date() || 'La fecha debe ser igual o posterior a la fecha y hora actual'
+}
