@@ -34,7 +34,7 @@ const optionsTable = {
       url: "/activity/changeStatus",
     },
     view: {
-      show: false,
+      show: true,
     },
     delete: {
       url: "/activity/delete",
@@ -57,6 +57,9 @@ const optionsFilter = ref({
 const goViewEdit = (data: any) => {
   router.push({ name: "ActivitiesTeacher-Form", params: { action: "edit", id: data.id } })
 }
+const goViewView = (data: any) => {
+  router.push({ name: "ActivitiesTeacher-Form", params: { action: "view", id: data.id } })
+}
 
 const goViewCreate = () => {
   router.push({ name: "ActivitiesTeacher-Form", params: { action: "create" } })
@@ -70,6 +73,14 @@ const refreshTable = () => {
   if (refTableFull.value) {
     refTableFull.value.fetchTableData(null, false, true)
   }
+}
+
+// Función para ir a la vista de entregas
+const goToSubmissions = (activityId: string) => {
+  router.push({
+    name: 'Teacher-Activity-Submissions', // El nombre que le pusimos en el definePage
+    params: { id: activityId }
+  });
 }
 </script>
 
@@ -91,7 +102,7 @@ const refreshTable = () => {
       </VCardText>
 
       <VCardText class="mt-2">
-        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit"
+        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit" @view="goViewView"
           @update:loading="tableLoading = $event">
           <template #item.title="{ item }">
             <div class="py-2">
@@ -105,7 +116,7 @@ const refreshTable = () => {
                 <div v-if="item.subject" class="d-flex align-center">
                   <VIcon icon="tabler-book" size="14" class="me-2" />
                   <span class="text-caption text-medium-emphasis me-2">Materia:</span>
-                  <span class="text-caption font-weight-medium">{{ item.subject }}</span>
+                  <span class="text-caption font-weight-medium">{{ item.subject.name }}</span>
                 </div>
 
                 <div v-if="item.grade" class="d-flex align-center">
@@ -119,11 +130,13 @@ const refreshTable = () => {
                   <span class="text-caption text-medium-emphasis me-2">Sección:</span>
                   <span class="text-caption font-weight-medium">{{ item.section }}</span>
                 </div>
+
+
                 <div v-if="item.deadline_at" class="d-flex align-center">
                   <VIcon icon="tabler-calendar-time" size="14" class="me-2" />
                   <span class="text-caption text-medium-emphasis me-2">Entrega:</span>
                   <span class="text-caption font-weight-medium">
-                    {{ item.deadline_at.replace('T', ' ').slice(0, 16) }}
+                    {{ item.deadline_at }}
                   </span>
                 </div>
               </div>
@@ -131,12 +144,10 @@ const refreshTable = () => {
             </div>
           </template>
 
-
-
           <!-- Opcional: formatear deadline -->
           <template #item.deadline_at="{ item }">
             <span>
-              {{ item.deadline_at ? item.deadline_at.replace('T', ' ').slice(0, 16) : '—' }}
+              {{ item.deadline_at }}
             </span>
           </template>
 
@@ -145,6 +156,17 @@ const refreshTable = () => {
             <VChip variant="tonal" :color="item.status_color">
               {{ item.status_description }}
             </VChip>
+          </template>
+
+          <template #item.actions2="{ item }">
+
+            <VListItem @click="goToSubmissions(item.id)" v-if="item.status != 'ACTIVITY_STATUS_001'">
+              <template #prepend>
+                <VIcon icon="tabler-users" />
+              </template>
+              <span>Ver Entregas y Evaluar</span>
+            </VListItem>
+
           </template>
         </TableFullNew>
       </VCardText>
