@@ -1,0 +1,1 @@
+import{am as t,N as e,Y as s,bP as n}from"./index-G19AM_2b.js";function i(){const o=t(!1);return e(()=>{window.requestAnimationFrame(()=>{o.value=!0})}),{ssrBootStyles:s(()=>o.value?void 0:{transition:"none !important"}),isBooted:n(o)}}export{i as u};

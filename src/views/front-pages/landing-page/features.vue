@@ -71,14 +71,14 @@ const featuresData = [
 }
 
 .title-text::before{
-  background: url('../../../assets/images/front-pages/icons/section-title-icon.png') no-repeat left bottom/contain;
+  background: url('../../../assets/images/front-pages/icons/') no-repeat left bottom/contain;
   content: 'Everything You Need';
   font-weight: 700;
 }
 
 .section-title::after {
   position: absolute;
-  background: url('../../../assets/images/front-pages/icons/section-title-icon.png') no-repeat left bottom;
+//  background: url('../../../assets/images/front-pages/icons/') no-repeat left bottom;
   background-size: contain;
   block-size: 100%;
   content: '';
