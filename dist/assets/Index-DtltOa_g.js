@@ -1,0 +1,1 @@
+import{d as n,c as o,o as s,j as _}from"./index-DB6WM5dt.js";const p=n({__name:"Index",setup(r,{expose:t}){t();const e={};return Object.defineProperty(e,"__isScriptSetup",{enumerable:!1,value:!0}),e}});function a(r,t,e,c,d,u){return s(),_("div")}const i=o(p,[["render",a],["__file","/var/www/html/src/pages/Report/Index.vue"]]);export{i as default};
