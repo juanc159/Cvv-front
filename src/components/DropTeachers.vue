@@ -45,9 +45,13 @@ const drop = (index: any) => {
 }
 
 const saveOrder = async () => {
+  const teachersOrder = props.teachers.map((t: any, index: number) => ({
+    id: t.id,
+    order: index,
+  }));
 
-  const { data, response } = await useApi(`/teachers/order`).put({
-    teachers: props.teachers
+  await useApi(`/teachers/order`).post({
+    teachers: teachersOrder,
   });
 };
 
