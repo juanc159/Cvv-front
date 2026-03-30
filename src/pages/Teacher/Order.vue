@@ -1,41 +1,39 @@
 <script lang="ts" setup>
+import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
+
 definePage({
   name: "Teacher-Order",
   path: "/teacher-Order",
   meta: {
-    redirectIfLoggedIn: true,
     requiresAuth: true,
     requiredPermission: "teacher.index",
   },
 });
 
-onMounted(async () => {
-})
+const authenticationStore = useAuthenticationStore();
 
-const loading = reactive({
-  form: false
-})
-
-interface ITeachers {
+interface ITeacher {
+  backgroundColor: string,
+  photo: string,
   subject_name: string,
   fullName: string,
   jobPosition: string,
   email: string,
   phone: string,
-  photo: string,
-  backgroundColor: string,
+  files: Array<{
+    name: string,
+    path: string,
+  }>,
 }
 
 const currentTab = ref();
 
-const tabsData = ref<{ title: string, number_records: string, data: Array<ITeachers> }[]>([])
+const tabsData = ref<{ title: string, number_records: string, data: Array<ITeacher> }[]>([])
 
-const { data, response } = await useApi("pw-teachers/" + 1).get();
+const { data } = await useApi("pw-teachers/" + authenticationStore.company.id).get();
 if (data.value.code == 200) {
   tabsData.value = data.value.tabsData;
 }
-
-
 
 </script>
 
@@ -94,11 +92,4 @@ if (data.value.code == 200) {
 </template>
 
 <style scoped>
-.green-background {
-  background-color: rgb(252, 231, 231);
-}
-
-.red-background {
-  background-color: rgb(236, 247, 255);
-}
 </style>
