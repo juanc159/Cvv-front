@@ -78,7 +78,7 @@ if (data.value.code == 200) {
               <VWindow v-model="currentTab">
                 <VWindowItem v-for="(item, index) in tabsData" :key="index">
                   <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-                    <DropTeachers v-if="item.data?.length > 0" :teachers="item.data" />
+                    <DropTeachers v-if="item.data?.length > 0" :teachers="item.data" :company-id="authenticationStore.company.id" />
                   </div>
                 </VWindowItem>
               </VWindow>

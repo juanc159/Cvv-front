@@ -19,6 +19,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  companyId: {
+    type: String,
+    required: true,
+  },
 });
 
 
@@ -50,7 +54,8 @@ const saveOrder = async () => {
     order: index,
   }));
 
-  await useApi(`/teachers/order`).post({
+  await useAxios(`/teachers/order`).post({
+    company_id: props.companyId,
     teachers: teachersOrder,
   });
 };
