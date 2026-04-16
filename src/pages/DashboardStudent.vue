@@ -146,7 +146,7 @@ onMounted(() => {
                 </VCard>
               </VCol>
 
-              <VCol cols="6" sm="4" md="3">
+              <VCol cols="6" sm="4" md="3"> 
                 <VCard variant="outlined" class="text-center pa-3 card-hover cursor-pointer"
                   @click="!user.boletin ? null : openBoletinPreview(user)" :disabled="!user.boletin || loading.boletin"
                   :loading="loading.boletin" :class="{ 'card-disabled': !user.boletin }" v-ripple>
