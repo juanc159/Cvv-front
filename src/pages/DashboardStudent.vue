@@ -62,17 +62,36 @@ const openPdfPreview = async (obj: object) => {
   }
 };
 
-// 2. BOLETÍN (Lógica corregida: usa obj.boletin)
+// 2. BOLETÍN (ver en pestaña en lugar de descargar)
 const openBoletinPreview = async (obj: object) => {
-  // Validación estricta: si no hay boletín, no hace nada
   if (!obj.boletin) return;
 
   loading.boletin = true;
-  const namePdf = `boletin_${obj.identity_document}.pdf`;
+  try {
+    const { data, response } = await useAxios('/file/download').get({
+      params: { file: obj.boletin },
+      responseType: 'blob',
+    });
 
-  // Descarga usando la variable correcta
-  await downloadFileV2(obj.boletin, namePdf);
-  loading.boletin = false;
+    if (!response || response.status !== 200) return;
+
+    if (data instanceof Blob && data.type === 'application/json') {
+      const text = await data.text();
+      try {
+        const parsed = JSON.parse(text);
+        console.error('Error abriendo boletín:', parsed.message);
+      } catch {
+        console.error('Error abriendo boletín');
+      }
+      return;
+    }
+
+    const blob = new Blob([data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  } finally {
+    loading.boletin = false;
+  }
 };
 
 // 3. SOLVENCIA
