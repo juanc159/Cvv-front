@@ -111,13 +111,19 @@ const openSolvencyCertificatePreview = async (obj: any, mode: 'view' | 'download
 };
 
 // 4. PROSECUCIÓN
-const openProsecutionPdfPreview = async (obj: object) => {
+const openProsecutionPdfPreview = async (obj: any, mode: 'view' | 'download' = 'view') => {
+  if (!obj.url_to_download_prosecucion_pdf) return;
   loading.url_to_download_prosecucion_pdf = true;
-  const { data, response } = await useAxios(`${obj.url_to_download_prosecucion_pdf}`).get();
-  if (response.status == 200 && data) {
-    openPdfBase64(data.pdf);
+  try {
+    const { data, response } = await useAxios(`${obj.url_to_download_prosecucion_pdf}`).get({
+      responseType: 'blob',
+    });
+    if (!response || response.status !== 200) return;
+    if (await isJsonErrorBlob(data)) return;
+    handleBlob(data, `constancia_${obj.identity_document || obj.id}.pdf`, mode);
+  } finally {
+    loading.url_to_download_prosecucion_pdf = false;
   }
-  loading.url_to_download_prosecucion_pdf = false;
 };
 
 // --- Modales ---
@@ -246,10 +252,24 @@ onMounted(() => {
               </VCol>
 
               <VCol cols="6" sm="4" md="3" v-if="user.url_to_download_prosecucion_pdf">
-                <VCard variant="outlined" class="text-center pa-3 card-hover cursor-pointer"
-                  @click="openProsecutionPdfPreview(user)" :loading="loading.url_to_download_prosecucion_pdf" v-ripple>
+                <VCard variant="outlined" class="text-center pa-3"
+                  :loading="loading.url_to_download_prosecucion_pdf">
                   <VIcon icon="tabler-certificate" size="32" color="warning" class="mb-2" />
-                  <div class="text-body-2 font-weight-medium">Constancia</div>
+                  <div class="text-body-2 font-weight-medium mb-2">Constancia</div>
+                  <div class="d-flex flex-column flex-sm-row justify-center gap-2">
+                    <VBtn size="x-small" variant="tonal" color="warning" class="w-100 w-sm-auto"
+                      :disabled="loading.url_to_download_prosecucion_pdf"
+                      @click="openProsecutionPdfPreview(user, 'view')">
+                      <VIcon icon="tabler-eye" size="16" class="me-1" />
+                      Ver
+                    </VBtn>
+                    <VBtn size="x-small" variant="tonal" color="warning" class="w-100 w-sm-auto"
+                      :disabled="loading.url_to_download_prosecucion_pdf"
+                      @click="openProsecutionPdfPreview(user, 'download')">
+                      <VIcon icon="tabler-download" size="16" class="me-1" />
+                      Descargar
+                    </VBtn>
+                  </div>
                 </VCard>
               </VCol>
 
