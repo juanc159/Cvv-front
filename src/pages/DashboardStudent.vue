@@ -184,13 +184,15 @@ onMounted(() => {
                   :loading="loading.btnPdf" :class="{ 'card-disabled': !user.pdf }">
                   <VIcon icon="tabler-file-analytics" size="32" color="primary" class="mb-2" />
                   <div class="text-body-2 font-weight-medium mb-2">Notas Cert.</div>
-                  <div class="d-flex justify-center gap-2">
-                    <VBtn size="x-small" variant="tonal" color="primary" :disabled="!user.pdf || loading.btnPdf"
+                  <div class="d-flex flex-column flex-sm-row justify-center gap-2">
+                    <VBtn size="x-small" variant="tonal" color="primary" class="w-100 w-sm-auto"
+                      :disabled="!user.pdf || loading.btnPdf"
                       @click="openPdfPreview(user, 'view')">
                       <VIcon icon="tabler-eye" size="16" class="me-1" />
                       Ver
                     </VBtn>
-                    <VBtn size="x-small" variant="tonal" color="primary" :disabled="!user.pdf || loading.btnPdf"
+                    <VBtn size="x-small" variant="tonal" color="primary" class="w-100 w-sm-auto"
+                      :disabled="!user.pdf || loading.btnPdf"
                       @click="openPdfPreview(user, 'download')">
                       <VIcon icon="tabler-download" size="16" class="me-1" />
                       Descargar
@@ -202,15 +204,17 @@ onMounted(() => {
               <VCol cols="6" sm="4" md="3">
                 <VCard variant="outlined" class="text-center pa-3"
                   :loading="loading.boletin" :class="{ 'card-disabled': !user.boletin }">
-                  <VIcon icon="tabler-report" size="32" color="info" class="mb-2" />
+                  <VIcon icon="tabler-report" size="32" color="primary" class="mb-2" />
                   <div class="text-body-2 font-weight-medium mb-2">Boletín</div>
-                  <div class="d-flex justify-center gap-2">
-                    <VBtn size="x-small" variant="tonal" color="info" :disabled="!user.boletin || loading.boletin"
+                  <div class="d-flex flex-column flex-sm-row justify-center gap-2">
+                    <VBtn size="x-small" variant="tonal" color="primary" class="w-100 w-sm-auto"
+                      :disabled="!user.boletin || loading.boletin"
                       @click="openBoletinPreview(user, 'view')">
                       <VIcon icon="tabler-eye" size="16" class="me-1" />
                       Ver
                     </VBtn>
-                    <VBtn size="x-small" variant="tonal" color="info" :disabled="!user.boletin || loading.boletin"
+                    <VBtn size="x-small" variant="tonal" color="primary" class="w-100 w-sm-auto"
+                      :disabled="!user.boletin || loading.boletin"
                       @click="openBoletinPreview(user, 'download')">
                       <VIcon icon="tabler-download" size="16" class="me-1" />
                       Descargar
@@ -222,16 +226,16 @@ onMounted(() => {
               <VCol cols="6" sm="4" md="3">
                 <VCard variant="outlined" class="text-center pa-3"
                   :loading="loading.solvencyCertificate" :class="{ 'card-disabled': !user.solvencyCertificate }">
-                  <VIcon icon="tabler-circle-check" size="32" color="success" class="mb-2" />
+                  <VIcon icon="tabler-circle-check" size="32" color="primary" class="mb-2" />
                   <div class="text-body-2 font-weight-medium mb-2">Solvencia</div>
-                  <div class="d-flex justify-center gap-2">
-                    <VBtn size="x-small" variant="tonal" color="success"
+                  <div class="d-flex flex-column flex-sm-row justify-center gap-2">
+                    <VBtn size="x-small" variant="tonal" color="primary" class="w-100 w-sm-auto"
                       :disabled="!user.solvencyCertificate || loading.solvencyCertificate"
                       @click="openSolvencyCertificatePreview(user, 'view')">
                       <VIcon icon="tabler-eye" size="16" class="me-1" />
                       Ver
                     </VBtn>
-                    <VBtn size="x-small" variant="tonal" color="success"
+                    <VBtn size="x-small" variant="tonal" color="primary" class="w-100 w-sm-auto"
                       :disabled="!user.solvencyCertificate || loading.solvencyCertificate"
                       @click="openSolvencyCertificatePreview(user, 'download')">
                       <VIcon icon="tabler-download" size="16" class="me-1" />
