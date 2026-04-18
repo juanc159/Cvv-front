@@ -42,5 +42,8 @@ const app = createApp(App)
 registerPlugins(app)
 app.component('Editor', Editor)
 
-// Mount vue app
-app.mount('#app')
+// Refrescar datos del usuario al cargar la app (F5, abrir pestaña).
+// Si el token es válido, sincroniza con el backend; si no, limpia la sesión.
+import { useAuthenticationStore } from '@/stores/useAuthenticationStore'
+const authStore = useAuthenticationStore()
+authStore.fetchMe().finally(() => app.mount('#app'))

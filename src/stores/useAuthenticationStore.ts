@@ -30,6 +30,32 @@ export const useAuthenticationStore = defineStore("useAuthenticationStore", {
     async logout(): Promise<void> {
 
       this.$reset();
+      useCookie("accessToken").value = null;
+    },
+
+    async fetchMe(): Promise<boolean> {
+      const token = useCookie("accessToken").value;
+      if (!token) return false;
+
+      try {
+        const { data, response } = await useAxios("/me").get();
+
+        if (response?.status === 200 && data && (data.code === '200' || data.code === 200)) {
+          this.isAuthenticate = true;
+          this.user = data.user;
+          this.company = data.company;
+          this.menu = data.menu;
+          this.permissions = data.permissions;
+          this.access_token = token;
+          return true;
+        }
+
+        await this.logout();
+        return false;
+      } catch {
+        await this.logout();
+        return false;
+      }
     },
     async login(formulario: ILogin): Promise<IPromise> {
       this.loading = true;

@@ -47,7 +47,14 @@ export const useAxios = (url, config = {}) => {
       const status = err.response?.status;
       const errorData = err.response?.data || { code: status, message: 'Error desconocido' };
 
-      if (status === 403 || errorData?.code === 403) {
+      if (status === 401 || errorData?.code === 401 || errorData?.code === '401') {
+        // Token vencido o inválido: limpiar sesión y mandar a login
+        useCookie('accessToken').value = null;
+        if (router.currentRoute?.value?.name !== 'Login') {
+          toast('Sesión expirada', errorData?.message || 'Por favor inicie sesión nuevamente.', 'warning');
+          router.push({ name: 'Login' });
+        }
+      } else if (status === 403 || errorData?.code === 403) {
         router.push({ name: 'NotAuthorized' });
       } else if (errorData?.message) {
         toast('Error', errorData.message, 'danger');
