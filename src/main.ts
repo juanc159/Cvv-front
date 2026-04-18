@@ -9,6 +9,7 @@ import '@styles/styles.scss'
 
 import Editor from '@tinymce/tinymce-vue'
 
+import axios from 'axios'
 import Echo from 'laravel-echo'
 import Pusher from 'pusher-js'
 
@@ -23,14 +24,29 @@ window.Echo = new Echo({
   forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
   enabledTransports: ['ws', 'wss'],
 
-  // Importante: configurar el endpoint de autorización
-  authEndpoint: `${import.meta.env.VITE_API_BASE_URL}/broadcasting/auth`,
-
-  auth: {
-    headers: {
-      Authorization: `Bearer ${useCookie("accessToken").value}`
-    }
-  }
+  // Authorizer custom: lee el token FRESCO del cookie en cada intento de suscripción.
+  // Esto evita que Echo quede con un token vencido o vacío capturado al arranque.
+  authorizer: (channel: any) => {
+    return {
+      authorize: (socketId: string, callback: (err: any, data?: any) => void) => {
+        const token = useCookie('accessToken').value;
+        axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/broadcasting/auth`,
+          {
+            socket_id: socketId,
+            channel_name: channel.name,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        )
+          .then((response: any) => callback(null, response.data))
+          .catch((error: any) => callback(error));
+      },
+    };
+  },
 });
 
 

@@ -93,12 +93,13 @@ export const useNotificationStore = defineStore('notification', () => {
 
   // 6. Inicializar WebSockets (Centralizado)
   const initializeListener = () => {
-    if (isListening.value || !authStore.user?.id) return;
+    const broadcastUserId = authStore.user?.user_id ?? authStore.user?.id;
+    if (isListening.value || !broadcastUserId) return;
 
     console.log('🔌 Iniciando WebSocket Global para Notificaciones');
 
     // Canal privado estándar de Laravel: App.Models.User.{id}
-    window.Echo.private('App.Models.User.' + authStore.user.id)
+    window.Echo.private('App.Models.User.' + broadcastUserId)
 
       // Escucha actualizaciones (borrado/leído en otros dispositivos)
       .listen('.update-notification', (event: any) => {
