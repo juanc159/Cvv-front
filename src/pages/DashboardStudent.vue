@@ -32,93 +32,79 @@ const loading = reactive({
 
 // --- Funciones de Descarga/Visualización ---
 
+const handleBlob = (data: any, fileName: string, mode: 'view' | 'download') => {
+  const blob = new Blob([data], { type: 'application/pdf' });
+  const url = window.URL.createObjectURL(blob);
+  if (mode === 'download') {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } else {
+    window.open(url, '_blank');
+  }
+};
+
+const isJsonErrorBlob = async (data: any): Promise<boolean> => {
+  if (data instanceof Blob && data.type === 'application/json') {
+    const text = await data.text();
+    try {
+      const parsed = JSON.parse(text);
+      console.error('Error:', parsed.message);
+    } catch {
+      console.error('Error al procesar PDF');
+    }
+    return true;
+  }
+  return false;
+};
+
 // 1. NOTAS CERTIFICADAS
-const openPdfPreview = async (obj: object) => {
+const openPdfPreview = async (obj: any, mode: 'view' | 'download' = 'view') => {
   if (!obj.pdf) return;
   loading.btnPdf = true;
   try {
     const { data, response } = await useAxios(`/pw-pdfNote/${obj.id}`).get({
       responseType: 'blob',
     });
-
     if (!response || response.status !== 200) return;
-
-    if (data instanceof Blob && data.type === 'application/json') {
-      const text = await data.text();
-      try {
-        const parsed = JSON.parse(text);
-        console.error('Error generating PDF:', parsed.message);
-      } catch {
-        console.error('Error generating PDF');
-      }
-      return;
-    }
-
-    const blob = new Blob([data], { type: 'application/pdf' });
-    const url = window.URL.createObjectURL(blob);
-    window.open(url, '_blank');
+    if (await isJsonErrorBlob(data)) return;
+    handleBlob(data, `notas_${obj.identity_document || obj.id}.pdf`, mode);
   } finally {
     loading.btnPdf = false;
   }
 };
 
-// 2. BOLETÍN (ver en pestaña en lugar de descargar)
-const openBoletinPreview = async (obj: object) => {
+// 2. BOLETÍN
+const openBoletinPreview = async (obj: any, mode: 'view' | 'download' = 'view') => {
   if (!obj.boletin) return;
-
   loading.boletin = true;
   try {
     const { data, response } = await useAxios('/file/download').get({
       params: { file: obj.boletin },
       responseType: 'blob',
     });
-
     if (!response || response.status !== 200) return;
-
-    if (data instanceof Blob && data.type === 'application/json') {
-      const text = await data.text();
-      try {
-        const parsed = JSON.parse(text);
-        console.error('Error abriendo boletín:', parsed.message);
-      } catch {
-        console.error('Error abriendo boletín');
-      }
-      return;
-    }
-
-    const blob = new Blob([data], { type: 'application/pdf' });
-    const url = window.URL.createObjectURL(blob);
-    window.open(url, '_blank');
+    if (await isJsonErrorBlob(data)) return;
+    handleBlob(data, `boletin_${obj.identity_document || obj.id}.pdf`, mode);
   } finally {
     loading.boletin = false;
   }
 };
 
 // 3. SOLVENCIA
-const openSolvencyCertificatePreview = async (obj: object) => {
+const openSolvencyCertificatePreview = async (obj: any, mode: 'view' | 'download' = 'view') => {
   if (!obj.solvencyCertificate) return;
   loading.solvencyCertificate = true;
   try {
     const { data, response } = await useAxios(`/pw-pdfSolvencyCertificate/${obj.id}`).get({
       responseType: 'blob',
     });
-
     if (!response || response.status !== 200) return;
-
-    if (data instanceof Blob && data.type === 'application/json') {
-      const text = await data.text();
-      try {
-        const parsed = JSON.parse(text);
-        console.error('Error generating PDF:', parsed.message);
-      } catch {
-        console.error('Error generating PDF');
-      }
-      return;
-    }
-
-    const blob = new Blob([data], { type: 'application/pdf' });
-    const url = window.URL.createObjectURL(blob);
-    window.open(url, '_blank');
+    if (await isJsonErrorBlob(data)) return;
+    handleBlob(data, `solvencia_${obj.identity_document || obj.id}.pdf`, mode);
   } finally {
     loading.solvencyCertificate = false;
   }
@@ -194,31 +180,64 @@ onMounted(() => {
 
             <VRow>
               <VCol cols="6" sm="4" md="3">
-                <VCard variant="outlined" class="text-center pa-3 card-hover cursor-pointer"
-                  @click="!user.pdf ? null : openPdfPreview(user)" :disabled="!user.pdf || loading.btnPdf"
-                  :loading="loading.btnPdf" :class="{ 'card-disabled': !user.pdf }" v-ripple>
+                <VCard variant="outlined" class="text-center pa-3"
+                  :loading="loading.btnPdf" :class="{ 'card-disabled': !user.pdf }">
                   <VIcon icon="tabler-file-analytics" size="32" color="primary" class="mb-2" />
-                  <div class="text-body-2 font-weight-medium">Notas Cert.</div>
-                </VCard>
-              </VCol>
-
-              <VCol cols="6" sm="4" md="3"> 
-                <VCard variant="outlined" class="text-center pa-3 card-hover cursor-pointer"
-                  @click="!user.boletin ? null : openBoletinPreview(user)" :disabled="!user.boletin || loading.boletin"
-                  :loading="loading.boletin" :class="{ 'card-disabled': !user.boletin }" v-ripple>
-                  <VIcon icon="tabler-report" size="32" color="info" class="mb-2" />
-                  <div class="text-body-2 font-weight-medium">Boletín</div>
+                  <div class="text-body-2 font-weight-medium mb-2">Notas Cert.</div>
+                  <div class="d-flex justify-center gap-2">
+                    <VBtn size="x-small" variant="tonal" color="primary" :disabled="!user.pdf || loading.btnPdf"
+                      @click="openPdfPreview(user, 'view')">
+                      <VIcon icon="tabler-eye" size="16" class="me-1" />
+                      Ver
+                    </VBtn>
+                    <VBtn size="x-small" variant="tonal" color="primary" :disabled="!user.pdf || loading.btnPdf"
+                      @click="openPdfPreview(user, 'download')">
+                      <VIcon icon="tabler-download" size="16" class="me-1" />
+                      Descargar
+                    </VBtn>
+                  </div>
                 </VCard>
               </VCol>
 
               <VCol cols="6" sm="4" md="3">
-                <VCard variant="outlined" class="text-center pa-3 card-hover cursor-pointer"
-                  @click="!user.solvencyCertificate ? null : openSolvencyCertificatePreview(user)"
-                  :disabled="!user.solvencyCertificate || loading.solvencyCertificate"
-                  :loading="loading.solvencyCertificate" :class="{ 'card-disabled': !user.solvencyCertificate }"
-                  v-ripple>
+                <VCard variant="outlined" class="text-center pa-3"
+                  :loading="loading.boletin" :class="{ 'card-disabled': !user.boletin }">
+                  <VIcon icon="tabler-report" size="32" color="info" class="mb-2" />
+                  <div class="text-body-2 font-weight-medium mb-2">Boletín</div>
+                  <div class="d-flex justify-center gap-2">
+                    <VBtn size="x-small" variant="tonal" color="info" :disabled="!user.boletin || loading.boletin"
+                      @click="openBoletinPreview(user, 'view')">
+                      <VIcon icon="tabler-eye" size="16" class="me-1" />
+                      Ver
+                    </VBtn>
+                    <VBtn size="x-small" variant="tonal" color="info" :disabled="!user.boletin || loading.boletin"
+                      @click="openBoletinPreview(user, 'download')">
+                      <VIcon icon="tabler-download" size="16" class="me-1" />
+                      Descargar
+                    </VBtn>
+                  </div>
+                </VCard>
+              </VCol>
+
+              <VCol cols="6" sm="4" md="3">
+                <VCard variant="outlined" class="text-center pa-3"
+                  :loading="loading.solvencyCertificate" :class="{ 'card-disabled': !user.solvencyCertificate }">
                   <VIcon icon="tabler-circle-check" size="32" color="success" class="mb-2" />
-                  <div class="text-body-2 font-weight-medium">Solvencia</div>
+                  <div class="text-body-2 font-weight-medium mb-2">Solvencia</div>
+                  <div class="d-flex justify-center gap-2">
+                    <VBtn size="x-small" variant="tonal" color="success"
+                      :disabled="!user.solvencyCertificate || loading.solvencyCertificate"
+                      @click="openSolvencyCertificatePreview(user, 'view')">
+                      <VIcon icon="tabler-eye" size="16" class="me-1" />
+                      Ver
+                    </VBtn>
+                    <VBtn size="x-small" variant="tonal" color="success"
+                      :disabled="!user.solvencyCertificate || loading.solvencyCertificate"
+                      @click="openSolvencyCertificatePreview(user, 'download')">
+                      <VIcon icon="tabler-download" size="16" class="me-1" />
+                      Descargar
+                    </VBtn>
+                  </div>
                 </VCard>
               </VCol>
 
