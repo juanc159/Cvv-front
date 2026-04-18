@@ -36,11 +36,29 @@ const loading = reactive({
 const openPdfPreview = async (obj: object) => {
   if (!obj.pdf) return;
   loading.btnPdf = true;
-  const { data, response } = await useAxios(`/pw-pdfNote/${obj.id}`).get();
-  loading.btnPdf = false;
+  try {
+    const { data, response } = await useAxios(`/pw-pdfNote/${obj.id}`).get({
+      responseType: 'blob',
+    });
 
-  if (response.status == 200 && data) {
-    openPdfBase64(data.pdf);
+    if (!response || response.status !== 200) return;
+
+    if (data instanceof Blob && data.type === 'application/json') {
+      const text = await data.text();
+      try {
+        const parsed = JSON.parse(text);
+        console.error('Error generating PDF:', parsed.message);
+      } catch {
+        console.error('Error generating PDF');
+      }
+      return;
+    }
+
+    const blob = new Blob([data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  } finally {
+    loading.btnPdf = false;
   }
 };
 
@@ -61,11 +79,30 @@ const openBoletinPreview = async (obj: object) => {
 const openSolvencyCertificatePreview = async (obj: object) => {
   if (!obj.solvencyCertificate) return;
   loading.solvencyCertificate = true;
-  const { data, response } = await useAxios(`/pw-pdfSolvencyCertificate/${obj.id}`).get();
-  if (response.status == 200 && data) {
-    openPdfBase64(data.pdf);
+  try {
+    const { data, response } = await useAxios(`/pw-pdfSolvencyCertificate/${obj.id}`).get({
+      responseType: 'blob',
+    });
+
+    if (!response || response.status !== 200) return;
+
+    if (data instanceof Blob && data.type === 'application/json') {
+      const text = await data.text();
+      try {
+        const parsed = JSON.parse(text);
+        console.error('Error generating PDF:', parsed.message);
+      } catch {
+        console.error('Error generating PDF');
+      }
+      return;
+    }
+
+    const blob = new Blob([data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  } finally {
+    loading.solvencyCertificate = false;
   }
-  loading.solvencyCertificate = false;
 };
 
 // 4. PROSECUCIÓN

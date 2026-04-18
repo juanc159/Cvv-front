@@ -95,23 +95,28 @@ const calculateTotal = computed(() => {
     registrationFeeInfo.value.educationalCouncilFee;
 });
 
-// Generic certificate download function with error handling
 const downloadCertificate = async (route: string, id: number, additionalInfo?: any): Promise<void> => {
   try {
     const { data, response } = await useAxios(route).get({
-      params: {
-        additionalInfo: additionalInfo
-      }
+      params: { additionalInfo },
+      responseType: 'blob',
     });
 
-    if (response.status === 200 && data?.pdf) {
-      openPdfBase64(data.pdf);
-    } else {
-      throw new Error('Invalid response format');
+    if (!response || response.status !== 200) {
+      throw new Error('Invalid response');
     }
+
+    if (data instanceof Blob && data.type === 'application/json') {
+      const text = await data.text();
+      console.error('Error generating PDF:', text);
+      return;
+    }
+
+    const blob = new Blob([data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, '_blank');
   } catch (error) {
     console.error(`Error downloading certificate from ${route}:`, error);
-    // Here you could add user notification of the error
   }
 };
 

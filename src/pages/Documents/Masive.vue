@@ -126,7 +126,6 @@ const literalValidator = (value: string) => {
   return true;
 };
 
-// Generic certificate download function with error handling
 const downloadCertificate = async (route: string): Promise<void> => {
   try {
     const params: any = {
@@ -143,19 +142,37 @@ const downloadCertificate = async (route: string): Promise<void> => {
           ...student,
           literal: student.literal || '',
         }));
-        showAdditionalInfoModal.value = false; // Close the additional info modal
-        showStudentsModal.value = true; // Open the students modal
+        showAdditionalInfoModal.value = false;
+        showStudentsModal.value = true;
       } else {
         throw new Error('Invalid response format');
       }
-    } else {
-      const { data, response } = await useAxios(route).get({ params });
-      if (response.status === 200 && data?.pdf) {
-        openPdfBase64(data.pdf);
-      } else {
-        throw new Error('Invalid response format');
-      }
+      return;
     }
+
+    const { data, response } = await useAxios(route).get({
+      params,
+      responseType: 'blob',
+    });
+
+    if (!response || response.status !== 200) {
+      throw new Error('Invalid response');
+    }
+
+    if (data instanceof Blob && data.type === 'application/json') {
+      const text = await data.text();
+      try {
+        const parsed = JSON.parse(text);
+        toast(parsed.message || 'Error al generar el PDF', '', 'danger');
+      } catch {
+        toast('Error al generar el PDF', '', 'danger');
+      }
+      return;
+    }
+
+    const blob = new Blob([data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, '_blank');
   } catch (error) {
     console.error(`Error downloading certificate from ${route}:`, error);
   }
@@ -189,14 +206,28 @@ const saveLiteralsAndGenerate = async () => {
           ordering: prosecutionInfo.value.ordering,
           company_id: authenticationStore.company.id,
         },
+        responseType: 'blob',
       });
 
-      if (pdfResponse.status === 200 && pdfData?.pdf) {
-        openPdfBase64(pdfData.pdf);
-        showStudentsModal.value = false;
-      } else {
-        throw new Error('Invalid response format');
+      if (!pdfResponse || pdfResponse.status !== 200) {
+        throw new Error('Invalid response');
       }
+
+      if (pdfData instanceof Blob && pdfData.type === 'application/json') {
+        const text = await pdfData.text();
+        try {
+          const parsed = JSON.parse(text);
+          toast(parsed.message || 'Error al generar el PDF', '', 'danger');
+        } catch {
+          toast('Error al generar el PDF', '', 'danger');
+        }
+        return;
+      }
+
+      const blob = new Blob([pdfData], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      showStudentsModal.value = false;
     }
   } catch (error) {
     console.error('Error saving literals:', error);

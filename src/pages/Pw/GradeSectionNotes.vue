@@ -53,13 +53,30 @@ const openPdfPreview = async (obj: object) => {
 
 
   loading.form = true
-  const { data, response } = await useApi(`pw-pdfNote/${obj.id}`).get();
-  loading.form = false
+  try {
+    const { data, response } = await useAxios(`/pw-pdfNote/${obj.id}`).get({
+      responseType: 'blob',
+    })
 
-  if (response.value?.ok && data.value) {
-    openPdfBase64(data.value.pdf)
+    if (!response || response.status !== 200) return
+
+    if (data instanceof Blob && data.type === 'application/json') {
+      const text = await data.text()
+      try {
+        const parsed = JSON.parse(text)
+        Swal.fire(parsed.message || 'Error al generar el PDF')
+      } catch {
+        Swal.fire('Error al generar el PDF')
+      }
+      return
+    }
+
+    const blob = new Blob([data], { type: 'application/pdf' })
+    const url = window.URL.createObjectURL(blob)
+    window.open(url, '_blank')
+  } finally {
+    loading.form = false
   }
-
 }
 
 </script>
