@@ -209,18 +209,18 @@ onMounted(() => {
 
               <VCol cols="6" sm="4" md="3">
                 <VCard variant="outlined" class="text-center pa-3"
-                  :loading="loading.boletin" :class="{ 'card-disabled': !user.boletin }">
+                  :loading="loading.boletin" :class="{ 'card-disabled': !user.boletin || !user.pdf }">
                   <VIcon icon="tabler-report" size="32" color="primary" class="mb-2" />
                   <div class="text-body-2 font-weight-medium mb-2">Boletín</div>
                   <div class="d-flex flex-column flex-sm-row justify-center gap-2">
                     <VBtn size="x-small" variant="tonal" color="primary" class="w-100 w-sm-auto"
-                      :disabled="!user.boletin || loading.boletin"
+                      :disabled="!user.boletin || !user.pdf || loading.boletin"
                       @click="openBoletinPreview(user, 'view')">
                       <VIcon icon="tabler-eye" size="16" class="me-1" />
                       Ver
                     </VBtn>
                     <VBtn size="x-small" variant="tonal" color="primary" class="w-100 w-sm-auto"
-                      :disabled="!user.boletin || loading.boletin"
+                      :disabled="!user.boletin || !user.pdf || loading.boletin"
                       @click="openBoletinPreview(user, 'download')">
                       <VIcon icon="tabler-download" size="16" class="me-1" />
                       Descargar
