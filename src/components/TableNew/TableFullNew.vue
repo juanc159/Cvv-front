@@ -316,9 +316,15 @@ const debouncedFetchTableData = debounce((page: number) => {
   fetchTableData(page);
 }, 500);
 
+// Limpia la selección actual de filas (checkboxes).
+const clearSelection = () => {
+  selected.value = [];
+};
+
 defineExpose({
   openDeleteModal,
   fetchTableData,
+  clearSelection,
   options,
 });
 </script>

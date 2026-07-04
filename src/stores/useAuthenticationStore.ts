@@ -43,7 +43,11 @@ export const useAuthenticationStore = defineStore("useAuthenticationStore", {
         if (response?.status === 200 && data && (data.code === '200' || data.code === 200)) {
           this.isAuthenticate = true;
           this.user = data.user;
-          this.company = data.company;
+          // Solo actualiza la compañía si el backend realmente devuelve una (teacher/student).
+          // Para admin, el backend devuelve company sin id → conservamos la que el admin eligió (persistida).
+          if (data.company?.id) {
+            this.company = data.company;
+          }
           this.menu = data.menu;
           this.permissions = data.permissions;
           this.access_token = token;

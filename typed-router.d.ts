@@ -61,6 +61,7 @@ declare module 'vue-router/auto-routes' {
     'second-page': RouteRecordInfo<'second-page', '/second-page', Record<never, never>, Record<never, never>>,
     'Service-List': RouteRecordInfo<'Service-List', '/Service/List', Record<never, never>, Record<never, never>>,
     'Service-Form': RouteRecordInfo<'Service-Form', 'service-form/:action/:id?', Record<never, never>, Record<never, never>>,
+    'Student-Documents': RouteRecordInfo<'Student-Documents', '/Student/Documents', Record<never, never>, Record<never, never>>,
     'Student-List': RouteRecordInfo<'Student-List', '/Student/List', Record<never, never>, Record<never, never>>,
     'student-modal-import-students': RouteRecordInfo<'student-modal-import-students', '/Student/ModalImportStudents', Record<never, never>, Record<never, never>>,
     'student-modal-unsubscribe': RouteRecordInfo<'student-modal-unsubscribe', '/Student/ModalUnsubscribe', Record<never, never>, Record<never, never>>,

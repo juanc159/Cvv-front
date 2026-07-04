@@ -82,8 +82,22 @@ const updateQueries = async () => {
 
   for (const key in filters.extraFilters) {
     const field = filters.extraFilters[key];
-    if (field.value !== null && field.value !== undefined && field.value !== '') {
-      queries.value[`filter[${key}]`] = field.value;
+    const isEmpty = field.value === null || field.value === undefined || field.value === ''
+      || (Array.isArray(field.value) && field.value.length === 0);
+    if (!isEmpty) {
+      if (['select', 'selectChipCount'].includes(field.type)) {
+        const values = Array.isArray(field.value)
+          ? field.value.map(item => item.value)
+          : [field.value?.value];
+        queries.value[`filter[${key}]`] = values.join(',');
+      } else if (field.type === 'selectApi') {
+        const values = Array.isArray(field.value)
+          ? field.value.map(item => `${item.value}|${item.title}`)
+          : [field.value ? `${field.value.value}|${field.value.title}` : ''];
+        queries.value[`filter[${key}]`] = values.filter(v => v !== '').join(',');
+      } else {
+        queries.value[`filter[${key}]`] = field.value;
+      }
     }
   }
 
@@ -249,7 +263,8 @@ const activeFilters = computed(() => {
       const value = sourceFilters[key];
       const stringValue = value !== null && value !== undefined ? String(value) : '';
       if (stringValue.trim() !== '') {
-        const field = props.optionsFilter.dialog?.inputs?.find(f => f.name === filterKey);
+        const field = props.optionsFilter.dialog?.inputs?.find(f => f.name === filterKey)
+          || props.optionsFilter.extraFilters?.[filterKey];
         if (field) {
           if (field.type === 'selectApi') {
             const titles = stringValue.split(',').map(v => v.split('|')[1] || v).join(', ');
@@ -295,7 +310,9 @@ const removeFilter = (filterKey: string) => {
   }
 
   if (props.optionsFilter?.extraFilters && props.optionsFilter.extraFilters[filterKey]?.value !== undefined) {
-    props.optionsFilter.extraFilters[filterKey].value = '';
+    const extraType = props.optionsFilter.extraFilters[filterKey].type;
+    props.optionsFilter.extraFilters[filterKey].value =
+      ['selectChipCount', 'select', 'selectApi'].includes(extraType) ? [] : '';
   }
 
   // Si está deshabilitado, emitimos el evento con los filtros actualizados

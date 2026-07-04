@@ -155,6 +155,10 @@ const goViewCreate = () => {
   router.push({ name: "Student-Form", params: { action: "create" } })
 }
 
+const goDocuments = () => {
+  router.push({ name: "Student-Documents" })
+}
+
 const tableLoading = ref(false); // Estado de carga de la tabla
 
 // Método para refrescar los datos
@@ -233,6 +237,11 @@ const downloadFormatLoadStudents = async () => {
             <VTooltip location="top" transition="scale-transition" activator="parent" text="Exportar formato">
             </VTooltip>
           </VBtn> -->
+
+          <VBtn color="primary" variant="tonal" @click="goDocuments()">
+            <VIcon start icon="tabler-file-check" />
+            Documentos
+          </VBtn>
 
           <VBtn @click="goViewCreate()">
             Agregar estudiante
