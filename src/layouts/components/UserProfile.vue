@@ -2,6 +2,7 @@
 
 import { router } from "@/plugins/1.router";
 import { useAuthenticationStore } from "@/stores/useAuthenticationStore";
+import Swal from "sweetalert2";
 
 const authenticationStore = useAuthenticationStore();
 const { company, user } = storeToRefs(authenticationStore);
@@ -9,6 +10,34 @@ const { company, user } = storeToRefs(authenticationStore);
 const logout = () => {
   router.push({ name: "Login" });
   authenticationStore.logout()
+};
+
+// Solo el Super Administrador puede cerrar todas las sesiones del sistema.
+const SUPER_ADMIN_ROLE_ID = "21626ff9-4940-4143-879a-0f75b46eadb7";
+const isSuperAdmin = computed(() => user.value?.role_id === SUPER_ADMIN_ROLE_ID);
+
+const revokeAllSessions = async () => {
+  const result = await Swal.fire({
+    icon: "warning",
+    title: "¿Cerrar todas las sesiones?",
+    text: "Todos los usuarios (alumnos, docentes y personal) deberán volver a iniciar sesión. Tu sesión actual se mantendrá activa.",
+    showCancelButton: true,
+    confirmButtonText: "Sí, cerrar todas",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#d33",
+  });
+  if (!result.isConfirmed) return;
+
+  const { data, response } = await useAxios("/sessions/revoke-all").post({});
+  if (response?.status === 200) {
+    Swal.fire({
+      icon: "success",
+      title: "Sesiones cerradas",
+      text: data?.message || "Se cerraron todas las sesiones activas.",
+      timer: 4000,
+      timerProgressBar: true,
+    });
+  }
 };
 
 
@@ -93,6 +122,15 @@ const openModalPassword = () => {
           </VListItem>
 
 
+
+          <!-- 👉 Cerrar todas las sesiones (solo Super Administrador) -->
+          <VListItem v-if="isSuperAdmin" @click="revokeAllSessions()">
+            <template #prepend>
+              <VIcon class="me-2" icon="tabler-lock-off" size="22" color="error" />
+            </template>
+
+            <VListItemTitle class="text-error">Cerrar todas las sesiones</VListItemTitle>
+          </VListItem>
 
           <!-- Divider -->
           <VDivider class="my-2" />
