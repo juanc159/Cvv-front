@@ -1,29 +1,52 @@
 <script setup lang="ts">
+import { useAuthenticationStore } from '@/stores/useAuthenticationStore';
 import { useDropZone, useFileDialog, useObjectUrl } from '@vueuse/core';
 import { ref } from 'vue';
 
 import type { VForm } from 'vuetify/components/VForm';
 const formValidation = ref<VForm>()
+const authenticationStore = useAuthenticationStore()
 
+const { toast } = useToast()
 const dropZoneRef = ref<HTMLDivElement>()
+
+const isUploading = ref(false)  // Control de si estamos subiendo archivos
+const field = ref()
 interface FileData {
   file: File
   url: string
   progress?: number
   status?: 'pending' | 'uploading' | 'completed' | 'failed' // Agregamos el estado del archivo
+  error?: string
 }
 
 const fileData = ref<FileData[]>([])
 const { open, onChange } = useFileDialog({})
 
-function onDrop(DroppedFiles: File[] | null) {
-  DroppedFiles?.forEach(file => {
+// Cada campo acepta su tipo. El backend valida lo mismo por MIME real; esto es solo
+// para avisar antes de subir.
+const acceptedTypes: Record<string, { mimes: string[]; label: string }> = {
+  photo: {
+    mimes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+    label: 'una imagen (JPG, PNG, WEBP o GIF)',
+  },
+  boletin: {
+    mimes: ['application/pdf'],
+    label: 'un archivo PDF',
+  },
+}
 
-    if (file.type.slice(0, 6) !== 'image/') {
-      // eslint-disable-next-line no-alert
-      alert('Only image files are allowed')
+const acceptAttr = computed(() =>
+  field.value ? acceptedTypes[field.value]?.mimes.join(',') ?? '' : '')
 
-      return
+const addFiles = (files: File[]) => {
+  const rules = field.value ? acceptedTypes[field.value] : null
+
+  for (const file of files) {
+    // Sin campo elegido no se sabe qué tipo corresponde: se deja pasar y decide el backend.
+    if (rules && !rules.mimes.includes(file.type)) {
+      toast('Archivo no permitido', `${file.name}: se espera ${rules.label}`, 'danger')
+      continue
     }
 
     fileData.value.push({
@@ -32,22 +55,18 @@ function onDrop(DroppedFiles: File[] | null) {
       progress: undefined,
       status: 'pending'
     })
-  },
-  )
+  }
+}
+
+function onDrop(DroppedFiles: File[] | null) {
+  if (DroppedFiles) addFiles(DroppedFiles)
 }
 
 onChange(selectedFiles => {
   if (!selectedFiles)
     return
 
-  for (const file of selectedFiles) {
-    fileData.value.push({
-      file,
-      url: useObjectUrl(file).value ?? '',
-      progress: undefined,
-      status: 'pending'
-    })
-  }
+  addFiles(Array.from(selectedFiles))
 })
 
 useDropZone(dropZoneRef, onDrop)
@@ -71,12 +90,19 @@ const savefiles = async () => {
         const formData = new FormData()
         formData.append('file', fileItem.file)
         formData.append('field', field.value)
+        // El superadmin no tiene colegio propio: usa el que seleccionó y quedó en el store.
+        formData.append('company_id', String(authenticationStore.company.id ?? ''))
 
         const { data, response } = await useApi('/savefiles').post(formData)
         if (response.value?.ok && data.value) {
           fileItem.status = 'completed' // Cambiamos el estado a 'completed' si la carga fue exitosa
           fileItem.progress = 100 // Progreso al 100%
           // console.log(`Archivo ${fileItem.file.name} guardado correctamente`)
+        } else {
+          // Antes el archivo quedaba en 'uploading' para siempre y no se sabía qué pasó.
+          fileItem.status = 'failed'
+          fileItem.progress = undefined
+          fileItem.error = (data.value as any)?.message ?? 'No se pudo guardar'
         }
       } catch (error) {
         fileItem.status = 'failed' // Cambiamos el estado a 'failed' si hubo un error
@@ -89,9 +115,6 @@ const savefiles = async () => {
     isUploading.value = false  // Rehabilitar el botón después de que todos los archivos se hayan procesado
   }
 }
-
-const isUploading = ref(false)  // Control de si estamos subiendo archivos
-const field = ref()
 
 const fields = [
   {
@@ -121,7 +144,7 @@ const fields = [
     <VCardText>
       <div class="flex">
         <div class="w-full h-auto relative">
-          <div ref="dropZoneRef" class="cursor-pointer" @click="() => open()">
+          <div ref="dropZoneRef" class="cursor-pointer" @click="() => open({ accept: acceptAttr })">
             <div v-if="fileData.length === 0"
               class="d-flex flex-column justify-center align-center gap-y-3 px-6 py-10 border-dashed drop-zone">
               <IconBtn variant="tonal" class="rounded-sm">
@@ -157,8 +180,8 @@ const fields = [
                         <div v-if="item.status === 'completed'" class="mt-2 text-success">
                           <span>¡Archivo cargado exitosamente!</span>
                         </div>
-                        <div v-if="item.status === 'failed'" class="mt-2 text-danger">
-                          <span>Error al cargar el archivo</span>
+                        <div v-if="item.status === 'failed'" class="mt-2 text-error">
+                          <span>{{ item.error ?? 'Error al cargar el archivo' }}</span>
                         </div>
 
                       </VCardText>
