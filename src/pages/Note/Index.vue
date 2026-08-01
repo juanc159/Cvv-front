@@ -21,6 +21,7 @@ const loading = reactive({
   block_uploading_of_grades_to_teachers: false,
   delete_all_student_grade_scores_permission: false,
   viewing_notes: false,
+  enable_prosecution_documents: false,
 });
 
 const form = ref<{
@@ -41,6 +42,7 @@ const formValidationDownload = ref<VForm>();
 const typeEducations = ref<Array<object>>([]);
 const teachers = ref<Array<object>>([]);
 const selectedSwitch = ref<boolean>(false);
+const prosecutionDocumentsSwitch = ref<boolean>(false);
 const selectedNotes = ref({});
 const requiredValidator = (value: any) => !!value || 'Campo requerido';
 
@@ -120,14 +122,12 @@ const loadTypeEducationsAndTeachers = async () => {
   if (response.status == 200 && data) {
     typeEducations.value = data.typeEducations;
     selectedSwitch.value = data.blockData;
+    prosecutionDocumentsSwitch.value = data.prosecutionDocuments;
     teachers.value = data.teachers;
   }
   loading.form = false;
 };
-
-const hasPermission = (permission: string) => {
-  return true;
-};
+ 
 
 const loadDataVisualizeNotes = async () => {
   const { data, response } = await useApi('/type_educations/visualization/show').get()
@@ -220,6 +220,9 @@ const resetOptionDownloadPdf = async (
     company_id: authenticationStore.company.id,
   });
   if (response.value?.ok && data.value) {
+    toast("Éxito", (data.value as any).message, "success");
+  } else {
+    toast("No se pudo reiniciar", "", "danger");
   };
   loading.block_uploading_of_grades_to_teachers = false
 
@@ -228,6 +231,26 @@ const resetOptionDownloadPdf = async (
 const selectValueLabel = computed(() => {
 
   return selectedSwitch.value ? 'Sí' : 'No';
+});
+
+// Constancias de prosecución: solo se habilitan a fin de año escolar.
+const changeStatusProsecutionDocuments = async (value: any) => {
+  loading.enable_prosecution_documents = true
+  const { data, response } = await useApi(`/note-toggleProsecutionDocuments`).post({
+    value: value,
+  });
+  if (response.value?.ok && data.value) {
+    toast("Éxito", (data.value as any).message, "success");
+  } else {
+    // Si falló, dejamos el switch como estaba para no mentirle al admin.
+    prosecutionDocumentsSwitch.value = !value;
+    toast("No se pudo cambiar la opción", "", "danger");
+  }
+  loading.enable_prosecution_documents = false
+};
+
+const prosecutionDocumentsLabel = computed(() => {
+  return prosecutionDocumentsSwitch.value ? 'Habilitadas' : 'Deshabilitadas';
 });
 
 
@@ -247,7 +270,7 @@ const refModalQuestion = ref()
 
 const openModalQuestion = () => {
   refModalQuestion.value.openModal()
-  refModalQuestion.value.componentData.title = "Esta seguro que desea activar a todos los estudiantes en un estado insolventes"
+  refModalQuestion.value.componentData.title = "¿Seguro que desea apagar las notas, el boletín y la solvencia de TODOS los estudiantes del colegio?"
 }
 
 onMounted(async () => {
@@ -347,6 +370,31 @@ const deleteAllStudentGradeScores = async () => {
       </VCardText>
     </VCard>
 
+    <VCard :disabled="loading.enable_prosecution_documents" :loading="loading.enable_prosecution_documents" class="mt-3"
+      v-if="hasPermission('note.enable_prosecution_documents')">
+      <VCardTitle primary-title>Constancias de prosecución para los estudiantes</VCardTitle>
+      <VCardText>
+        <VRow>
+          <VCol cols="12">
+            <span class="text-body-2 text-medium-emphasis">
+              Al habilitarla, los estudiantes que estén <strong>solventes</strong> podrán ver y descargar su
+              constancia de prosecución o certificado desde su portal. Se usa solo al cierre del año escolar;
+              al terminar la temporada conviene deshabilitarla.
+            </span>
+          </VCol>
+        </VRow>
+        <VRow>
+          <VCol cols="12" sm="4">
+            <div class="demo-space-x">
+              <VSwitch v-model="prosecutionDocumentsSwitch"
+                @update:model-value="changeStatusProsecutionDocuments($event)" :label="prosecutionDocumentsLabel"
+                color="success" />
+            </div>
+          </VCol>
+        </VRow>
+      </VCardText>
+    </VCard>
+
     <VRow>
       <VCol cols="4">
         <VCard :disabled="loading.block_uploading_of_grades_to_teachers"
@@ -370,8 +418,15 @@ const deleteAllStudentGradeScores = async () => {
         <VCard :disabled="loading.block_uploading_of_grades_to_teachers"
           :loading="loading.block_uploading_of_grades_to_teachers" class="mt-3"
           v-if="hasPermission('note.reset_option_download_pdf')">
-          <VCardTitle primary-title>Reiniciar opción descarga pdf y boletin</VCardTitle>
+          <VCardTitle primary-title>Reiniciar notas, boletín y solvencia</VCardTitle>
           <VCardText>
+            <VRow>
+              <VCol cols="12">
+                <span class="text-body-2 text-medium-emphasis">
+                  Pone en cero las notas, el boletín y la solvencia de todos los estudiantes del colegio.
+                </span>
+              </VCol>
+            </VRow>
             <VRow>
               <VCol cols="12" sm="4">
                 <div class="demo-space-x">
