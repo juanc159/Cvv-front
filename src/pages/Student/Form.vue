@@ -151,6 +151,11 @@ const submitForm = async () => {
 
 if (route.params.action == 'view') disabledFiledsView.value = true
 
+// Grado y seccion solo son obligatorios al crear. Un alumno ya registrado puede quedarse
+// sin inscribir, que es como lo deja la promocion anual cuando nadie lo reclama.
+const isEdit = computed(() => !!route.params.id)
+const enrollmentRules = computed(() => isEdit.value ? [] : [requiredValidator])
+
 onMounted(async () => {
   clearForm()
   await fetchDataForm()
@@ -271,12 +276,12 @@ const genders = [
             </VCol>
 
             <VCol cols="12" sm="4">
-              <AppSelect clearable :items="gradesFilter" :requiredField="true" :rules="[requiredValidator]"
+              <AppSelect clearable :items="gradesFilter" :requiredField="!isEdit" :rules="enrollmentRules"
                 v-model="form.grade_id" label="Grados y niveles">
               </AppSelect>
             </VCol>
             <VCol cols="12" sm="4">
-              <AppSelect clearable :items="sections" :requiredField="true" :rules="[requiredValidator]"
+              <AppSelect clearable :items="sections" :requiredField="!isEdit" :rules="enrollmentRules"
                 v-model="form.section_id" label="Secciones"></AppSelect>
             </VCol>
 

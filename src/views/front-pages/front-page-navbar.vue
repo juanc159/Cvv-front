@@ -93,13 +93,14 @@ const menu = ref<
   //   isExternal: true, // Marca como externa
   //   icon: "tabler-books",
   // },
-  {
-    title: "Inscripciones Virtuales",
-    to: "https://docs.google.com/forms/d/e/1FAIpQLSfeLe_4SbsQDxi0LnkEIdubppFAUbq9RPu2pSHa7pFfpHiwVg/viewform",
-    hash: "",
-    isExternal: true, // Marca como externa
-    icon: "tabler-books",
-  },
+  // Oculto a peticion del colegio. Para mostrarlo de nuevo, descomentar.
+  // {
+  //   title: "Inscripciones Virtuales",
+  //   to: "https://docs.google.com/forms/d/e/1FAIpQLSfeLe_4SbsQDxi0LnkEIdubppFAUbq9RPu2pSHa7pFfpHiwVg/viewform",
+  //   hash: "",
+  //   isExternal: true, // Marca como externa
+  //   icon: "tabler-books",
+  // },
   {
     title: "Materia Pendiente",
     to: "Pw-SubjectPennding",
