@@ -13,16 +13,28 @@ definePage({
 })
 
 const authenticationStore = useAuthenticationStore()
+const { toast } = useToast()
 
 // TABLE
 const refTableFull = ref()
+const refModalQuestion = ref()
 
-const optionsTable = {
+// Vigentes: aún no vence la fecha límite. Histórico: ya venció.
+// El docente trabaja en vigentes; al histórico va a consultar y a limpiar por períodos.
+const tab = ref<'vigentes' | 'historico'>('vigentes')
+const isHistorico = computed(() => tab.value === 'historico')
+
+// El componente de tabla copia las opciones una sola vez al montarse, así que al cambiar de
+// pestaña se remonta con :key. De paso se reinicia la paginación, que es lo deseable.
+const optionsTable = computed(() => ({
   url: "/activity/list",
   paramsGlobal: {
     company_id: authenticationStore.company.id,
     user_id: authenticationStore.user.id, // IMPORTANTE: tu backend lo usa en create y validaciones
+    'filter[vigencia]': tab.value,
   },
+  // Solo en el histórico se seleccionan varias para borrarlas de una vez.
+  showSelect: isHistorico.value,
   headers: [
     { key: 'title', title: 'Título' },
     { key: 'deadline_at', title: 'Fecha límite' },
@@ -30,8 +42,13 @@ const optionsTable = {
     { key: 'actions', title: 'Acciones', sortable: false },
   ],
   actions: {
+    // Una actividad vencida ya no se edita ni cambia de estado; el backend también lo rechaza.
     changeStatus: {
+      show: !isHistorico.value,
       url: "/activity/changeStatus",
+    },
+    edit: {
+      show: !isHistorico.value,
     },
     view: {
       show: true,
@@ -40,7 +57,67 @@ const optionsTable = {
       url: "/activity/delete",
     },
   },
+}))
+
+// BORRADO MASIVO (solo histórico)
+const selected = ref<any[]>([])
+const deletePreview = ref<Record<string, number> | null>(null)
+const loadingDelete = ref(false)
+
+// Antes de confirmar se consulta qué se va a destruir: el docente tiene que saber cuántas
+// entregas de alumnos se lleva por delante, porque esto no se puede deshacer.
+const askDeleteSelected = async () => {
+  if (!selected.value.length) return
+
+  const { data, response } = await useApi<any>('/activity/deletePreview').post({
+    ids: selected.value,
+    company_id: authenticationStore.company.id,
+  })
+
+  if (!response.value?.ok || !data.value?.preview) return
+
+  deletePreview.value = data.value.preview
+
+  // El modal se configura por componentData: no acepta slots.
+  const modal = refModalQuestion.value
+  modal.componentData.title = '¿Eliminar las actividades seleccionadas?'
+  modal.componentData.subTitle = deleteSubtitle.value
+  modal.componentData.principalIcon = 'tabler-alert-triangle'
+  modal.componentData.btnSuccessText = 'Sí, eliminar'
+  modal.openModal()
 }
+
+const deleteSelected = async () => {
+  loadingDelete.value = true
+
+  const { data, response } = await useApi<any>('/activity/deleteMasive').post({
+    ids: selected.value,
+    company_id: authenticationStore.company.id,
+  })
+
+  loadingDelete.value = false
+
+  if (response.value?.ok && data.value?.code === 200) {
+    toast("Actividades eliminadas", data.value.message, "success")
+    selected.value = []
+    deletePreview.value = null
+    refTableFull.value?.clearSelection?.()
+    refreshTable()
+  }
+}
+
+// Texto de la confirmación, con el detalle de lo que se destruye.
+const deleteSubtitle = computed(() => {
+  const p = deletePreview.value
+  if (!p) return ''
+
+  const partes = [`${p.activities} actividad(es)`]
+  if (p.submissions) partes.push(`${p.submissions} entrega(s) de alumnos`)
+  if (p.comments) partes.push(`${p.comments} comentario(s)`)
+  if (p.files) partes.push(`${p.files} archivo(s) adjunto(s)`)
+
+  return `Se eliminará: ${partes.join(', ')}. Esta acción no se puede deshacer.`
+})
 
 // FILTER
 const optionsFilter = ref({
@@ -97,13 +174,37 @@ const goToSubmissions = (activityId: string) => {
         </div>
       </VCardTitle>
 
+      <VTabs v-model="tab" class="px-4">
+        <VTab value="vigentes">
+          <VIcon start icon="tabler-clock" size="18" />
+          Vigentes
+        </VTab>
+        <VTab value="historico">
+          <VIcon start icon="tabler-archive" size="18" />
+          Histórico
+        </VTab>
+      </VTabs>
+
       <VCardText>
         <FilterDialogNew :options-filter="optionsFilter" @force-search="refreshTable" :table-loading="tableLoading" />
       </VCardText>
 
+      <VCardText v-if="isHistorico && selected.length" class="pt-0">
+        <VAlert type="warning" variant="tonal" density="compact">
+          <div class="d-flex align-center flex-wrap gap-3">
+            <span><strong>{{ selected.length }}</strong> actividad(es) seleccionada(s)</span>
+            <VSpacer />
+            <VBtn size="small" color="error" @click="askDeleteSelected">
+              <VIcon start icon="tabler-trash" size="18" />
+              Eliminar seleccionadas
+            </VBtn>
+          </div>
+        </VAlert>
+      </VCardText>
+
       <VCardText class="mt-2">
-        <TableFullNew ref="refTableFull" :options="optionsTable" @edit="goViewEdit" @view="goViewView"
-          @update:loading="tableLoading = $event">
+        <TableFullNew :key="tab" ref="refTableFull" :options="optionsTable" @edit="goViewEdit" @view="goViewView"
+          @update:selected="selected = $event" @update:loading="tableLoading = $event">
           <template #item.title="{ item }">
             <div class="py-2">
               <!-- Título -->
@@ -171,6 +272,8 @@ const goToSubmissions = (activityId: string) => {
         </TableFullNew>
       </VCardText>
     </VCard>
+
+    <ModalQuestion ref="refModalQuestion" @success="deleteSelected" />
   </div>
 </template>
 <style scoped>
